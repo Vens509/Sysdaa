@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %} - Utilisateurs{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'utilisateurs/utilisateurs.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="utilisateurs-list-page">
+  <div class="sys-pagehead">
+    <div class="sys-pagehead__title">
+      <h1 class="sys-h1">Utilisateurs</h1>
+      <p class="sys-subtitle">Gestion des comptes, rôles et statuts.</p>
+    </div>
+    <div class="sys-pagehead__actions">
+      <a class="btn btn-primary" href="{% url 'utilisateurs:creer' %}">+ Créer</a>
+    </div>
+  </div>
+
+  <div class="sys-toolbar">
+    <form class="row g-2 align-items-end" method="get">
+      <div class="col-lg-8">
+        <label class="form-label mb-1">Recherche</label>
+        <input class="form-control" name="q" value="{{ q }}" placeholder="Email, nom, prénom, rôle, direction...">
+      </div>
+      <div class="col-lg-4 d-grid d-lg-flex gap-2">
+        <button class="btn btn-dark" type="submit">Rechercher</button>
+        <a class="btn btn-outline-secondary" href="{% url 'utilisateurs:liste' %}">Réinitialiser</a>
+      </div>
+    </form>
+  </div>
+
+  <div class="card utilisateurs-list-card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-dark">
+            <tr>
+              <th>Email</th>
+              <th>Nom</th>
+              <th>Direction affectée</th>
+              <th>Rôle</th>
+              <th>Statut</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in utilisateurs %}
+              <tr>
+                <td class="text-nowrap fw-semibold">{{ u.email }}</td>
+                <td>{{ u.prenom }} {{ u.nom }}</td>
+
+                <td>
+                  {% if u.direction_affectee %}
+                    {{ u.direction_affectee }}
+                  {% else %}
+                    <span class="text-muted">—</span>
+                  {% endif %}
+                </td>
+
+                <td>{{ u.role.nom_role }}</td>
+                <td>
+                  <span class="badge {% if u.statut == 'Actif' %}text-bg-success{% else %}text-bg-secondary{% endif %}">
+                    {{ u.statut }}
+                  </span>
+                </td>
+                <td class="text-end">
+                  <div class="d-inline-flex flex-wrap gap-2 justify-content-end">
+                    <a class="btn btn-sm btn-outline-primary" href="{% url 'utilisateurs:modifier' u.id %}">
+                      Modifier
+                    </a>
+
+                    <form method="post" action="{% url 'utilisateurs:toggle_statut' u.id %}" class="d-inline">
+                      {% csrf_token %}
+                      <button type="submit"
+                              class="btn btn-sm {% if u.statut == 'Actif' %}btn-outline-warning{% else %}btn-outline-success{% endif %}">
+                        {% if u.statut == 'Actif' %}Désactiver{% else %}Activer{% endif %}
+                      </button>
+                    </form>
+
+                    <a class="btn btn-sm btn-outline-dark" href="{% url 'utilisateurs:reset_password' u.id %}">
+                      Reset MDP
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="6" class="text-center text-muted py-4">Aucun utilisateur.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

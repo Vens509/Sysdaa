@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %} - Supprimer fournisseur{% endblock %}
+
+{% block content %}
+<div class="sys-pagehead">
+  <div class="sys-pagehead__title">
+    <h1 class="sys-h1">Supprimer le fournisseur</h1>
+    <p class="sys-subtitle">
+      Suppression : <strong>{{ fournisseur.nom }}</strong>
+    </p>
+  </div>
+
+  <div class="sys-pagehead__actions">
+    <a class="btn btn-outline-secondary" href="{% url 'fournisseurs:detail' fournisseur.id %}">Retour</a>
+  </div>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-8 col-xl-7">
+    <div class="card">
+      <div class="card-body">
+        <div class="alert alert-warning">
+          <div class="fw-semibold">Cette action est définitive.</div>
+          <div class="small text-muted mt-1">
+            La suppression supprime aussi les adresses associées et les liaisons fournisseur↔article.
+          </div>
+        </div>
+
+        <form method="post" class="d-flex flex-wrap gap-2">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Oui, supprimer</button>
+          <a class="btn btn-secondary" href="{% url 'fournisseurs:detail' fournisseur.id %}">Annuler</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

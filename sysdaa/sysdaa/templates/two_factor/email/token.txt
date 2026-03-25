@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<body style="font-family: Arial; background:#f6f8fb; padding:20px;">
+  <div style="max-width:500px;margin:auto;background:white;padding:20px;border-radius:10px;">
+    
+    <h2 style="color:#194993;">SYSDAA - Vérification</h2>
+
+    <p>Bonjour,</p>
+
+    <p>Votre code de vérification est :</p>
+
+    <h1 style="text-align:center;letter-spacing:5px;">
+      {{ token }}
+    </h1>
+
+    <p>Ce code expire dans quelques minutes.</p>
+
+    <p style="color:#888;">Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.</p>
+
+  </div>
+</body>
+</html>

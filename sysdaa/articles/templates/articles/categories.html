@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %} — Catégories{% endblock %}
+
+{% block content %}
+<div class="sys-pagehead">
+  <div class="sys-pagehead__title">
+    <h1 class="sys-h1">Catégories</h1>
+    <p class="sys-subtitle">Organisation des articles par catégorie.</p>
+  </div>
+
+  <div class="sys-pagehead__actions">
+    <a class="btn btn-outline-secondary" href="{% url 'articles:liste' %}">← Articles</a>
+    <a class="btn btn-primary" href="{% url 'articles:categorie_creer' %}">+ Nouvelle catégorie</a>
+  </div>
+</div>
+
+<div class="sys-toolbar">
+  <form method="get" class="row g-2 align-items-end">
+    <div class="col-md-10">
+      <label class="form-label mb-1">Recherche</label>
+      <input class="form-control" name="q" value="{{ q }}" placeholder="Rechercher une catégorie..." />
+    </div>
+    <div class="col-md-2 d-grid">
+      <button class="btn btn-dark" type="submit">OK</button>
+    </div>
+  </form>
+</div>
+
+<div class="card shadow-sm border-0">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-striped table-hover table-bordered mb-0 align-middle">
+        <thead>
+          <tr>
+            <th>Libellé</th>
+            <th>Articles liés</th>
+            <th style="width:260px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in categories %}
+            <tr>
+              <td class="fw-semibold">{{ c.libelle }}</td>
+              <td>{{ c.nombre_articles }}</td>
+              <td>
+                <div class="d-flex gap-2 flex-wrap">
+                  <a class="btn btn-sm btn-outline-primary" href="{% url 'articles:categorie_modifier' c.id %}">
+                    Modifier
+                  </a>
+
+                  {% if c.peut_supprimer %}
+                    <a class="btn btn-sm btn-outline-danger" href="{% url 'articles:categorie_supprimer' c.id %}">
+                      Supprimer
+                    </a>
+                  {% else %}
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-danger"
+                      disabled
+                      title="Suppression impossible : cette catégorie contient déjà des articles."
+                    >
+                      Supprimer
+                    </button>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="3" class="p-3">
+                <div class="sys-empty">Aucune catégorie.</div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

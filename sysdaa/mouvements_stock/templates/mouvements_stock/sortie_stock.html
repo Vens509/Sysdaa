@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %} - Sortie de stock{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'mouvements_stock/mouvements_stock.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="sys-pagehead">
+  <div class="sys-pagehead__title">
+    <h1 class="sys-h1">Sortie de stock</h1>
+    <p class="sys-subtitle">
+      Enregistrez une sortie manuelle hors réquisition.
+    </p>
+  </div>
+
+  <div class="sys-pagehead__actions">
+    <a class="btn btn-outline-secondary" href="{% url 'mouvements_stock:liste_mouvements' %}">
+      Retour aux mouvements
+    </a>
+  </div>
+</div>
+
+<form method="post" class="card shadow-sm border-0" data-mouvement-form="sortie">
+  {% csrf_token %}
+
+  <div class="card-body p-4">
+
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger mb-4">
+        {% for err in form.non_field_errors %}
+          <div>{{ err }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="row g-3">
+
+      <div class="col-md-8">
+        <label class="form-label" for="{{ form.article.id_for_label }}">Article</label>
+        {{ form.article }}
+        {% if form.article.errors %}
+          <div class="text-danger small mt-1">
+            {% for err in form.article.errors %}
+              <div>{{ err }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label" for="{{ form.quantite.id_for_label }}">Quantité à sortir</label>
+        {{ form.quantite }}
+        {% if form.quantite.errors %}
+          <div class="text-danger small mt-1">
+            {% for err in form.quantite.errors %}
+              <div>{{ err }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label" for="{{ form.conditionnement_operation.id_for_label }}">Conditionnement utilisé</label>
+        {{ form.conditionnement_operation }}
+        {% if form.conditionnement_operation.errors %}
+          <div class="text-danger small mt-1">
+            {% for err in form.conditionnement_operation.errors %}
+              <div>{{ err }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label" for="{{ form.quantite_par_conditionnement_operation.id_for_label }}">
+          Nombre d’unités dans 1 conditionnement utilisé
+        </label>
+        {{ form.quantite_par_conditionnement_operation }}
+        <small class="text-muted">
+          Cette valeur est gérée automatiquement.
+        </small>
+        {% if form.quantite_par_conditionnement_operation.errors %}
+          <div class="text-danger small mt-1">
+            {% for err in form.quantite_par_conditionnement_operation.errors %}
+              <div>{{ err }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="col-12">
+        <label class="form-label" for="{{ form.motif_sortie.id_for_label }}">Motif de la sortie</label>
+        {{ form.motif_sortie }}
+        {% if form.motif_sortie.errors %}
+          <div class="text-danger small mt-1">
+            {% for err in form.motif_sortie.errors %}
+              <div>{{ err }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+    </div>
+
+    <div class="mt-4 p-3 border rounded bg-light">
+
+      <strong>Résumé dynamique</strong>
+
+      <div id="article-conditionnement-info" class="small text-muted mt-2">
+        Conditionnement principal de l’article : —
+      </div>
+
+      <div id="stock-actuel-info" class="small text-muted">
+        Stock actuel : —
+      </div>
+
+      <div id="equivalent-unites-info" class="small fw-semibold mt-1">
+        Équivalent réel : —
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="card-footer bg-white text-end">
+
+    <a href="{% url 'mouvements_stock:liste_mouvements' %}"
+       class="btn btn-outline-secondary">
+      Annuler
+    </a>
+
+    <button type="submit" class="btn btn-danger">
+      Enregistrer la sortie
+    </button>
+
+  </div>
+
+</form>
+
+<script src="{% static 'mouvements_stock/mouvements_stock.js' %}"></script>
+
+{% endblock %}

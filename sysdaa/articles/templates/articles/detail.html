@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+{% block title %} — Détail article{% endblock %}
+
+{% block content %}
+<div class="sys-pagehead">
+  <div class="sys-pagehead__title">
+    <h1 class="sys-h1">Détail article</h1>
+    <p class="sys-subtitle">
+      Informations détaillées, conditionnement et état réel du stock.
+    </p>
+  </div>
+
+  <div class="sys-pagehead__actions">
+    <a class="btn btn-outline-primary" href="{% url 'articles:modifier' article.id %}">
+      Modifier
+    </a>
+    <a class="btn btn-outline-danger" href="{% url 'articles:supprimer' article.id %}">
+      Supprimer
+    </a>
+    <a class="btn btn-outline-secondary" href="{% url 'articles:liste' %}">
+      ← Retour
+    </a>
+  </div>
+</div>
+
+<div class="row g-4">
+
+  <div class="col-12 col-lg-7">
+    <div class="card h-100 shadow-sm border-0">
+      <div class="card-body">
+
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+          <div>
+            <h2 class="h4 mb-1">{{ article.nom }}</h2>
+            <div class="text-muted">
+              Catégorie :
+              <strong>
+                {% if article.categorie %}
+                  {{ article.categorie.libelle }}
+                {% else %}
+                  Non définie
+                {% endif %}
+              </strong>
+            </div>
+          </div>
+
+          <div>
+            {% if article.est_en_rupture %}
+              <span class="badge text-bg-danger">Rupture</span>
+            {% elif article.en_alerte %}
+              <span class="badge text-bg-warning">Stock bas</span>
+            {% else %}
+              <span class="badge text-bg-success">Disponible</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="row g-4">
+
+          <div class="col-md-6">
+            <div class="sys-label">Nom de l’article</div>
+            <div class="sys-value fs-5">{{ article.nom }}</div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="sys-label">Catégorie</div>
+            <div class="sys-value">
+              {% if article.categorie %}
+                {{ article.categorie.libelle }}
+              {% else %}
+                <span class="text-muted">Non définie</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="sys-label">Conditionnement principal</div>
+            <div class="sys-value">{{ article.libelle_conditionnement }}</div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="sys-label">Unité de calcul</div>
+            <div class="sys-value">{{ article.unite_base }}</div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="sys-label">Stock initial</div>
+            <div class="sys-value">{{ article.stock_initial_affichage }}</div>
+            <div class="small text-muted mt-1">Stock de départ du mois</div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="sys-label">Stock disponible</div>
+            <div class="sys-value">{{ article.stock_actuel_affichage }}</div>
+            <div class="small text-muted mt-1">Quantité disponible actuelle</div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="sys-label">Seuil minimal</div>
+            <div class="sys-value">{{ article.stock_minimal_affichage }}</div>
+          </div>
+
+          <div class="col-12">
+            <div class="sys-label">État du stock</div>
+            <div class="sys-value">
+              {% if article.est_en_rupture %}
+                <span class="badge text-bg-danger">Rupture</span>
+                <span class="ms-2 text-muted">Aucune quantité disponible actuellement.</span>
+              {% elif article.en_alerte %}
+                <span class="badge text-bg-warning">Stock bas</span>
+                <span class="ms-2 text-muted">
+                  Le stock disponible a atteint ou dépassé le seuil minimal.
+                </span>
+              {% else %}
+                <span class="badge text-bg-success">Disponible</span>
+                <span class="ms-2 text-muted">Le stock reste au-dessus du seuil minimal.</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="col-12">
+            <hr class="sys-divider">
+
+            <div class="sys-label">Traçabilité</div>
+
+            <div class="small">
+              Enregistré par :
+              <strong>
+                {% if article.utilisateur_enregistreur %}
+                  {{ article.utilisateur_enregistreur }}
+                {% else %}
+                  Non renseigné
+                {% endif %}
+              </strong>
+              <span class="text-muted">—</span>
+              Créé le :
+              {% if article.date_creation %}
+                {{ article.date_creation|date:"d/m/Y H:i" }}
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </div>
+
+            <div class="small text-muted">
+              Dernière modification :
+              {% if article.date_modification %}
+                {{ article.date_modification|date:"d/m/Y H:i" }}
+              {% else %}
+                —
+              {% endif %}
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-5">
+    <div class="card h-100 shadow-sm border-0">
+      <div class="card-body">
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+          <div>
+            <div class="fw-semibold">Fournisseurs</div>
+            <div class="text-muted small">
+              Sources d’approvisionnement associées à cet article.
+            </div>
+          </div>
+
+          <a class="btn btn-sm btn-outline-secondary" href="{% url 'fournisseurs:liste' %}">
+            Fournisseurs
+          </a>
+        </div>
+
+        {% if has_fournisseurs %}
+          <div class="list-group list-group-flush">
+            {% for lien in liens_fournisseurs %}
+              <div class="list-group-item px-0">
+                <div class="fw-semibold">{{ lien.fournisseur.nom }}</div>
+
+                {% if lien.fournisseur.email or lien.fournisseur.telephone %}
+                  <div class="small text-muted mt-1">
+                    {% if lien.fournisseur.email %}
+                      {{ lien.fournisseur.email }}
+                    {% endif %}
+                    {% if lien.fournisseur.email and lien.fournisseur.telephone %}
+                      <span class="mx-1">•</span>
+                    {% endif %}
+                    {% if lien.fournisseur.telephone %}
+                      {{ lien.fournisseur.telephone }}
+                    {% endif %}
+                  </div>
+                {% endif %}
+
+                {% if lien.fournisseur.adresse %}
+                  <div class="small text-muted mt-1">{{ lien.fournisseur.adresse }}</div>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="alert alert-light border mb-0">
+            Aucun fournisseur n’est associé à cet article pour le moment.
+          </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

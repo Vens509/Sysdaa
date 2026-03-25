@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %} - Réquisitions traitées{% endblock %}
+{% block content %}
+
+<div class="sys-pagehead">
+  <div class="sys-pagehead__title">
+    <h1 class="sys-h1">Réquisitions traitées</h1>
+    <p class="sys-subtitle">
+      Historique des réquisitions déjà traitées par le gestionnaire.
+    </p>
+  </div>
+
+  <div class="sys-pagehead__actions">
+    <a class="btn btn-outline-secondary" href="{% url 'requisitions:liste' %}">
+      Retour aux réquisitions confirmées
+    </a>
+  </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+  <div class="card-body">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-md-10">
+        <label class="form-label">Recherche</label>
+        <input class="form-control" name="q" value="{{ q }}" placeholder="Direction, motif, email, gestionnaire..." />
+      </div>
+
+      <div class="col-md-2 d-grid">
+        <button class="btn btn-dark" type="submit">Filtrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card shadow-sm border-0">
+  <div class="card-header bg-white d-flex justify-content-between align-items-center">
+    <h2 class="h6 mb-0">Liste des réquisitions traitées</h2>
+    <span class="text-muted small">{{ requisitions|length }} résultat{{ requisitions|length|pluralize }}</span>
+  </div>
+
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0 align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Direction</th>
+            <th>Articles</th>
+            <th>Traité par</th>
+            <th>Date de traitement</th>
+            <th>Date de réception</th>
+            <th class="text-end">Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for r in requisitions %}
+            <tr>
+              <td class="fw-semibold">REQ-{{ r.id }}</td>
+
+              <td>
+                {% if r.soumetteur and r.soumetteur.direction_affectee %}
+                  {{ r.soumetteur.direction_affectee }}
+                {% else %}
+                  {{ r.direction_demandeuse|default:"—" }}
+                {% endif %}
+              </td>
+
+              <td style="min-width: 280px;">
+                {% with lignes=r.lignes.all %}
+                  {% if lignes %}
+                    <div class="d-flex flex-column gap-1">
+                      {% for l in lignes %}
+                        {% if forloop.counter <= 3 %}
+                          <div class="small">
+                            <span class="fw-semibold">{{ l.article.nom }}</span>
+                            <span class="text-muted">
+                              — {% if l.quantite_livree %}{{ l.quantite_livree_affichage }}{% else %}{{ l.quantite_demandee_affichage }}{% endif %}
+                            </span>
+                          </div>
+                        {% endif %}
+                      {% endfor %}
+                      {% if lignes|length > 3 %}
+                        <span class="badge text-bg-secondary">+{{ lignes|length|add:"-3" }}</span>
+                      {% endif %}
+                    </div>
+                  {% else %}
+                    <span class="text-muted">—</span>
+                  {% endif %}
+                {% endwith %}
+              </td>
+
+              <td>
+                {% if r.traitee_par %}
+                  {{ r.traitee_par.prenom }} {{ r.traitee_par.nom }}
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+
+              <td class="text-nowrap">
+                {% if r.date_livraison %}
+                  {{ r.date_livraison|date:"d/m/Y à H:i" }}
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+
+              <td class="text-nowrap">
+                {% if r.date_reception %}
+                  {{ r.date_reception|date:"d/m/Y à H:i" }}
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+
+              <td class="text-end">
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'requisitions:detail' r.id %}">
+                  Voir
+                </a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="7" class="text-muted text-center py-4">
+                Aucune réquisition traitée.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

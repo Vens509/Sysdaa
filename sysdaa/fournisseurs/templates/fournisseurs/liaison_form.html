@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %} - Lier un article{% endblock %}
+
+{% block content %}
+<div class="sys-pagehead">
+  <div class="sys-pagehead__title">
+    <h1 class="sys-h1">Lier un article</h1>
+    <p class="sys-subtitle">{{ fournisseur.nom }}</p>
+  </div>
+
+  <div class="sys-pagehead__actions">
+    <a class="btn btn-outline-secondary" href="{% url 'fournisseurs:detail' fournisseur.id %}">Retour</a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <div class="mb-3">
+        <label class="form-label">Article</label>
+        {{ form.article }}
+        {% if form.article.errors %}
+          <div class="text-danger small mt-1">{{ form.article.errors|striptags }}</div>
+        {% endif %}
+      </div>
+
+      <div class="d-flex flex-wrap gap-2">
+        <button class="btn btn-success" type="submit">Enregistrer</button>
+        <a class="btn btn-secondary" href="{% url 'fournisseurs:detail' fournisseur.id %}">Annuler</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,133 @@
+
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rapports</title>
+
+  <link rel="stylesheet" href="/static/rapports/rapports.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body class="rp-body">
+  <header class="rp-header">
+    <div class="rp-container rp-header__inner">
+      <div class="rp-brand">SYSDAA • Rapports</div>
+      <nav class="rp-nav">
+        <a href="/rapports/">Liste</a>
+        <a href="/rapports/generer/">Générer</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="rp-container rp-main">
+    
+
+    
+  <div class="rp-card">
+    <div class="rp-card__head">
+      <h1 class="rp-title">Rapport mensuel — 02/2001</h1>
+
+      
+    </div>
+
+    <script id="rp-data" type="application/json">{"periode": {"mois": 2, "annee": 2001, "start": "2001-02-01T00:00:00-05:00", "end": "2001-03-01T00:00:00-05:00"}, "stock": {"entree": {"nb_mouvements": 0, "quantite": 0}, "sortie": {"nb_mouvements": 0, "quantite": 0}, "avec_requisition": {"nb_mouvements": 0, "quantite": 0}, "sans_requisition": {"nb_mouvements": 0, "quantite": 0}, "top_articles_sortie": []}, "requisitions": {"nb_traitees": 0, "top_direction": {"nom": "", "nb": 0}, "top_directions": [], "lignes": {"nb_lignes": 0, "total_demandee": 0, "total_livree": 0, "satisfaction_pct": 0.0}, "top_articles_demandes": [], "top_articles_livres": []}, "mouvements": []}</script>
+
+    <section class="rp-kpis">
+      <div class="rp-kpi">
+        <div class="rp-kpi__label">Entrées (quantité)</div>
+        <div class="rp-kpi__value" data-kpi="entree_qte">0</div>
+      </div>
+
+      <div class="rp-kpi">
+        <div class="rp-kpi__label">Sorties (quantité)</div>
+        <div class="rp-kpi__value" data-kpi="sortie_qte">0</div>
+      </div>
+
+      <div class="rp-kpi">
+        <div class="rp-kpi__label">Réquisitions traitées</div>
+        <div class="rp-kpi__value" data-kpi="req_traitees">0</div>
+      </div>
+
+      <div class="rp-kpi">
+        <div class="rp-kpi__label">Sans réquisition (quantités)</div>
+        <div class="rp-kpi__value rp-kpi__value--sm" data-kpi="sans_req_qte">—</div>
+      </div>
+
+      <div class="rp-kpi">
+        <div class="rp-kpi__label">Demandée vs livrée</div>
+        <div class="rp-kpi__value rp-kpi__value--sm" data-kpi="demandee_livree">—</div>
+      </div>
+
+      <div class="rp-kpi">
+        <div class="rp-kpi__label">Satisfaction</div>
+        <div class="rp-kpi__value" data-kpi="satisfaction_pct">0%</div>
+      </div>
+
+      <div class="rp-kpi">
+        <div class="rp-kpi__label">Direction top</div>
+        <div class="rp-kpi__value rp-kpi__value--sm" data-kpi="top_direction">—</div>
+      </div>
+    </section>
+
+    <section class="rp-charts">
+      <div class="rp-chart-card">
+        <h2 class="rp-subtitle">Entrées vs Sorties</h2>
+        <canvas id="chartPie" height="220"></canvas>
+      </div>
+
+      <div class="rp-chart-card">
+        <h2 class="rp-subtitle">Sans réquisition (Entrée vs Sortie)</h2>
+        <canvas id="chartSansRequisition" height="220"></canvas>
+      </div>
+
+      <div class="rp-chart-card">
+        <h2 class="rp-subtitle">Top articles (sorties)</h2>
+        <canvas id="chartTopArticles" height="220"></canvas>
+      </div>
+
+      <div class="rp-chart-card">
+        <h2 class="rp-subtitle">Top articles demandés</h2>
+        <canvas id="chartTopDemandes" height="220"></canvas>
+      </div>
+
+      <div class="rp-chart-card">
+        <h2 class="rp-subtitle">Top articles livrés</h2>
+        <canvas id="chartTopLivres" height="220"></canvas>
+      </div>
+
+      <div class="rp-chart-card rp-chart-card--full">
+        <h2 class="rp-subtitle">Top directions (réquisitions créées)</h2>
+        <canvas id="chartDirections" height="260"></canvas>
+      </div>
+    </section>
+
+    <section class="rp-card rp-card--inner">
+      <h2 class="rp-subtitle">Mouvements (aperçu)</h2>
+      <div class="rp-muted">
+        Inclut les mouvements liés à une réquisition et ceux sans réquisition (périmé, endommagé, ajustement, etc.).
+      </div>
+
+      <div class="rp-table-wrap">
+        <table class="rp-table" id="mvTable">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Article</th>
+              <th>Qté</th>
+              <th>REQ</th>
+              <th>Direction</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  </main>
+
+  <script src="/static/rapports/rapports.js"></script>
+</body>
+</html>

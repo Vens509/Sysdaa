@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %} - Détail audit{% endblock %}
+
+{% block content %}
+<div class="sys-pagehead">
+  <div class="sys-pagehead__title">
+    <h1 class="sys-h1">Détail de l’audit</h1>
+    <p class="sys-subtitle">
+      Consultation complète d’un événement du journal système.
+    </p>
+  </div>
+
+  <div class="sys-pagehead__actions">
+    <a href="{% url 'audit:liste' %}" class="btn btn-outline-secondary">
+      Liste
+    </a>
+  </div>
+</div>
+
+<div class="card shadow-sm border-0" style="border-radius:18px;">
+  <div class="card-body p-4">
+    <div class="row g-4">
+
+      <div class="col-12 col-lg-6">
+        <div class="text-muted small">Date</div>
+        <div class="fw-semibold">{{ a.date_action|date:"d/m/Y H:i:s" }}</div>
+      </div>
+
+      <div class="col-12 col-lg-3">
+        <div class="text-muted small">Niveau</div>
+        <div class="fw-semibold">{{ a.niveau|default:"—" }}</div>
+      </div>
+
+      <div class="col-12 col-lg-3">
+        <div class="text-muted small">Succès</div>
+        <div class="fw-semibold">
+          {% if a.succes %}
+            <span class="badge text-bg-success">OK</span>
+          {% else %}
+            <span class="badge text-bg-danger">Échec</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="col-12"><hr class="my-2"></div>
+
+      <div class="col-12 col-lg-4">
+        <div class="text-muted small">Application</div>
+        <div class="fw-semibold">{{ a.app|default:"—" }}</div>
+      </div>
+
+      <div class="col-12 col-lg-4">
+        <div class="text-muted small">Action</div>
+        <div class="fw-semibold">{{ a.action|default:"—" }}</div>
+      </div>
+
+      <div class="col-12 col-lg-4">
+        <div class="text-muted small">Adresse IP</div>
+        <div class="fw-semibold">{{ a.ip|default:"—" }}</div>
+      </div>
+
+      <div class="col-12"><hr class="my-2"></div>
+
+      <div class="col-12 col-lg-6">
+        <div class="text-muted small">Acteur</div>
+        <div class="fw-semibold">
+          {% if a.acteur %}
+            {{ a.acteur.nom|default:"" }} {{ a.acteur.prenom|default:"" }}
+          {% else %}
+            —
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-3">
+        <div class="text-muted small">Cible</div>
+        <div class="fw-semibold">
+          {% if a.cible_label %}
+            {{ a.cible_label }}
+          {% elif a.cible_id %}
+            {{ a.cible_id }}
+          {% else %}
+            —
+          {% endif %}
+        </div>
+        {% if a.cible_type %}
+          <div class="small text-muted">{{ a.cible_type }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-12 col-lg-3">
+        <div class="text-muted small">Identifiant saisi</div>
+        <div class="fw-semibold">{{ identifiant_affiche|default:"—" }}</div>
+      </div>
+
+      <div class="col-12"><hr class="my-2"></div>
+
+      <div class="col-12">
+        <div class="text-muted small">Message</div>
+        <div class="fw-semibold">{{ a.message|default:"—" }}</div>
+      </div>
+
+      <div class="col-12">
+        <hr class="my-2">
+        <div class="text-muted small mb-2">Détails (JSON)</div>
+
+        {{ details_json|json_script:"audit_details_json" }}
+
+        <pre id="audit_details_pre"
+             class="p-3 mb-0"
+             style="white-space:pre-wrap;border-radius:14px;border:1px solid rgba(217,230,255,.95);background:rgba(238,245,255,.55);"></pre>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const dataEl = document.getElementById("audit_details_json");
+  const preEl = document.getElementById("audit_details_pre");
+
+  if (!dataEl || !preEl) return;
+
+  try {
+    const parsed = JSON.parse(dataEl.textContent || "{}");
+    preEl.textContent = JSON.stringify(parsed, null, 2);
+  } catch (e) {
+    preEl.textContent = "{}";
+  }
+})();
+</script>
+{% endblock %}

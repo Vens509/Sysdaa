@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %} - Rapports analytiques{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'rapports/rapports.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="sys-pagehead">
+  <div class="sys-pagehead__title">
+    <h1 class="sys-h1">Rapports analytiques</h1>
+    <p class="sys-subtitle">
+      Génération de rapports de stock et de synthèses d'activité.
+    </p>
+  </div>
+</div>
+
+{% if messages %}
+  <div class="rp-messages">
+    {% for message in messages %}
+      <div class="rp-message rp-message--{{ message.tags|default:'error' }}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="rp-card rp-card--form mb-4">
+  <form method="post" class="rp-form" id="rapportForm" novalidate>
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="rp-message rp-message--error mb-3">
+        {{ form.non_field_errors|striptags }}
+      </div>
+    {% endif %}
+
+    <div class="rp-grid rp-grid--form">
+      <div class="rp-field">
+        <label for="{{ form.annee_fiscale.id_for_label }}">{{ form.annee_fiscale.label }}</label>
+        {{ form.annee_fiscale }}
+        {% if form.annee_fiscale.errors %}
+          <div class="rp-error">{{ form.annee_fiscale.errors|striptags }}</div>
+        {% endif %}
+      </div>
+
+      <div class="rp-field">
+        <label for="{{ form.periode.id_for_label }}">{{ form.periode.label }}</label>
+        {{ form.periode }}
+        {% if form.periode.errors %}
+          <div class="rp-error">{{ form.periode.errors|striptags }}</div>
+        {% endif %}
+      </div>
+
+      <div class="rp-field" id="rp-mois-wrap">
+        <label for="{{ form.mois.id_for_label }}">{{ form.mois.label }}</label>
+        {{ form.mois }}
+        {% if form.mois.errors %}
+          <div class="rp-error">{{ form.mois.errors|striptags }}</div>
+        {% endif %}
+      </div>
+
+      <div class="rp-field">
+        <label for="{{ form.type_rapport.id_for_label }}">{{ form.type_rapport.label }}</label>
+        {{ form.type_rapport }}
+        {% if form.type_rapport.errors %}
+          <div class="rp-error">{{ form.type_rapport.errors|striptags }}</div>
+        {% endif %}
+      </div>
+
+      <div class="rp-field">
+        <label for="{{ form.categorie.id_for_label }}">{{ form.categorie.label }}</label>
+        {{ form.categorie }}
+        {% if form.categorie.errors %}
+          <div class="rp-error">{{ form.categorie.errors|striptags }}</div>
+        {% endif %}
+      </div>
+
+      <div class="rp-field">
+        <label for="{{ form.direction.id_for_label }}">{{ form.direction.label }}</label>
+        {{ form.direction }}
+        {% if form.direction.errors %}
+          <div class="rp-error">{{ form.direction.errors|striptags }}</div>
+        {% endif %}
+      </div>
+
+      <div class="rp-field">
+        <label for="{{ form.etat_requisition.id_for_label }}">{{ form.etat_requisition.label }}</label>
+        {{ form.etat_requisition }}
+        {% if form.etat_requisition.errors %}
+          <div class="rp-error">{{ form.etat_requisition.errors|striptags }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="rp-actions rp-actions--start">
+      <button type="submit" class="rp-btn rp-btn--primary">
+        Générer le rapport
+      </button>
+    </div>
+  </form>
+</div>
+
+{% if rapport %}
+  <div class="rp-card rp-card--report">
+    <div class="rp-card__head">
+      <div class="rp-head-brand">
+        <div class="rp-head-brand__content">
+          <h2 class="rp-title">{{ rapport.title }}</h2>
+          <div class="rp-muted">{{ rapport.subtitle }}</div>
+          <div class="rp-meta-line">Année fiscale : {{ rapport.annee_fiscale_label }}</div>
+          <div class="rp-meta-line">Période : {{ rapport.period_label }}</div>
+
+          {% if rapport.filters_text %}
+            <div class="rp-meta-line">
+              Filtres appliqués :
+              {% for item in rapport.filters_text %}
+                <span>{{ item }}{% if not forloop.last %} • {% endif %}</span>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          {% if rapport.date_export %}
+            <div class="rp-meta-line">Généré le {{ rapport.date_export|date:"d/m/Y à H:i" }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="rp-actions-inline">
+        <a class="rp-btn" href="{% url 'rapports:export_excel' %}?{{ rapport.extra_context.export_querystring }}">
+          Export Excel
+        </a>
+        <a class="rp-btn rp-btn--danger" href="{% url 'rapports:export_pdf' %}?{{ rapport.extra_context.export_querystring }}">
+          Export PDF
+        </a>
+      </div>
+    </div>
+
+    {% if rapport.extra_context.mode_logique == "stock" %}
+      <div class="rp-legend">
+        <span class="rp-legend__item">
+          <span class="rp-flag-icon rp-flag-icon--ok" aria-hidden="true">⚑</span>
+          <span>Stock OK</span>
+        </span>
+
+        <span class="rp-legend__item">
+          <span class="rp-flag-icon rp-flag-icon--warning" aria-hidden="true">⚑</span>
+          <span>Alerte orange</span>
+        </span>
+
+        <span class="rp-legend__item">
+          <span class="rp-flag-icon rp-flag-icon--danger" aria-hidden="true">⚑</span>
+          <span>Alerte rouge</span>
+        </span>
+      </div>
+    {% endif %}
+
+    {% if rapport.summary_cards %}
+      <div class="rp-summary-grid{% if rapport.extra_context.mode_logique == 'stock' %} rp-summary-grid--stock{% endif %}">
+        {% for card in rapport.summary_cards %}
+          <div class="rp-summary-card{% if card.tone == 'warning' %} rp-summary-card--warning{% elif card.tone == 'danger' %} rp-summary-card--danger{% elif card.tone == 'ok' %} rp-summary-card--ok{% endif %}">
+            <div class="rp-summary-card__label">{{ card.label }}</div>
+            <div class="rp-summary-card__value">{{ card.value }}</div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="rp-table-tools">
+      <div class="rp-table-tools__left">
+        <div class="rp-table-tools__title">Résultats du rapport</div>
+      </div>
+
+      <div class="rp-table-tools__right">
+        <input
+          type="search"
+          id="rpTableSearch"
+          class="form-control"
+          placeholder="Rechercher dans le tableau..."
+          autocomplete="off"
+        >
+      </div>
+    </div>
+
+    <div class="rp-table-wrap">
+      <table class="rp-table" id="rpReportTable">
+        <thead>
+          <tr>
+            {% for col in rapport.columns %}
+              <th class="{% if not forloop.first %}rp-td-center{% endif %}">{{ col }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for ligne in rapport.rows %}
+            <tr>
+              {% for value in ligne.values %}
+                <td class="{% if not forloop.first %}rp-td-center{% endif %}">
+                  {% if value == 'ROUGE' %}
+                    <span class="rp-flag-icon rp-flag-icon--danger" title="Alerte rouge" aria-hidden="true">⚑</span>
+                  {% elif value == 'ORANGE' %}
+                    <span class="rp-flag-icon rp-flag-icon--warning" title="Alerte orange" aria-hidden="true">⚑</span>
+                  {% elif value == 'OK' %}
+                    <span class="rp-flag-icon rp-flag-icon--ok" title="Stock OK" aria-hidden="true">⚑</span>
+                  {% else %}
+                    {{ value }}
+                  {% endif %}
+                </td>
+              {% endfor %}
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="{{ rapport.columns|length }}" class="rp-empty">
+                Aucune donnée disponible pour cette période.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="rp-table-emptysearch d-none" id="rpTableEmptySearch">
+      Aucun résultat ne correspond à votre recherche dans le tableau.
+    </div>
+  </div>
+{% endif %}
+
+<script id="rp-config-data" type="application/json">
+{
+  "selectors": {
+    "periode": "#{{ form.periode.id_for_label }}",
+    "moisWrap": "#rp-mois-wrap",
+    "tableSearch": "#rpTableSearch",
+    "table": "#rpReportTable",
+    "tableEmptySearch": "#rpTableEmptySearch"
+  }
+}
+</script>
+<script src="{% static 'rapports/rapports.js' %}"></script>
+{% endblock %}

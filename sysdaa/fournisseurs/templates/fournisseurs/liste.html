@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %} - Fournisseurs{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'fournisseurs/fournisseurs.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="sys-pagehead">
+  <div class="sys-pagehead__title">
+    <h1 class="sys-h1">Fournisseurs</h1>
+    <p class="sys-subtitle">Gestion des fournisseurs du système.</p>
+  </div>
+
+  <div class="sys-pagehead__actions">
+    <a class="btn btn-primary" href="{% url 'fournisseurs:creer' %}">
+      + Créer
+    </a>
+  </div>
+</div>
+
+<div class="sys-toolbar">
+  <form class="row g-2 align-items-end" method="get">
+    <div class="col-lg-8">
+      <label class="form-label mb-1">Recherche</label>
+      <input
+        class="form-control"
+        name="q"
+        value="{{ q }}"
+        placeholder="Nom, rue, ville, pays..."
+      >
+    </div>
+
+    <div class="col-lg-4 d-grid d-lg-flex gap-2">
+      <button class="btn btn-dark" type="submit">
+        Rechercher
+      </button>
+
+      <a class="btn btn-outline-secondary" href="{% url 'fournisseurs:liste' %}">
+        Réinitialiser
+      </a>
+    </div>
+  </form>
+</div>
+
+<div class="card shadow-sm border-0 sys-card-soft">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-dark">
+          <tr>
+            <th>Nom</th>
+            <th>Adresse</th>
+            <th class="text-center">Articles liés</th>
+            <th style="width: 260px;">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for f in fournisseurs %}
+            <tr>
+              <td class="fw-semibold">
+                <a class="text-decoration-none sys-link-strong" href="{% url 'fournisseurs:detail' f.id %}">
+                  {{ f.nom }}
+                </a>
+              </td>
+
+              <td>
+                {{ f.adresse_principale }}
+              </td>
+
+              <td class="text-center">
+                <span class="badge rounded-pill sys-pill-count">
+                  {{ f.nb_articles }}
+                </span>
+              </td>
+
+              <td>
+                <div class="d-flex gap-2 flex-wrap">
+                  <a class="btn btn-sm btn-outline-secondary" href="{% url 'fournisseurs:detail' f.id %}">
+                    Détail
+                  </a>
+
+                  <a class="btn btn-sm btn-outline-primary" href="{% url 'fournisseurs:modifier' f.id %}">
+                    Modifier
+                  </a>
+
+                  <a class="btn btn-sm btn-outline-danger" href="{% url 'fournisseurs:supprimer' f.id %}">
+                    Supprimer
+                  </a>
+                </div>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="4" class="text-center text-muted py-4">
+                Aucun fournisseur enregistré.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

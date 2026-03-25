@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %} - État du stock{% endblock %}
+
+{% block content %}
+<div class="sys-pagehead">
+  <div class="sys-pagehead__title">
+    <h1 class="sys-h1">État du stock</h1>
+    <p class="sys-subtitle">
+      Recherche rapide et aperçu des niveaux de stock.
+    </p>
+  </div>
+
+  <div class="sys-pagehead__actions">
+    <a class="btn btn-outline-secondary" href="{% url 'mouvements_stock:liste_mouvements' %}">
+      ← Mouvements
+    </a>
+  </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+  <div class="card-body">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-md-10">
+        <label class="form-label">Recherche article, catégorie</label>
+        <input
+          type="text"
+          name="q"
+          value="{{ q }}"
+          class="form-control"
+          placeholder="Ex: Encre, Papier, Fournitures..."
+        >
+      </div>
+
+      <div class="col-md-2 d-grid">
+        <button class="btn btn-primary" type="submit">
+          Rechercher
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card shadow-sm border-0">
+  <div class="card-body p-0">
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+
+        <thead class="table-light">
+          <tr>
+            <th>Article</th>
+            <th>Catégorie</th>
+            <th>Stock initial</th>
+            <th>Stock actuel</th>
+            <th>Stock minimal</th>
+            <th>Alerte</th>
+          </tr>
+        </thead>
+
+        <tbody>
+        {% for article in articles %}
+          <tr>
+
+            <td>
+              <div class="fw-semibold">{{ article.nom }}</div>
+
+              <div class="text-muted small">
+                {% if article.est_stocke_par_unite %}
+                  Stock géré directement à l’unité.
+                {% else %}
+                  1 {{ article.unite|lower }} = {{ article.quantite_par_conditionnement }} unités
+                {% endif %}
+              </div>
+            </td>
+
+            <td>
+              {{ article.categorie.libelle }}
+            </td>
+
+            <td>
+              {{ article.stock_initial_affichage }}
+            </td>
+
+            <td>
+              {{ article.stock_actuel_affichage }}
+            </td>
+
+            <td>
+              {{ article.stock_minimal_affichage }}
+            </td>
+
+            <td>
+              {% if article.est_en_rupture %}
+                <span class="badge text-bg-danger">Rupture</span>
+              {% elif article.en_alerte %}
+                <span class="badge text-bg-warning">Alerte</span>
+              {% else %}
+                <span class="badge text-bg-success">Normal</span>
+              {% endif %}
+            </td>
+
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" class="text-center text-muted py-4">
+              Aucun article trouvé.
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+
+      </table>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

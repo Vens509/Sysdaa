@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %} — Catégorie{% endblock %}
+
+{% block content %}
+<div class="sys-pagehead">
+  <div class="sys-pagehead__title">
+    <h1 class="sys-h1">
+      {% if mode == "edit" %}Modifier la catégorie{% else %}Créer une catégorie{% endif %}
+    </h1>
+    <p class="sys-subtitle">Utilisez un libellé clair, simple et unique.</p>
+  </div>
+
+  <div class="sys-pagehead__actions">
+    <a class="btn btn-outline-secondary" href="{% url 'articles:categories' %}">← Retour</a>
+  </div>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-8 col-xl-7">
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+          {% endif %}
+
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.libelle.id_for_label }}">Libellé</label>
+            {{ form.libelle }}
+            {% if form.libelle.errors %}
+              <div class="text-danger small mt-1">{{ form.libelle.errors|striptags }}</div>
+            {% endif %}
+          </div>
+
+          <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-success" type="submit">Enregistrer</button>
+            <a class="btn btn-outline-secondary" href="{% url 'articles:categories' %}">Annuler</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

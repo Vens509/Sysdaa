@@ -1,0 +1,411 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %} - Détail{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'requisitions/requisitions.css' %}">
+{% endblock %}
+
+{% block content %}
+
+{% with rn=user.role.nom_role|default_if_none:"" %}
+<div class="sys-pagehead mb-4">
+  <div class="sys-pagehead__title">
+    <h1 class="sys-h1 mb-1">Détail — REQ-{{ requisition.id }}</h1>
+    <p class="sys-subtitle mb-0">Informations générales, lignes demandées, traitement et réception.</p>
+  </div>
+
+  <div class="sys-pagehead__actions d-flex flex-wrap gap-2">
+    <a class="btn btn-outline-secondary" href="{% url 'requisitions:liste' %}">
+      Retour
+    </a>
+    <a class="btn btn-dark" href="{% url 'requisitions:detail_pdf' requisition.id %}" target="_blank">
+      Imprimer
+    </a>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-12 col-xl-8">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-header bg-white border-0 pb-0">
+        <h2 class="h5 mb-1">Informations générales</h2>
+        <p class="text-muted mb-0">Suivi complet de la réquisition.</p>
+      </div>
+
+      <div class="card-body">
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <label class="form-label text-muted small mb-1">Numéro de réquisition</label>
+            <div class="form-control bg-light">REQ-{{ requisition.id }}</div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label text-muted small mb-1">État actuel</label>
+            <div class="form-control bg-light">{{ requisition.etat_requisition }}</div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label text-muted small mb-1">Date de préparation</label>
+            <div class="form-control bg-light">
+              {% if requisition.date_preparation %}
+                {{ requisition.date_preparation|date:"d/m/Y à H:i" }}
+              {% else %}
+                —
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label text-muted small mb-1">Préparée par</label>
+            <div class="form-control bg-light">
+              {% if requisition.soumetteur %}
+                {{ requisition.soumetteur.prenom }} {{ requisition.soumetteur.nom }}
+              {% else %}
+                —
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label text-muted small mb-1">Email du demandeur</label>
+            <div class="form-control bg-light">
+              {% if requisition.soumetteur %}
+                {{ requisition.soumetteur.email|default:"—" }}
+              {% else %}
+                —
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label text-muted small mb-1">Direction concernée</label>
+            <div class="form-control bg-light">
+              {% if requisition.soumetteur and requisition.soumetteur.direction_affectee %}
+                {{ requisition.soumetteur.direction_affectee }}
+              {% else %}
+                {{ requisition.direction_demandeuse|default:"—" }}
+              {% endif %}
+            </div>
+          </div>
+
+          {% if requisition.directeur_direction or requisition.date_approbation %}
+            <div class="col-md-6">
+              <label class="form-label text-muted small mb-1">Confirmé par le directeur</label>
+              <div class="form-control bg-light">
+                {% if requisition.directeur_direction %}
+                  {{ requisition.directeur_direction.prenom }} {{ requisition.directeur_direction.nom }}
+                {% else %}
+                  —
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label text-muted small mb-1">Date de confirmation</label>
+              <div class="form-control bg-light">
+                {% if requisition.date_approbation %}
+                  {{ requisition.date_approbation|date:"d/m/Y à H:i" }}
+                {% else %}
+                  —
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+
+          {% if requisition.transferee_vers_directeur_daa or requisition.date_transfert_directeur_daa or requisition.directeur_daa %}
+            <div class="col-md-4">
+              <label class="form-label text-muted small mb-1">Transférée au Directeur DAA</label>
+              <div class="form-control bg-light">
+                {% if requisition.transferee_vers_directeur_daa %}Oui{% else %}Non{% endif %}
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label text-muted small mb-1">Directeur DAA</label>
+              <div class="form-control bg-light">
+                {% if requisition.directeur_daa %}
+                  {{ requisition.directeur_daa.prenom }} {{ requisition.directeur_daa.nom }}
+                {% else %}
+                  —
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label text-muted small mb-1">Date de transfert au DAA</label>
+              <div class="form-control bg-light">
+                {% if requisition.date_transfert_directeur_daa %}
+                  {{ requisition.date_transfert_directeur_daa|date:"d/m/Y à H:i" }}
+                {% else %}
+                  —
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+
+          {% if requisition.sceau_directeur_daa or requisition.date_sceau_directeur_daa %}
+            <div class="col-md-6">
+              <label class="form-label text-muted small mb-1">Sceau Directeur DAA</label>
+              <div class="form-control bg-light">
+                {% if requisition.sceau_directeur_daa %}
+                  {{ requisition.sceau_directeur_daa }}
+                {% else %}
+                  —
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label text-muted small mb-1">Date du sceau Directeur DAA</label>
+              <div class="form-control bg-light">
+                {% if requisition.date_sceau_directeur_daa %}
+                  {{ requisition.date_sceau_directeur_daa|date:"d/m/Y à H:i" }}
+                {% else %}
+                  —
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+
+          {% if requisition.traitee_par or requisition.date_livraison %}
+            <div class="col-md-6">
+              <label class="form-label text-muted small mb-1">Traité par</label>
+              <div class="form-control bg-light">
+                {% if requisition.traitee_par %}
+                  {{ requisition.traitee_par.prenom }} {{ requisition.traitee_par.nom }}
+                {% else %}
+                  —
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label text-muted small mb-1">Date de traitement</label>
+              <div class="form-control bg-light">
+                {% if requisition.date_livraison %}
+                  {{ requisition.date_livraison|date:"d/m/Y à H:i" }}
+                {% else %}
+                  —
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+
+          {% if requisition.recue_par or requisition.date_reception %}
+            <div class="col-md-6">
+              <label class="form-label text-muted small mb-1">Reçu par</label>
+              <div class="form-control bg-light">
+                {% if requisition.recue_par %}
+                  {{ requisition.recue_par.prenom }} {{ requisition.recue_par.nom }}
+                {% else %}
+                  —
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label text-muted small mb-1">Date de réception</label>
+              <div class="form-control bg-light">
+                {% if requisition.date_reception %}
+                  {{ requisition.date_reception|date:"d/m/Y à H:i" }}
+                {% else %}
+                  —
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+
+          {% if requisition.demande_modification_motif %}
+            <div class="col-12">
+              <label class="form-label text-muted small mb-1">Motif de la demande de modification</label>
+              <div class="form-control bg-light" style="min-height: 90px; white-space: pre-wrap;">{{ requisition.demande_modification_motif }}</div>
+            </div>
+          {% endif %}
+
+          <div class="col-12">
+            <label class="form-label text-muted small mb-1">Motif de la réquisition</label>
+            <div class="form-control bg-light" style="min-height: 90px; white-space: pre-wrap;">{{ requisition.motif_global|default:"—" }}</div>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label text-muted small mb-1">Remarque</label>
+            <div class="form-control bg-light" style="min-height: 90px; white-space: pre-wrap;">{{ requisition.remarque|default:"—" }}</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-4">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-header bg-white">
+        <h2 class="h6 mb-0">Résumé</h2>
+      </div>
+      <div class="card-body">
+        <div class="mb-3">
+          <div class="text-muted small">Nombre de lignes</div>
+          <div class="fs-4 fw-bold">{{ requisition.lignes.all|length }}</div>
+        </div>
+
+        <div class="mb-3">
+          <div class="text-muted small">État actuel</div>
+          <div class="fw-semibold">{{ requisition.etat_requisition }}</div>
+        </div>
+
+        <div class="mb-3">
+          <div class="text-muted small">Direction</div>
+          <div>
+            {% if requisition.soumetteur and requisition.soumetteur.direction_affectee %}
+              {{ requisition.soumetteur.direction_affectee }}
+            {% else %}
+              {{ requisition.direction_demandeuse|default:"—" }}
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <div class="text-muted small">Préparée le</div>
+          <div>
+            {% if requisition.date_preparation %}
+              {{ requisition.date_preparation|date:"d/m/Y à H:i" }}
+            {% else %}
+              —
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+  <div class="card-header bg-white">
+    <h2 class="h5 mb-0">Lignes de la réquisition</h2>
+  </div>
+
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Article</th>
+            <th class="text-end">Quantité demandée</th>
+            <th>Conditionnement</th>
+            <th class="text-end">Quantité livrée</th>
+            <th>Conditionnement</th>
+            <th>Motif</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for l in requisition.lignes.all %}
+            <tr>
+              <td>
+                <div class="fw-semibold">{{ l.article.nom }}</div>
+                <div class="small text-muted">{{ l.article.libelle_conditionnement }}</div>
+              </td>
+
+              <td class="text-end">
+                <div class="fw-semibold">{{ l.quantite_demandee|default:0 }}</div>
+              </td>
+
+              <td>
+                <div class="fw-semibold">{{ l.unite_demandee|default:"Unité" }}</div>
+              </td>
+
+              <td class="text-end">
+                {% if l.quantite_livree %}
+                  <div class="fw-semibold">{{ l.quantite_livree }}</div>
+                {% else %}
+                  <span class="text-muted">—</span>
+                {% endif %}
+              </td>
+
+              <td>
+                {% if l.quantite_livree %}
+                  <div class="fw-semibold">{{ l.unite_livree|default:"Unité" }}</div>
+                {% else %}
+                  <span class="text-muted">—</span>
+                {% endif %}
+              </td>
+
+              <td class="text-muted">{{ l.motif_article|default:"—" }}</td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6" class="text-center text-muted py-4">Aucune ligne.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="d-flex flex-wrap gap-2" id="zone-actions">
+  <a class="btn btn-outline-secondary" href="{% url 'requisitions:liste' %}">Retour</a>
+
+  {% if rn == "Secrétaire" %}
+    {% if requisition.etat_requisition == "En attente" or requisition.etat_requisition == "En attente de modification" %}
+      <a class="btn btn-primary {% if request.GET.source == 'notification' %}shadow{% endif %}" href="{% url 'requisitions:modifier' requisition.id %}">
+        Modifier
+      </a>
+    {% endif %}
+  {% endif %}
+
+  {% if IS_DIRECTION_APPROVER and requisition.etat_requisition == "En attente" %}    
+  <a class="btn btn-warning {% if request.GET.source == 'notification' %}shadow{% endif %}" href="{% url 'requisitions:modifier' requisition.id %}">
+      Modifier
+    </a>
+
+    <form method="post" action="{% url 'requisitions:valider_direction' requisition.id %}" class="d-inline">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-success {% if request.GET.source == 'notification' %}shadow{% endif %}">
+        Confirmer
+      </button>
+    </form>
+  {% endif %}
+
+  {% if rn == "Gestionnaire des ressources matérielles" and requisition.etat_requisition == "Validé" %}
+    <a class="btn btn-dark {% if request.GET.source == 'notification' %}shadow{% endif %}" href="{% url 'requisitions:transferer_daa' requisition.id %}">
+      Transférer au DAA
+    </a>
+
+    <a class="btn btn-primary {% if request.GET.source == 'notification' %}shadow{% endif %}" href="{% url 'requisitions:traiter' requisition.id %}">
+      Traiter
+    </a>
+
+    <a class="btn btn-warning {% if request.GET.source == 'notification' %}shadow{% endif %}" href="{% url 'requisitions:demander_modification' requisition.id %}">
+      Renvoyer en modification
+    </a>
+  {% endif %}
+
+  {% if rn == "Directeur DAA" and requisition.etat_requisition == "Validé" and requisition.transferee_vers_directeur_daa %}
+    <form method="post" action="{% url 'requisitions:valider_daa' requisition.id %}" class="d-inline">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-success {% if request.GET.source == 'notification' %}shadow{% endif %}">
+        Valider
+      </button>
+    </form>
+
+    <a class="btn btn-danger {% if request.GET.source == 'notification' %}shadow{% endif %}" href="{% url 'requisitions:rejeter_daa' requisition.id %}">
+      Rejeter
+    </a>
+  {% endif %}
+
+  {% if rn == "Secrétaire" and requisition.etat_requisition == "Traité" and not requisition.date_reception %}
+    <form method="post" action="{% url 'requisitions:accuser_reception' requisition.id %}" class="d-inline">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-success {% if request.GET.source == 'notification' %}shadow{% endif %}">
+        Confirmer la réception
+      </button>
+    </form>
+  {% endif %}
+</div>
+{% endwith %}
+
+{% endblock %}

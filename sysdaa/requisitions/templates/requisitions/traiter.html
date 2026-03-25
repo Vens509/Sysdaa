@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %} - Traiter{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'requisitions/requisitions.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="sys-pagehead mb-4">
+  <div class="sys-pagehead__title">
+    <h1 class="sys-h1 mb-1">Traiter la réquisition</h1>
+    <p class="sys-subtitle mb-0">
+      REQ-{{ requisition.id }} • Direction : {{ requisition.direction_demandeuse }}
+    </p>
+  </div>
+
+  <div class="sys-pagehead__actions">
+    <a class="btn btn-outline-secondary" href="{% url 'requisitions:detail' requisition.id %}">
+      Retour au détail
+    </a>
+  </div>
+</div>
+
+<form method="post" class="card shadow-sm border-0" id="traiterRequisitionForm" novalidate>
+  {% csrf_token %}
+
+  <div class="card-header bg-white border-0 pb-0">
+    <h2 class="h5 mb-1">Saisie des quantités livrées</h2>
+    <p class="text-muted mb-0">
+      Enregistrez les quantités réellement remises pour chaque article.
+    </p>
+  </div>
+
+  <div class="card-body">
+
+    <div class="alert alert-light border req-form-guide mb-4">
+      <div class="fw-semibold mb-1">Règles de traitement</div>
+      <div class="small mb-1">
+        Pour chaque ligne, vous pouvez livrer soit en <strong>Unité</strong>, soit dans le
+        <strong>conditionnement principal</strong> de l’article lorsque cela est autorisé.
+      </div>
+      <div class="small mb-1">
+        La quantité livrée ne peut pas dépasser la quantité demandée ni le stock actuellement disponible.
+      </div>
+      <div class="small text-muted">
+        Une quantité de <strong>0</strong> signifie qu’aucune livraison n’est enregistrée pour cette ligne.
+      </div>
+    </div>
+
+    <div class="table-responsive req-table-wrap">
+      <table class="table table-hover align-middle mb-0 req-table">
+        <thead class="table-light">
+          <tr>
+            <th>Article</th>
+            <th class="text-end">Quantité demandée</th>
+            <th>Conditionnement demandé</th>
+            <th class="text-end">Stock disponible</th>
+            <th>Conditionnement livré</th>
+            <th class="text-end" style="width: 180px;">Quantité livrée</th>
+            <th>Motif</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for l in requisition.lignes.all %}
+            <tr
+              class="js-traiter-row"
+              data-ligne-id="{{ l.id }}"
+              data-article-nom="{{ l.article.nom }}"
+              data-stock-unites="{{ l.article.stock_actuel|default:0 }}"
+              data-demande-unites="{{ l.quantite_demandee_unites|default:0 }}"
+              data-quantite-par-conditionnement="{{ l.article.quantite_par_conditionnement|default:1 }}"
+              data-unite-principale="{{ l.article.unite }}"
+            >
+              <td class="req-articles-col">
+                <div class="fw-semibold">{{ l.article.nom }}</div>
+                <div class="small text-muted">{{ l.article.libelle_conditionnement }}</div>
+              </td>
+
+              <td class="text-end">
+                <div class="fw-semibold">{{ l.quantite_demandee|default:0 }}</div>
+              </td>
+
+              <td>
+                <div class="fw-semibold">{{ l.unite_demandee|default:"Unité" }}</div>
+              </td>
+
+              <td class="text-end">
+                <div class="fw-semibold">{{ l.article.stock_actuel_affichage }}</div>
+              </td>
+
+              <td style="min-width: 210px;">
+                <select
+                  name="unite_livree_{{ l.id }}"
+                  class="form-select form-select-sm js-unite-livree">
+                  {% for unite in l.unites_autorisees %}
+                    <option value="{{ unite }}" {% if unite == l.unite_demandee %}selected{% endif %}>
+                      {{ unite }}
+                    </option>
+                  {% endfor %}
+                </select>
+                <div class="form-text small mt-1 js-unite-help">
+                  Choix autorisés :
+                  {% for unite in l.unites_autorisees %}
+                    {% if not forloop.first %} / {% endif %}{{ unite }}
+                  {% endfor %}
+                </div>
+              </td>
+
+              <td class="text-end" style="max-width: 180px;">
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  inputmode="numeric"
+                  name="quantite_livree_{{ l.id }}"
+                  value="{{ l.quantite_livree|default:0 }}"
+                  class="form-control form-control-sm text-end js-quantite-livree"
+                  placeholder="0"
+                >
+                <div class="form-text small mt-1 d-none js-qty-error text-danger"></div>
+              </td>
+
+              <td class="text-muted">
+                {{ l.motif_article|default:"—" }}
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="7" class="text-center text-muted py-4">Aucune ligne.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <div class="card-footer bg-white d-flex justify-content-end gap-2 flex-wrap">
+    <a class="btn btn-outline-secondary" href="{% url 'requisitions:detail' requisition.id %}">
+      Annuler
+    </a>
+    <button class="btn btn-primary" type="submit">
+      Valider le traitement
+    </button>
+  </div>
+</form>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  "use strict";
+
+  const form = document.getElementById("traiterRequisitionForm");
+  if (!form) return;
+
+  const rows = Array.from(form.querySelectorAll(".js-traiter-row"));
+  if (!rows.length) return;
+
+  function normalizeText(value) {
+    return String(value || "").trim().toLowerCase();
+  }
+
+  function getRowData(row) {
+    return {
+      stockUnites: Number(row.dataset.stockUnites || 0),
+      demandeUnites: Number(row.dataset.demandeUnites || 0),
+      quantiteParConditionnement: Number(row.dataset.quantiteParConditionnement || 1),
+      unitePrincipale: String(row.dataset.unitePrincipale || "").trim(),
+      articleNom: String(row.dataset.articleNom || "").trim(),
+      uniteSelect: row.querySelector(".js-unite-livree"),
+      qtyInput: row.querySelector(".js-quantite-livree"),
+      error: row.querySelector(".js-qty-error"),
+    };
+  }
+
+  function computeBaseUnits(unite, qty, unitePrincipale, qpc) {
+    const q = Number(qty || 0);
+    if (!Number.isFinite(q) || q <= 0) return 0;
+
+    const currentUnit = normalizeText(unite);
+    const mainUnit = normalizeText(unitePrincipale);
+
+    if (!currentUnit || currentUnit === "unité" || currentUnit === "unite") {
+      return q;
+    }
+
+    if (currentUnit === mainUnit) {
+      return q * (Number(qpc || 1) || 1);
+    }
+
+    return q;
+  }
+
+  function showError(errorEl, message) {
+    if (!errorEl) return;
+    errorEl.textContent = message || "";
+    errorEl.classList.remove("d-none");
+  }
+
+  function hideError(errorEl) {
+    if (!errorEl) return;
+    errorEl.textContent = "";
+    errorEl.classList.add("d-none");
+  }
+
+  function renderRow(row) {
+    const {
+      stockUnites,
+      demandeUnites,
+      quantiteParConditionnement,
+      unitePrincipale,
+      uniteSelect,
+      qtyInput,
+      error,
+    } = getRowData(row);
+
+    if (!uniteSelect || !qtyInput) return true;
+
+    const unite = String(uniteSelect.value || "Unité").trim() || "Unité";
+    const qty = Number(qtyInput.value || 0);
+
+    if (!Number.isFinite(qty) || qty < 0) {
+      showError(error, "La quantité livrée doit être un nombre entier positif ou zéro.");
+      qtyInput.classList.add("is-invalid");
+      return false;
+    }
+
+    const baseUnits = computeBaseUnits(
+      unite,
+      qty,
+      unitePrincipale,
+      quantiteParConditionnement
+    );
+
+    if (baseUnits > demandeUnites) {
+      showError(error, "La quantité livrée dépasse la quantité demandée pour cette ligne.");
+      qtyInput.classList.add("is-invalid");
+      return false;
+    }
+
+    if (baseUnits > stockUnites) {
+      showError(error, "La quantité livrée dépasse le stock actuellement disponible.");
+      qtyInput.classList.add("is-invalid");
+      return false;
+    }
+
+    hideError(error);
+    qtyInput.classList.remove("is-invalid");
+    return true;
+  }
+
+  rows.forEach((row) => {
+    const { uniteSelect, qtyInput } = getRowData(row);
+
+    if (uniteSelect) {
+      uniteSelect.addEventListener("change", function () {
+        renderRow(row);
+      });
+    }
+
+    if (qtyInput) {
+      qtyInput.addEventListener("input", function () {
+        renderRow(row);
+      });
+
+      qtyInput.addEventListener("blur", function () {
+        renderRow(row);
+      });
+    }
+
+    renderRow(row);
+  });
+
+  form.addEventListener("submit", function (event) {
+    let ok = true;
+    let totalLivraison = 0;
+
+    rows.forEach((row) => {
+      const valid = renderRow(row);
+      const { qtyInput, uniteSelect, quantiteParConditionnement, unitePrincipale } = getRowData(row);
+
+      if (!valid) {
+        ok = false;
+      }
+
+      const qty = Number(qtyInput?.value || 0);
+      const unite = String(uniteSelect?.value || "Unité").trim() || "Unité";
+      const baseUnits = computeBaseUnits(unite, qty, unitePrincipale, quantiteParConditionnement);
+      totalLivraison += baseUnits;
+    });
+
+    if (totalLivraison <= 0) {
+      ok = false;
+      alert("Vous devez enregistrer au moins une quantité livrée supérieure à zéro.");
+    }
+
+    if (!ok) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  });
+})();
+</script>
+{% endblock %}

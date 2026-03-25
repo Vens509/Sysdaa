@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %} - Configurations{% endblock %}
+
+{% block content %}
+<div class="sys-pagehead">
+  <div class="sys-pagehead__title">
+    <h1 class="sys-h1">Configurations</h1>
+    <p class="sys-subtitle">
+      Consultation de l’année fiscale.
+    </p>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-12 col-lg-6">
+    <div class="card h-100 shadow-sm border-primary">
+      <div class="card-body">
+        <div class="text-muted small mb-2">Année fiscale active</div>
+        <div class="fw-bold fs-4">{{ annee_fiscale.code }}</div>
+        <div class="text-muted small mt-2">
+          Du {{ annee_fiscale.date_debut|date:"d/m/Y" }} au {{ annee_fiscale.date_fin|date:"d/m/Y" }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-6">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <div class="text-muted small mb-2">Statut courant</div>
+        <div class="fw-semibold">
+          {% if cfg_active.est_active %}
+            <span class="badge text-bg-success">Active</span>
+          {% else %}
+            <span class="badge text-bg-secondary">Inactive</span>
+          {% endif %}
+        </div>
+        <div class="text-muted small mt-2">
+          Début : {{ cfg_active.annee_debut }}<br>
+          Fin : {{ cfg_active.annee_fin }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h2 class="h5 mb-3">Historique des années fiscales</h2>
+
+    <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Année de début</th>
+            <th>Année de fin</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for cfg in configurations %}
+            <tr>
+              <td>{{ cfg.annee_debut }}</td>
+              <td>{{ cfg.annee_fin }}</td>
+              <td>
+                {% if cfg.est_active %}
+                  <span class="badge text-bg-success">Active</span>
+                {% else %}
+                  <span class="badge text-bg-secondary">Inactive</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="3" class="text-center text-muted py-4">
+                Aucune configuration fiscale disponible.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

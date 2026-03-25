@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% block title %} - Mouvements de stock{% endblock %}
+
+{% block content %}
+<div class="sys-pagehead">
+  <div class="sys-pagehead__title">
+    <h1 class="sys-h1">Mouvements de stock</h1>
+    <p class="sys-subtitle">
+      Historique des entrées et sorties enregistrées dans le système.
+    </p>
+  </div>
+
+  <div class="sys-pagehead__actions d-flex gap-2">
+    <a class="btn btn-outline-primary" href="{% url 'mouvements_stock:entree_stock' %}">
+      Nouvelle entrée
+    </a>
+    <a class="btn btn-outline-danger" href="{% url 'mouvements_stock:sortie_stock' %}">
+      Nouvelle sortie
+    </a>
+  </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+  <div class="card-body">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-md-7">
+        <label class="form-label">Recherche</label>
+        <input
+          type="text"
+          name="q"
+          value="{{ q }}"
+          class="form-control"
+          placeholder="Article, motif, conditionnement, direction, email..."
+        />
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">Type</label>
+        <select name="type" class="form-select">
+          <option value="">Tous</option>
+          {% for value, label in types %}
+            <option value="{{ value }}" {% if type == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-2 d-grid">
+        <button class="btn btn-dark" type="submit">Filtrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card shadow-sm border-0">
+  <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <h2 class="h6 mb-0">Historique des mouvements</h2>
+    <span class="text-muted small">
+      {{ total_resultats }} résultat{{ total_resultats|pluralize }}
+      {% if is_paginated %}
+        • Page {{ page_obj.number }} sur {{ paginator.num_pages }}
+      {% endif %}
+    </span>
+  </div>
+
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Article</th>
+            <th>Quantité saisie</th>
+            <th>Équivalent réel</th>
+            <th>Origine</th>
+            <th>Détail</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for m in mouvements %}
+            <tr>
+              <td class="fw-semibold">#{{ m.id }}</td>
+
+              <td class="text-nowrap">
+                {{ m.date_mouvement|date:"d/m/Y à H:i" }}
+              </td>
+
+              <td>
+                {% if m.type_mouvement == "ENTREE" %}
+                  <span class="badge text-bg-success">Entrée</span>
+                {% else %}
+                  <span class="badge text-bg-danger">Sortie</span>
+                {% endif %}
+              </td>
+
+              <td>
+                <div class="fw-semibold">{{ m.article.nom }}</div>
+                <div class="text-muted small">
+                  {{ m.article.categorie|default:"—" }}
+                </div>
+                <div class="text-muted small">
+                  Conditionnement article : {{ m.article.unite }}{% if m.article.quantite_par_conditionnement > 1 %} ({{ m.article.quantite_par_conditionnement }} unités){% endif %}
+                </div>
+              </td>
+
+              <td style="min-width: 190px;">
+                <div class="fw-medium">{{ m.quantite_affichage }}</div>
+                <div class="text-muted small">
+                  1 {{ m.conditionnement_operation_normalise|lower }} = {{ m.quantite_par_conditionnement_mouvement }} unité{{ m.quantite_par_conditionnement_mouvement|pluralize }}
+                </div>
+              </td>
+
+              <td>
+                <div class="fw-semibold">{{ m.equivalent_unites_affichage }}</div>
+              </td>
+
+              <td>
+                {% if m.requisition %}
+                  <span class="badge text-bg-primary">Réquisition</span>
+                {% elif m.type_mouvement == "SORTIE" %}
+                  <span class="badge text-bg-secondary">Sortie manuelle</span>
+                {% else %}
+                  <span class="badge text-bg-light border">Saisie manuelle</span>
+                {% endif %}
+              </td>
+
+              <td style="min-width: 280px;">
+                {% if m.requisition %}
+                  <div class="fw-medium">REQ-{{ m.requisition.id }}</div>
+                  <div class="text-muted small">
+                    {{ m.requisition.motif_global|default:"—"|truncatechars:80 }}
+                  </div>
+                {% elif m.motif_sortie %}
+                  <div>{{ m.motif_sortie|truncatechars:100 }}</div>
+                {% else %}
+                  <span class="text-muted">—</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="8" class="text-center text-muted py-4">
+                Aucun mouvement trouvé.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% if is_paginated %}
+    <div class="card-footer bg-white">
+      <nav aria-label="Pagination des mouvements de stock">
+        <ul class="pagination justify-content-center mb-0 flex-wrap">
+          {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?q={{ q|urlencode }}&type={{ type|urlencode }}&page=1">Première</a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="?q={{ q|urlencode }}&type={{ type|urlencode }}&page={{ page_obj.previous_page_number }}">Précédente</a>
+            </li>
+          {% else %}
+            <li class="page-item disabled">
+              <span class="page-link">Première</span>
+            </li>
+            <li class="page-item disabled">
+              <span class="page-link">Précédente</span>
+            </li>
+          {% endif %}
+
+          {% for num in paginator.page_range %}
+            {% if num == page_obj.number %}
+              <li class="page-item active" aria-current="page">
+                <span class="page-link">{{ num }}</span>
+              </li>
+            {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+              <li class="page-item">
+                <a class="page-link" href="?q={{ q|urlencode }}&type={{ type|urlencode }}&page={{ num }}">{{ num }}</a>
+              </li>
+            {% endif %}
+          {% endfor %}
+
+          {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?q={{ q|urlencode }}&type={{ type|urlencode }}&page={{ page_obj.next_page_number }}">Suivante</a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="?q={{ q|urlencode }}&type={{ type|urlencode }}&page={{ paginator.num_pages }}">Dernière</a>
+            </li>
+          {% else %}
+            <li class="page-item disabled">
+              <span class="page-link">Suivante</span>
+            </li>
+            <li class="page-item disabled">
+              <span class="page-link">Dernière</span>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

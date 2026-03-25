@@ -1,0 +1,371 @@
+{% load static %}
+{% load i18n %}
+{% load two_factor_tags %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+    {% if wizard.steps.current == 'auth' %}
+      Connexion
+    {% elif wizard.steps.current == 'token' %}
+      Vérification OTP
+    {% elif wizard.steps.current == 'backup' %}
+      Backup token
+    {% else %}
+      Authentification sécurisée
+    {% endif %}
+  </title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    :root{
+      --sys-primary:#194993;
+      --sys-primary-dark:#12366d;
+      --sys-accent:#FFC952;
+      --sys-border:#d9e2f1;
+      --sys-text:#15304f;
+      --sys-muted:#64748b;
+      --sys-bg:#eef4fb;
+      --sys-card:#ffffff;
+      --sys-danger:#b42318;
+    }
+
+    *{box-sizing:border-box;}
+    html,body{height:100%;}
+    body{
+      margin:0;
+      font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--sys-text);
+      background:
+        radial-gradient(circle at top right, rgba(255,201,82,.22), transparent 26%),
+        radial-gradient(circle at bottom left, rgba(25,73,147,.14), transparent 28%),
+        linear-gradient(135deg, #f7fbff 0%, var(--sys-bg) 100%);
+      min-height:100vh;
+    }
+
+    .auth-shell{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+    }
+
+    .auth-card{
+      width:100%;
+      max-width:520px;
+      background:var(--sys-card);
+      border:1px solid rgba(25,73,147,.10);
+      border-radius:24px;
+      box-shadow:0 20px 60px rgba(15, 23, 42, .10);
+      overflow:hidden;
+    }
+
+    .auth-card__header{
+      padding:28px 28px 20px;
+      background:linear-gradient(180deg, rgba(25,73,147,.08), rgba(25,73,147,.02));
+      border-bottom:1px solid var(--sys-border);
+      text-align:center;
+    }
+
+    .auth-title{
+      margin:0;
+      font-size:1.7rem;
+      font-weight:800;
+      color:var(--sys-primary-dark);
+      text-align:center;
+    }
+
+    .auth-subtitle{
+      margin:10px 0 0;
+      font-size:.98rem;
+      color:var(--sys-muted);
+      line-height:1.55;
+      text-align:center;
+    }
+
+    .auth-card__body{
+      padding:28px;
+    }
+
+    .form-label{
+      font-weight:700;
+      color:var(--sys-primary-dark);
+      margin-bottom:8px;
+    }
+
+    .form-control, .form-select{
+      min-height:48px;
+      border-radius:14px;
+      border:1px solid #cfd9e8;
+      padding:.75rem .95rem;
+      box-shadow:none !important;
+    }
+
+    .form-control:focus, .form-select:focus{
+      border-color:rgba(25,73,147,.55);
+      box-shadow:0 0 0 .20rem rgba(25,73,147,.12) !important;
+    }
+
+    .btn{
+      min-height:46px;
+      border-radius:14px;
+      font-weight:700;
+      padding:.7rem 1.15rem;
+    }
+
+    .btn-primary{
+      background:var(--sys-primary);
+      border-color:var(--sys-primary);
+    }
+
+    .btn-primary:hover,
+    .btn-primary:focus{
+      background:var(--sys-primary-dark);
+      border-color:var(--sys-primary-dark);
+    }
+
+    .btn-outline-secondary{
+      border-color:#cfd9e8;
+      color:var(--sys-primary-dark);
+    }
+
+    .btn-outline-secondary:hover,
+    .btn-outline-secondary:focus{
+      background:#f3f6fb;
+      color:var(--sys-primary-dark);
+      border-color:#b8c6dc;
+    }
+
+    .alert{
+      border:none;
+      border-radius:14px;
+      font-size:.95rem;
+    }
+
+    .text-danger,
+    .invalid-feedback,
+    .errorlist{
+      color:var(--sys-danger) !important;
+    }
+
+    .errorlist{
+      list-style:none;
+      padding:0;
+      margin:6px 0 0;
+    }
+
+    .auth-divider{
+      height:1px;
+      background:var(--sys-border);
+      margin:20px 0 0;
+    }
+
+    .auth-footer-note{
+      margin-top:18px;
+      color:var(--sys-muted);
+      font-size:.88rem;
+      text-align:center;
+    }
+
+    .auth-step-title{
+      text-align:center;
+      font-weight:700;
+      color:var(--sys-primary-dark);
+      margin-bottom:18px;
+    }
+
+    @media (max-width: 575.98px){
+      .auth-shell{padding:16px;}
+      .auth-card__header,.auth-card__body{padding:20px;}
+      .auth-title{font-size:1.45rem;}
+      .d-flex.auth-actions{flex-direction:column;}
+      .d-flex.auth-actions .btn{width:100%;}
+    }
+
+    .alert {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+  </style>
+</head>
+<body>
+  <main class="auth-shell">
+    <section class="auth-card" aria-label="Authentification SYSDAA">
+      <div class="auth-card__header">
+        <h1 class="auth-title">
+          {% if wizard.steps.current == 'auth' %}
+            Connexion
+          {% elif wizard.steps.current == 'token' %}
+            Vérification du code
+          {% elif wizard.steps.current == 'backup' %}
+            Backup token
+          {% else %}
+            Authentification sécurisée
+          {% endif %}
+        </h1>
+
+        <p class="auth-subtitle">
+          {% if wizard.steps.current == 'auth' %}
+            Connectez-vous à votre compte.
+          {% elif wizard.steps.current == 'token' %}
+            Entrez le code reçu par email pour terminer la connexion.
+          {% elif wizard.steps.current == 'backup' %}
+            Entrez un backup token pour continuer.
+          {% else %}
+            Vérification de sécurité.
+          {% endif %}
+        </p>
+      </div>
+
+      <div class="auth-card__body">
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} mb-3 text-center auto-dismiss">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+
+        {% if wizard.form.non_field_errors %}
+          <div class="alert alert-danger mb-3">
+            {{ wizard.form.non_field_errors }}
+          </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {{ wizard.management_form }}
+
+          {% if redirect_field_name and redirect_field_value %}
+            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
+          {% endif %}
+
+          {% if wizard.steps.current == 'auth' %}
+
+            <div class="mb-3">
+              <label class="form-label" for="{{ wizard.form.username.id_for_label }}">Email</label>
+              {{ wizard.form.username }}
+              {% if wizard.form.username.errors %}
+                <div class="small mt-2 text-danger">{{ wizard.form.username.errors|striptags }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="{{ wizard.form.password.id_for_label }}">Mot de passe</label>
+              {{ wizard.form.password }}
+              {% if wizard.form.password.errors %}
+                <div class="small mt-2 text-danger">{{ wizard.form.password.errors|striptags }}</div>
+              {% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Se connecter</button>
+
+          {% elif wizard.steps.current == 'token' %}
+
+            <div class="auth-step-title">Saisissez votre code OTP</div>
+
+            {% for field in wizard.form %}
+              {% if field.name != 'remember' %}
+                <div class="mb-3">
+                  <label class="form-label" for="{{ field.id_for_label }}">
+                    {% if field.label %}{{ field.label }}{% else %}Code OTP{% endif %}
+                  </label>
+                  {{ field }}
+                  {% if field.errors %}
+                    <div class="small mt-2 text-danger">{{ field.errors|striptags }}</div>
+                  {% endif %}
+                  {% if field.help_text %}
+                    <div class="form-text">{{ field.help_text }}</div>
+                  {% endif %}
+                </div>
+              {% endif %}
+            {% endfor %}
+
+            <div class="d-flex justify-content-between gap-2 auth-actions">
+              <button type="submit" name="resend_token" value="1" class="btn btn-outline-secondary flex-fill">
+                Renvoyer le code
+              </button>
+              <button type="submit" class="btn btn-primary flex-fill">
+                Valider le code
+              </button>
+            </div>
+
+          {% elif wizard.steps.current == 'backup' %}
+
+            <div class="auth-step-title">Backup token</div>
+
+            {% for field in wizard.form %}
+              <div class="mb-3">
+                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                  <div class="small mt-2 text-danger">{{ field.errors|striptags }}</div>
+                {% endif %}
+              </div>
+            {% endfor %}
+
+            <button type="submit" class="btn btn-primary w-100">Continuer</button>
+
+          {% else %}
+
+            {% for field in wizard.form %}
+              <div class="mb-3">
+                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                  <div class="small mt-2 text-danger">{{ field.errors|striptags }}</div>
+                {% endif %}
+              </div>
+            {% endfor %}
+
+            <button type="submit" class="btn btn-primary w-100">Continuer</button>
+          {% endif %}
+        </form>
+
+        <p class="auth-footer-note">
+          Vous devez être totalement authentifié avant d'accéder au système.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      document.querySelectorAll("input, select, textarea").forEach(function (el) {
+        if (el.type === "hidden" || el.type === "checkbox" || el.type === "radio") return;
+
+        if (el.tagName === "SELECT") {
+          el.classList.add("form-select");
+        } else {
+          el.classList.add("form-control");
+        }
+      });
+    });
+    
+    document.addEventListener("DOMContentLoaded", function () {
+      const alerts = document.querySelectorAll(".auto-dismiss");
+
+      alerts.forEach(function(alert) {
+        setTimeout(function () {
+          alert.style.transition = "opacity 0.5s ease";
+          alert.style.opacity = "0";
+
+          setTimeout(function () {
+            alert.remove();
+          }, 500);
+        }, 4000); // message d'erreur disparait apres 4 secondes 
+      });
+    });
+
+  </script>
+</body>
+</html>

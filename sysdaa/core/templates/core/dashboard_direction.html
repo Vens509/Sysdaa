@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %} — À confirmer{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="sys-pagehead">
+  <div>
+    <h1 class="sys-h1">Réquisitions à confirmer</h1>
+    <p class="sys-subtitle">En attente de votre validation.</p>
+  </div>
+</div>
+
+<div class="card dash-card">
+  <div class="card-body">
+
+    <div class="dash-table-wrap">
+      <table class="table align-middle dash-table mb-0">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Direction</th>
+            <th>Date</th>
+            <th class="text-end">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in requisitions %}
+            <tr>
+              <td class="fw-semibold">#{{ r.id }}</td>
+              <td class="text-truncate" style="max-width: 360px;">{{ r.direction_demandeuse }}</td>
+              <td class="text-muted text-nowrap">{{ r.date_preparation|date:"Y-m-d H:i" }}</td>
+
+              <td class="text-end text-nowrap">
+                <div class="d-inline-flex gap-2 flex-wrap justify-content-end">
+                  <a class="btn btn-outline-secondary btn-sm"
+                     href="{% url 'requisitions:detail' r.id %}">
+                    Voir
+                  </a>
+
+                  {# ✅ 1 clic : Confirmer en POST direct #}
+                  <form method="post"
+                        action="{% url 'requisitions:valider_direction' r.id %}"
+                        class="d-inline">
+                    {% csrf_token %}
+                    <button class="btn btn-primary btn-sm" type="submit">
+                      Confirmer
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="4" class="text-muted">Aucune réquisition à confirmer.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'core/dashboard.js' %}"></script>
+{% endblock %}

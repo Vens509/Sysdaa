@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %} — Dashboard admin{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dash-shell">
+
+  <div class="sys-pagehead dash-head">
+    <div>
+      <h1 class="sys-h1">Dashboard admin</h1>
+      <p class="sys-subtitle">
+        Vue d’ensemble des utilisateurs et des journaux d’audit.
+      </p>
+    </div>
+
+    <div class="sys-pagehead__actions d-flex gap-2 flex-wrap">
+      <div class="dash-pill">
+        <span class="dash-pill__label">Date</span>
+        <span class="dash-pill__value">{{ today }}</span>
+      </div>
+      <div class="dash-pill">
+        <span class="dash-pill__label">Audit (30j)</span>
+        <span class="dash-pill__value">{{ kpi_audit_30_total }} logs • {{ kpi_audit_30_erreurs }} erreurs</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-md-6 col-xl-3">
+      <div class="card dash-kpi">
+        <div class="card-body">
+          <div class="dash-kpi-label">Utilisateurs</div>
+          <div class="dash-kpi-value">{{ kpi_total_users }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+      <div class="card dash-kpi dash-kpi--success">
+        <div class="card-body">
+          <div class="dash-kpi-label">Actifs</div>
+          <div class="dash-kpi-value">{{ kpi_actifs }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+      <div class="card dash-kpi dash-kpi--danger">
+        <div class="card-body">
+          <div class="dash-kpi-label">Inactifs</div>
+          <div class="dash-kpi-value">{{ kpi_inactifs }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+      <div class="card dash-kpi dash-kpi--accent">
+        <div class="card-body">
+          <div class="dash-kpi-label">Jamais connectés</div>
+          <div class="dash-kpi-value">{{ kpi_jamais_connecte }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-xl-7">
+      <div class="card dash-panel h-100">
+        <div class="card-header dash-panel__header">
+          <div>
+            <div class="dash-card-title">Créations utilisateurs</div>
+            <div class="dash-card-sub">30 derniers jours (date_creation)</div>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="dash-chart dash-chart--wide">
+            <canvas id="chartAdminUsersDaily"></canvas>
+          </div>
+
+          <hr class="dash-hr">
+
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <div class="dash-mini">
+                <div class="dash-mini__label">Rôles</div>
+                <div class="dash-mini__value">{{ kpi_roles }}</div>
+                <div class="dash-mini__hint">Nombre total de rôles configurés</div>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <div class="dash-mini">
+                <div class="dash-mini__label">Actifs / Inactifs</div>
+                <div class="dash-mini__value">{{ kpi_actifs }} / {{ kpi_inactifs }}</div>
+                <div class="dash-mini__hint">État actuel des comptes utilisateurs</div>
+              </div>
+            </div>
+          </div>
+
+          <hr class="dash-hr">
+
+          <div class="dash-chartbox mb-3">
+            <div class="dash-chartbox__title">Répartition des utilisateurs par rôle</div>
+
+            {% if users_by_role %}
+              <div class="dash-table-wrap">
+                <table class="table align-middle dash-table mb-0">
+                  <thead>
+                    <tr>
+                      <th>Rôle</th>
+                      <th class="text-end">Nombre</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in users_by_role %}
+                      <tr>
+                        <td class="fw-semibold text-nowrap">{{ item.role }}</td>
+                        <td class="text-end fw-bold">{{ item.total }}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <div class="text-muted">Aucune donnée utilisateur disponible.</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-xl-5">
+      <div class="card dash-panel h-100">
+        <div class="card-header dash-panel__header">
+          <div>
+            <div class="dash-card-title">Audit — synthèse</div>
+            <div class="dash-card-sub">Actions & niveaux (30j)</div>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-12">
+              <div class="dash-chartbox">
+                <div class="dash-chartbox__title">Niveaux</div>
+                <div class="dash-chart dash-chart--admin-half">
+                  <canvas id="chartAuditLevels"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="dash-chartbox">
+                <div class="dash-chartbox__title">Actions (Top + autres)</div>
+                <div class="dash-chart dash-chart--admin-half">
+                  <canvas id="chartAuditActions"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {% if not audit_logs %}
+            <div class="text-muted mt-3">Aucun log audit à afficher.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card dash-panel">
+    <div class="card-header dash-panel__header">
+      <div>
+        <div class="dash-card-title">Journal du système</div>
+        <div class="dash-card-sub">50 derniers événements (AuditLog)</div>
+      </div>
+      <span class="badge dash-badge">Logs</span>
+    </div>
+
+    <div class="card-body">
+      <div class="dash-table-wrap">
+        <table class="table align-middle dash-table mb-0">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Niveau</th>
+              <th>App • Action</th>
+              <th>Acteur</th>
+              <th>Message</th>
+              <th class="text-center">OK</th>
+              <th>IP</th>
+              <th class="text-center">Détails</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for l in audit_logs %}
+              <tr>
+                <td class="text-nowrap">{{ l.date_action|date:"Y-m-d H:i" }}</td>
+                <td class="text-nowrap">
+                  <span class="dash-log-badge dash-log-badge--{{ l.niveau|lower }}">{{ l.niveau }}</span>
+                </td>
+                <td class="text-nowrap">
+                  <span class="fw-semibold">{{ l.app }}</span>
+                  <span class="text-muted">•</span>
+                  <span>{{ l.action }}</span>
+                </td>
+                <td class="text-nowrap">
+                  {% if l.acteur %}
+                    {{ l.acteur.email }}
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+                <td>{{ l.message|default:"—" }}</td>
+                <td class="text-center">
+                  {% if l.succes %}
+                    <span class="dash-okmark">✓</span>
+                  {% else %}
+                    <span class="dash-badmark">✕</span>
+                  {% endif %}
+                </td>
+                <td class="text-nowrap">{{ l.ip|default:"—" }}</td>
+                <td class="text-center">
+                  <a class="btn btn-sm btn-outline-primary" href="{% url 'audit:detail' l.id %}">
+                    Détails
+                  </a>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="8" class="text-muted py-4">Aucun log disponible.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{{ admin_daily_labels_json|json_script:"admin-daily-labels" }}
+{{ admin_daily_values_json|json_script:"admin-daily-values" }}
+{{ audit_actions_pie|json_script:"admin-audit-actions" }}
+{{ audit_levels_donut|json_script:"admin-audit-levels" }}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="{% static 'core/dashboard_admin.js' %}"></script>
+{% endblock %}

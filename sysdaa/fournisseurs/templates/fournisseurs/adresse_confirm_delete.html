@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %} - Supprimer adresse{% endblock %}
+
+{% block content %}
+<div class="sys-pagehead">
+  <div class="sys-pagehead__title">
+    <h1 class="sys-h1">Supprimer l’adresse</h1>
+    <p class="sys-subtitle">
+      Fournisseur : <strong>{{ fournisseur.nom }}</strong>
+    </p>
+  </div>
+
+  <div class="sys-pagehead__actions">
+    <a class="btn btn-outline-secondary" href="{% url 'fournisseurs:detail' fournisseur.id %}">Retour</a>
+  </div>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-8 col-xl-7">
+    <div class="card">
+      <div class="card-body">
+        <div class="alert alert-warning mb-3">
+          <div class="fw-semibold">Cette action est définitive.</div>
+          <div class="small text-muted mt-1">
+            Adresse :
+            {% if adresse.numero %}{{ adresse.numero }} {% endif %}{{ adresse.rue }}
+            — {{ adresse.ville }}{% if adresse.ville and adresse.pays %}, {% endif %}{{ adresse.pays }}
+          </div>
+        </div>
+
+        <form method="post" class="d-flex flex-wrap gap-2">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Oui, supprimer</button>
+          <a class="btn btn-secondary" href="{% url 'fournisseurs:detail' fournisseur.id %}">Annuler</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

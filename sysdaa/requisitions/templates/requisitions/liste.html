@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+{% block title %} - Réquisitions{% endblock %}
+{% block content %}
+
+{% with rn=user.role.nom_role|default_if_none:"" %}
+<div class="sys-pagehead">
+  <div class="sys-pagehead__title">
+    <h1 class="sys-h1">Réquisitions</h1>
+    <p class="sys-subtitle">
+      {% if rn == "Gestionnaire des ressources matérielles" %}
+        Réquisitions confirmées prêtes à être traitées, transférées ou renvoyées en modification.
+      {% elif rn == "Directeur DAA" %}
+        Réquisitions transférées au Directeur DAA.
+      {% elif rn == "Secrétaire" %}
+        Liste des réquisitions créées et suivies dans le système.
+      {% else %}
+        Recherche, suivi et traitement des demandes.
+      {% endif %}
+    </p>
+  </div>
+
+  <div class="sys-pagehead__actions">
+    {% if rn == "Secrétaire" %}
+      <a class="btn btn-primary" href="{% url 'requisitions:creer' %}">
+        + Créer une réquisition
+      </a>
+    {% elif rn == "Gestionnaire des ressources matérielles" %}
+      <a class="btn btn-primary" href="{% url 'requisitions:liste_traitees' %}">
+        Liste des réquisitions traitées
+      </a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+  <div class="card-body">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-md-7">
+        <label class="form-label">Recherche</label>
+        <input
+          class="form-control"
+          name="q"
+          value="{{ q }}"
+          placeholder="Direction, motif, email..."
+        />
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">État</label>
+        <select class="form-select" name="etat">
+          <option value="">Tous</option>
+          {% for e in etats %}
+            <option value="{{ e }}" {% if etat == e %}selected{% endif %}>{{ e }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-2 d-grid">
+        <button class="btn btn-dark" type="submit">Filtrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card shadow-sm border-0">
+  <div class="card-header bg-white d-flex justify-content-between align-items-center">
+    <div>
+      <h2 class="h6 mb-0">
+        {% if rn == "Gestionnaire des ressources matérielles" %}
+          Réquisitions confirmées
+        {% elif rn == "Directeur DAA" %}
+          Réquisitions transférées
+        {% elif rn == "Secrétaire" %}
+          Mes réquisitions
+        {% else %}
+          Liste des réquisitions
+        {% endif %}
+      </h2>
+
+      <div class="text-muted small mt-1">
+        {% if rn == "Gestionnaire des ressources matérielles" %}
+          Cette liste n’affiche que les réquisitions à l’état <strong>Validé</strong>.
+        {% elif rn == "Directeur DAA" %}
+          Cette liste affiche uniquement les réquisitions transférées au Directeur DAA.
+        {% endif %}
+      </div>
+    </div>
+
+    <span class="text-muted small">
+      {{ requisitions|length }} résultat{{ requisitions|length|pluralize }}
+    </span>
+  </div>
+
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0 align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Direction</th>
+            <th>Articles</th>
+            <th>État</th>
+            <th>Date de préparation</th>
+            <th>Soumetteur</th>
+            {% if rn == "Directeur DAA" %}
+              <th>Date de transfert DAA</th>
+            {% endif %}
+            <th class="text-end">Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for r in requisitions %}
+            <tr>
+              <td class="fw-semibold">REQ-{{ r.id }}</td>
+
+              <td>
+                {% if r.soumetteur and r.soumetteur.direction_affectee %}
+                  {{ r.soumetteur.direction_affectee }}
+                {% else %}
+                  {{ r.direction_demandeuse|default:"—" }}
+                {% endif %}
+              </td>
+
+              <td style="min-width: 380px;">
+                {% with lignes=r.lignes.all %}
+                  {% if lignes %}
+                    <div class="d-flex flex-column gap-1">
+                      {% for l in lignes %}
+                        {% if forloop.counter <= 3 %}
+                          <div class="small">
+                            <span class="fw-semibold">{{ l.article.nom }}</span>
+                            <span class="text-muted">
+                              — {{ l.quantite_demandee_affichage }}
+                            </span>
+                            <span class="text-muted">
+                              ({{ l.quantite_demandee_unites_affichage }})
+                            </span>
+                          </div>
+                        {% endif %}
+                      {% endfor %}
+
+                      {% if lignes|length > 3 %}
+                        <div>
+                          <span class="badge text-bg-secondary">
+                            +{{ lignes|length|add:"-3" }} autre{{ lignes|length|add:"-3"|pluralize }}
+                          </span>
+                        </div>
+                      {% endif %}
+                    </div>
+                  {% else %}
+                    <span class="text-muted">—</span>
+                  {% endif %}
+                {% endwith %}
+              </td>
+
+              <td>
+                {% if r.etat_requisition == "Validé" %}
+                  <span class="badge text-bg-success">{{ r.etat_requisition }}</span>
+                {% elif r.etat_requisition == "Traité" %}
+                  <span class="badge text-bg-primary">{{ r.etat_requisition }}</span>
+                {% elif r.etat_requisition == "En attente" %}
+                  <span class="badge text-bg-warning">{{ r.etat_requisition }}</span>
+                {% elif r.etat_requisition == "En attente de modification" %}
+                  <span class="badge text-bg-warning">{{ r.etat_requisition }}</span>
+                {% elif r.etat_requisition == "Rejeté" %}
+                  <span class="badge text-bg-danger">{{ r.etat_requisition }}</span>
+                {% else %}
+                  <span class="badge text-bg-light border">{{ r.etat_requisition }}</span>
+                {% endif %}
+              </td>
+
+              <td class="text-nowrap">
+                {% if r.date_preparation %}
+                  {{ r.date_preparation|date:"d/m/Y à H:i" }}
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+
+              <td>
+                {% if r.soumetteur %}
+                  <div class="fw-medium">
+                    {{ r.soumetteur.prenom }} {{ r.soumetteur.nom }}
+                  </div>
+                  <div class="text-muted small">{{ r.soumetteur.email|default:"—" }}</div>
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+
+              {% if rn == "Directeur DAA" %}
+                <td class="text-nowrap">
+                  {% if r.date_transfert_directeur_daa %}
+                    {{ r.date_transfert_directeur_daa|date:"d/m/Y à H:i" }}
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+              {% endif %}
+
+              <td class="text-end">
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'requisitions:detail' r.id %}">
+                  Voir
+                </a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="{% if rn == 'Directeur DAA' %}8{% else %}7{% endif %}" class="text-muted text-center py-4">
+                {% if rn == "Gestionnaire des ressources matérielles" %}
+                  Aucune réquisition confirmée à traiter.
+                {% elif rn == "Directeur DAA" %}
+                  Aucune réquisition transférée.
+                {% elif rn == "Secrétaire" %}
+                  Aucune réquisition trouvée.
+                {% else %}
+                  Aucune réquisition.
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endwith %}
+
+{% endblock %}

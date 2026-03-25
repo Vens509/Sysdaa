@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+  {% if mode == "edit" %} - Modifier utilisateur{% else %} - Créer utilisateur{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'utilisateurs/utilisateurs.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="sys-pagehead">
+  <div class="sys-pagehead__title">
+    <h1 class="sys-h1">
+      {% if mode == "edit" %}Modifier un utilisateur{% else %}Créer un utilisateur{% endif %}
+    </h1>
+    <p class="sys-subtitle">Gestion des comptes, rôles et statuts.</p>
+  </div>
+  <div class="sys-pagehead__actions">
+    <a class="btn btn-outline-dark" href="{% url 'utilisateurs:liste' %}">Retour</a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {{ form.directeur_superviseur }}
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Email</label>
+          {{ form.email }}
+          {% if form.email.errors %}<div class="text-danger small mt-1">{{ form.email.errors|striptags }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Rôle</label>
+          {{ form.role }}
+          {% if form.role.errors %}<div class="text-danger small mt-1">{{ form.role.errors|striptags }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Nom</label>
+          {{ form.nom }}
+          {% if form.nom.errors %}<div class="text-danger small mt-1">{{ form.nom.errors|striptags }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Prénom</label>
+          {{ form.prenom }}
+          {% if form.prenom.errors %}<div class="text-danger small mt-1">{{ form.prenom.errors|striptags }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Direction affectée</label>
+          {{ form.direction_affectee }}
+          <div class="form-text" id="direction-affectee-help">
+            Ce champ s’adapte automatiquement selon le rôle choisi.
+          </div>
+          {% if form.direction_affectee.errors %}<div class="text-danger small mt-1">{{ form.direction_affectee.errors|striptags }}</div>{% endif %}
+        </div>
+
+        {% if mode == "edit" %}
+          <div class="col-md-6">
+            <label class="form-label">Statut</label>
+            {{ form.statut }}
+            {% if form.statut.errors %}<div class="text-danger small mt-1">{{ form.statut.errors|striptags }}</div>{% endif %}
+          </div>
+        {% endif %}
+
+        {% if mode != "edit" %}
+          <div class="col-12">
+            <div class="alert alert-warning mb-0">
+              Le copier-coller, la coupure et le glisser-déposer sont désactivés sur les champs de mot de passe.
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Mot de passe</label>
+            {{ form.password1 }}
+            {% if form.password1.errors %}<div class="text-danger small mt-1">{{ form.password1.errors|striptags }}</div>{% endif %}
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Confirmation</label>
+            {{ form.password2 }}
+            {% if form.password2.errors %}<div class="text-danger small mt-1">{{ form.password2.errors|striptags }}</div>{% endif %}
+          </div>
+        {% endif %}
+      </div>
+
+      <hr class="my-4">
+
+      <div class="d-flex gap-2 flex-wrap">
+        <button class="btn btn-primary" type="submit">
+          {% if mode == "edit" %}Enregistrer{% else %}Créer{% endif %}
+        </button>
+        <a class="btn btn-outline-secondary" href="{% url 'utilisateurs:liste' %}">Annuler</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'utilisateurs/password-security.js' %}"></script>
+<script src="{% static 'utilisateurs/utilisateurs-form.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %} - Détail fournisseur{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'fournisseurs/fournisseurs.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="sys-pagehead">
+  <div class="sys-pagehead__title">
+    <h1 class="sys-h1">{{ fournisseur.nom }}</h1>
+    <p class="sys-subtitle">Fiche complète du fournisseur et articles associés.</p>
+  </div>
+
+  <div class="sys-pagehead__actions d-flex flex-wrap gap-2">
+    <a class="btn btn-outline-primary" href="{% url 'fournisseurs:modifier' fournisseur.id %}">Modifier</a>
+    <a class="btn btn-outline-danger" href="{% url 'fournisseurs:supprimer' fournisseur.id %}">Supprimer</a>
+    <a class="btn btn-outline-secondary" href="{% url 'fournisseurs:liste' %}">Retour</a>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-12 col-lg-4">
+    <div class="card h-100 shadow-sm border-0 sys-card-soft">
+      <div class="card-body">
+        <div class="sys-section-title">Informations générales</div>
+
+        <div class="sys-kv">
+          <div class="sys-kv__label">Nom</div>
+          <div class="sys-kv__value">{{ fournisseur.nom }}</div>
+        </div>
+
+        <div class="sys-kv">
+          <div class="sys-kv__label">Nombre d’adresses</div>
+          <div class="sys-kv__value">{{ nb_adresses }}</div>
+        </div>
+
+        <div class="sys-kv mb-0">
+          <div class="sys-kv__label">Nombre d’articles liés</div>
+          <div class="sys-kv__value">{{ nb_articles }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-8">
+    <div class="card shadow-sm border-0 sys-card-soft">
+      <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+          <div>
+            <div class="sys-section-title mb-0">Adresses</div>
+            <div class="text-muted small">Adresses enregistrées pour ce fournisseur.</div>
+          </div>
+          <a class="btn btn-sm btn-dark" href="{% url 'fournisseurs:adresse_ajouter' fournisseur.id %}">+ Ajouter</a>
+        </div>
+
+        {% if adresses %}
+          <div class="list-group list-group-flush sys-listflush">
+            {% for a in adresses %}
+              <div class="list-group-item d-flex justify-content-between align-items-start gap-3">
+                <div class="me-2">
+                  <div class="fw-semibold">
+                    {% if a.numero %}{{ a.numero }} {% endif %}{% if a.rue %}{{ a.rue }}{% else %}<span class="text-muted">Adresse sans rue</span>{% endif %}
+                  </div>
+                  <div class="text-muted small">
+                    {% if a.ville or a.pays %}
+                      {{ a.ville }}{% if a.ville and a.pays %}, {% endif %}{{ a.pays }}
+                    {% else %}
+                      —
+                    {% endif %}
+                  </div>
+                </div>
+
+                <a class="btn btn-sm btn-outline-danger"
+                   href="{% url 'fournisseurs:adresse_supprimer' fournisseur.id a.id %}">
+                  Supprimer
+                </a>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="alert alert-light border mb-0">
+            <div class="fw-semibold">Aucune adresse enregistrée</div>
+            <div class="text-muted small">Ajoutez une adresse pour compléter la fiche du fournisseur.</div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="card shadow-sm border-0 sys-card-soft">
+      <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+          <div>
+            <div class="sys-section-title mb-0">Articles fournis</div>
+            <div class="text-muted small">Articles actuellement liés à ce fournisseur.</div>
+          </div>
+          <a class="btn btn-sm btn-dark" href="{% url 'fournisseurs:lier_article' fournisseur.id %}">+ Lier un article</a>
+        </div>
+
+        {% if liaisons %}
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>Article</th>
+                  <th>Catégorie</th>
+                  <th class="text-end">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for l in liaisons %}
+                  <tr>
+                    <td class="fw-semibold">
+                      <a class="text-decoration-none sys-link-strong" href="{% url 'articles:detail' l.article.id %}">
+                        {{ l.article.nom }}
+                      </a>
+                    </td>
+                    <td>
+                      {% if l.article.categorie %}
+                        {{ l.article.categorie.libelle }}
+                      {% else %}
+                        <span class="text-muted">—</span>
+                      {% endif %}
+                    </td>
+                    <td class="text-end">
+                      <a class="btn btn-sm btn-outline-danger"
+                         href="{% url 'fournisseurs:supprimer_liaison' fournisseur.id l.article.id %}">
+                        Retirer
+                      </a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="alert alert-light border mb-0">
+            <div class="fw-semibold">Aucun article lié</div>
+            <div class="text-muted small">Ajoutez une liaison pour associer un article à ce fournisseur.</div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

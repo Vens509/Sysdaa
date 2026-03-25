@@ -1,0 +1,1 @@
+from core.permissions import rapports_required

@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %} — Article{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'articles/articles.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="sys-pagehead">
+  <div class="sys-pagehead__title">
+    <h1 class="sys-h1">
+      {% if mode == "edit" %}Modifier l’article{% else %}Créer un article{% endif %}
+    </h1>
+    <p class="sys-subtitle">
+      Renseignez les informations essentielles de l’article et son stock de départ.
+    </p>
+  </div>
+
+  <div class="sys-pagehead__actions">
+    <a class="btn btn-outline-secondary" href="{% url 'articles:liste' %}">← Retour</a>
+  </div>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-12 col-xl-10">
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <form method="post" novalidate id="articleForm">
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+              {{ form.non_field_errors }}
+            </div>
+          {% endif %}
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" for="{{ form.nom.id_for_label }}">Nom de l’article</label>
+              {{ form.nom }}
+              {% if form.nom.errors %}
+                <div class="text-danger small mt-1">{{ form.nom.errors|striptags }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-6">
+              <div class="sys-fieldhead">
+                <label class="form-label mb-0" for="{{ form.categorie.id_for_label }}">Catégorie</label>
+                <button
+                  type="button"
+                  class="sys-mini-add-btn"
+                  data-toggle-category-create
+                  aria-label="Créer une nouvelle catégorie"
+                  title="Créer une nouvelle catégorie">
+                  +
+                </button>
+              </div>
+
+              <div class="sys-toggle-field">
+                <div data-category-select-wrap>
+                  {{ form.categorie }}
+                </div>
+
+                <div data-category-input-wrap hidden>
+                  {{ form.categorie_libre }}
+                </div>
+              </div>
+
+              {% if form.categorie.errors %}
+                <div class="text-danger small mt-1">{{ form.categorie.errors|striptags }}</div>
+              {% endif %}
+
+              {% if form.categorie_libre.errors %}
+                <div class="text-danger small mt-1">{{ form.categorie_libre.errors|striptags }}</div>
+              {% endif %}
+
+              <div class="form-text">
+                Choisissez une catégorie existante ou cliquez sur <strong>+</strong> pour en saisir une nouvelle.
+                Gérer les catégories : <a href="{% url 'articles:categories' %}">ouvrir</a>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Conditionnement principal</label>
+
+              <div
+                class="sys-unite-picker"
+                data-unite-picker
+                data-current-unite="{{ form.unite.value|default_if_none:'' }}"
+              >
+                <div class="sys-unite-picker__select-wrap" data-unite-select-wrap>
+                  <select
+                    class="form-select"
+                    id="unite_select_ui"
+                    data-unite-select-ui
+                  >
+                    <option value="">Sélectionnez un conditionnement</option>
+                    <option value="Unité">Unité</option>
+                    <option value="Boîte">Boîte</option>
+                    <option value="Paquet">Paquet</option>
+                    <option value="Carton">Carton</option>
+                    <option value="Caisse">Caisse</option>
+                    <option value="Ramette">Ramette</option>
+                    <option value="Rame">Rame</option>
+                    <option value="Douzaine">Douzaine</option>
+                    <option value="Sac">Sac</option>
+                    <option value="Bidon">Bidon</option>
+                    <option value="Bouteille">Bouteille</option>
+                    <option value="Flacon">Flacon</option>
+                    <option value="Lot">Lot</option>
+                    <option value="Autres">Autres</option>
+
+                    {% if unites_personnalisees %}
+                      {% for unite_personnalisee in unites_personnalisees %}
+                        <option value="{{ unite_personnalisee }}">{{ unite_personnalisee }}</option>
+                      {% endfor %}
+                    {% endif %}
+                  </select>
+                </div>
+
+                <div class="sys-unite-picker__custom-wrap mt-2" data-unite-custom-wrap hidden>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="unite_custom_ui"
+                    data-unite-custom-ui
+                    placeholder="Saisissez un autre conditionnement"
+                    value=""
+                  >
+                  <div class="form-text">
+                    Saisissez un conditionnement non présent dans la liste.
+                  </div>
+                </div>
+
+                <div class="d-none">
+                  {{ form.unite }}
+                </div>
+              </div>
+
+              {% if form.unite.errors %}
+                <div class="text-danger small mt-1">{{ form.unite.errors|striptags }}</div>
+              {% endif %}
+
+              <div class="form-text">
+                Choisissez dans la liste. Si le conditionnement n’existe pas, sélectionnez <strong>Autres</strong>.
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label" for="{{ form.quantite_par_conditionnement.id_for_label }}">
+                Nombre d’unités dans 1 conditionnement
+              </label>
+              {{ form.quantite_par_conditionnement }}
+              {% if form.quantite_par_conditionnement.errors %}
+                <div class="text-danger small mt-1">
+                  {{ form.quantite_par_conditionnement.errors|striptags }}
+                </div>
+              {% endif %}
+              {% if form.quantite_par_conditionnement.help_text %}
+                <div class="form-text" id="qpcHelpText">
+                  {{ form.quantite_par_conditionnement.help_text }}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label" for="{{ form.stock_initial_saisi.id_for_label }}">
+                Quantité initiale à enregistrer
+              </label>
+              {{ form.stock_initial_saisi }}
+              {% if form.stock_initial_saisi.errors %}
+                <div class="text-danger small mt-1">{{ form.stock_initial_saisi.errors|striptags }}</div>
+              {% endif %}
+              {% if form.stock_initial_saisi.help_text %}
+                <div class="form-text">{{ form.stock_initial_saisi.help_text }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label" for="{{ form.stock_minimal_saisi.id_for_label }}">
+                Seuil minimal d’alerte
+              </label>
+              {{ form.stock_minimal_saisi }}
+              {% if form.stock_minimal_saisi.errors %}
+                <div class="text-danger small mt-1">{{ form.stock_minimal_saisi.errors|striptags }}</div>
+              {% endif %}
+              {% if form.stock_minimal_saisi.help_text %}
+                <div class="form-text">{{ form.stock_minimal_saisi.help_text }}</div>
+              {% endif %}
+            </div>
+
+            {% if mode == "edit" %}
+              <div class="col-12">
+                <div class="alert alert-light border mb-0">
+                  <div class="fw-semibold mb-1">Rappel</div>
+                  <div class="small text-muted">
+                    Après historique de mouvements ou de réquisitions, certains champs peuvent devenir non modifiables.
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+
+            <div class="col-12">
+              <hr class="my-1">
+            </div>
+
+            <div class="col-12 col-lg-7">
+              <div class="sys-fieldhead">
+                <label class="form-label mb-0" for="{{ form.fournisseurs.id_for_label }}">Fournisseurs</label>
+                <button
+                  type="button"
+                  class="sys-mini-add-btn"
+                  data-toggle-fournisseurs-create
+                  aria-label="Ajouter de nouveaux fournisseurs"
+                  title="Ajouter de nouveaux fournisseurs">
+                  +
+                </button>
+              </div>
+
+              {{ form.fournisseurs }}
+
+              {% if form.fournisseurs.errors %}
+                <div class="text-danger small mt-1">{{ form.fournisseurs.errors|striptags }}</div>
+              {% endif %}
+
+              <div class="form-text">
+                Sélection multiple possible. Utilisez Ctrl (ou Cmd) pour choisir plusieurs fournisseurs existants.
+              </div>
+            </div>
+
+            <div class="col-12 col-lg-5" data-fournisseurs-input-wrap hidden>
+              <label class="form-label" for="{{ form.fournisseurs_libres.id_for_label }}">
+                Nouveaux fournisseurs
+              </label>
+              {{ form.fournisseurs_libres }}
+
+              {% if form.fournisseurs_libres.errors %}
+                <div class="text-danger small mt-1">{{ form.fournisseurs_libres.errors|striptags }}</div>
+              {% endif %}
+
+              <div class="form-text">
+                Saisissez un ou plusieurs noms. Vous pouvez mettre 1 fournisseur par ligne
+                ou les séparer par des virgules.
+              </div>
+            </div>
+          </div>
+
+          <hr class="my-4">
+
+          <div class="d-flex flex-wrap gap-2">
+            <button type="submit" class="btn btn-success">Enregistrer</button>
+            <a href="{% url 'articles:liste' %}" class="btn btn-outline-secondary">Annuler</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'articles/article-form.js' %}"></script>
+{% endblock %}

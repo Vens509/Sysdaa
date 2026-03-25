@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %} - Tableau de bord{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dash-shell">
+
+  <div class="sys-pagehead dash-head">
+    <div>
+      <h1 class="sys-h1">Tableau de bord</h1>
+      <p class="sys-subtitle">
+        Vue décisionnelle du stock, des réquisitions et des mouvements.
+      </p>
+    </div>
+
+    <div class="sys-pagehead__actions d-flex gap-2 flex-wrap">
+      <div class="dash-pill">
+        <span class="dash-pill__label">Date</span>
+        <span class="dash-pill__value">{{ today }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-summary-bar mb-4">
+    <div class="dash-summary-item dash-summary-item--ok">
+      <div class="dash-summary-item__top">
+        <span class="dash-summary-dot dash-summary-dot--ok"></span>
+        <span class="dash-summary-item__label">OK</span>
+      </div>
+      <div class="dash-summary-item__value">{{ stock_donut.ok|default:0 }}</div>
+      <div class="dash-summary-item__hint">Articles en état normal</div>
+    </div>
+
+    <div class="dash-summary-item dash-summary-item--warn">
+      <div class="dash-summary-item__top">
+        <span class="dash-summary-dot dash-summary-dot--warn"></span>
+        <span class="dash-summary-item__label">Alerte Orange</span>
+      </div>
+      <div class="dash-summary-item__value">{{ stock_donut.orange|default:0 }}</div>
+      <div class="dash-summary-item__hint">Articles au seuil d’alerte</div>
+    </div>
+
+    <div class="dash-summary-item dash-summary-item--danger">
+      <div class="dash-summary-item__top">
+        <span class="dash-summary-dot dash-summary-dot--danger"></span>
+        <span class="dash-summary-item__label">Alerte Rouge</span>
+      </div>
+      <div class="dash-summary-item__value">{{ stock_donut.rouge|default:0 }}</div>
+      <div class="dash-summary-item__hint">Articles en rupture</div>
+    </div>
+
+    <div class="dash-summary-item dash-summary-item--info">
+      <div class="dash-summary-item__top">
+        <span class="dash-summary-dot dash-summary-dot--info"></span>
+        <span class="dash-summary-item__label">Réquisitions</span>
+      </div>
+      <div class="dash-summary-item__value">{{ requisitions_total|default:0 }}</div>
+      <div class="dash-summary-item__hint">Volume global des demandes</div>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-xl-7">
+      <div class="card dash-panel h-100">
+        <div class="card-header dash-panel__header">
+          <div>
+            <div class="dash-card-title">Situation du stock</div>
+            <div class="dash-card-sub">Répartition par nombre d’articles selon leur état</div>
+          </div>
+          <span class="badge dash-badge">Pilotage</span>
+        </div>
+
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-12 col-lg-6">
+              <div class="dash-chartbox">
+                <div class="dash-chartbox__title">Articles par état de stock</div>
+                <div class="dash-chart dash-chart--tall">
+                  <canvas id="chartStockDonut"></canvas>
+                </div>
+                <div class="dash-legend">
+                  <span><i class="dash-legend__swatch dash-legend__swatch--ok"></i> OK</span>
+                  <span><i class="dash-legend__swatch dash-legend__swatch--warn"></i> Alerte Orange</span>
+                  <span><i class="dash-legend__swatch dash-legend__swatch--danger"></i> Alerte Rouge</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-lg-6">
+              <div class="dash-chartbox">
+                <div class="dash-chartbox__title">États des réquisitions</div>
+                <div class="dash-chart dash-chart--tall">
+                  <canvas id="chartReqPie"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-xl-5">
+      <div class="card dash-panel h-100">
+        <div class="card-header dash-panel__header">
+          <div>
+            <div class="dash-card-title">Top 5 articles les plus demandés</div>
+            <div class="dash-card-sub">30 derniers jours - quantités demandées</div>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="dash-table-wrap">
+            <table class="table align-middle dash-table mb-0">
+              <thead>
+                <tr>
+                  <th>Article</th>
+                  <th class="text-end">Quantité</th>
+                  <th class="text-muted">Conditionnement</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for a in top_articles %}
+                  <tr>
+                    <td class="fw-semibold">
+                      <div class="dash-article-cell">
+                        <span class="dash-article-bullet"></span>
+                        <span class="text-truncate">{{ a.nom }}</span>
+                      </div>
+                    </td>
+                    <td class="text-end fw-bold text-nowrap">{{ a.qte }}</td>
+                    <td class="text-muted text-nowrap">{{ a.unite }}</td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="3" class="text-muted py-4">
+                      Aucune donnée disponible sur les 30 derniers jours.
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="dash-side-note mt-3">
+            Cette liste met en évidence les articles les plus sollicités pour faciliter
+            l’anticipation du réapprovisionnement.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-12">
+      <div class="card dash-panel">
+        <div class="card-header dash-panel__header">
+          <div>
+            <div class="dash-card-title">Évolution journalière des mouvements</div>
+            <div class="dash-card-sub">30 derniers jours - nombre de mouvements d’entrée et de sortie</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="dash-chart dash-chart--wide">
+            <canvas id="chartDailyLine"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-12">
+      <div class="card dash-panel">
+        <div class="card-header dash-panel__header">
+          <div>
+            <div class="dash-card-title">Comparatif mensuel</div>
+            <div class="dash-card-sub">6 derniers mois - nombre de mouvements par mois</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="dash-chart dash-chart--wide">
+            <canvas id="chartMonthlyBar"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{{ daily_series|json_script:"daily-series" }}
+{{ monthly_series|json_script:"monthly-series" }}
+{{ stock_donut|json_script:"stock-donut" }}
+{{ req_pie|json_script:"req-pie" }}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="{% static 'core/dashboard.js' %}"></script>
+{% endblock %}

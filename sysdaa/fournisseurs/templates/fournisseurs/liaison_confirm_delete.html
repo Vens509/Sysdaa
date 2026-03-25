@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %} - Retirer liaison{% endblock %}
+{% block content %}
+<div class="sys-pagehead">
+  <div class="sys-pagehead__title">
+    <h1 class="sys-h1">Retirer l’article du fournisseur</h1>
+    <p class="sys-subtitle"><strong>{{ lien.fournisseur.nom }}</strong> — {{ lien.article.nom }}</p>
+  </div>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-7">
+    <div class="card">
+      <div class="card-body">
+        <div class="alert alert-warning">
+          Cette action retire uniquement la liaison (le fournisseur et l’article restent).
+        </div>
+
+        <form method="post" class="d-flex flex-wrap gap-2">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Oui, retirer</button>
+          <a class="btn btn-secondary" href="{% url 'fournisseurs:detail' lien.fournisseur.id %}">Annuler</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

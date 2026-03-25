@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %} - Transférer DAA{% endblock %}
+{% block content %}
+
+<div class="sys-pagehead">
+  <div class="sys-pagehead__title">
+    <h1 class="sys-h1">Transférer au Directeur DAA</h1>
+    <p class="sys-subtitle">REQ-{{ requisition.id }} • Direction : {{ requisition.direction_demandeuse }}</p>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body p-4">
+    <div class="text-muted small">Motif global</div>
+    <div class="fw-semibold">{{ requisition.motif_global|default:"—" }}</div>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-dark">
+          <tr>
+            <th>Article</th>
+            <th>Demande utilisateur</th>
+            <th>Équivalent réel demandé</th>
+            <th>Motif</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for l in requisition.lignes.all %}
+            <tr>
+              <td class="fw-semibold">{{ l.article.nom }}</td>
+              <td>{{ l.quantite_demandee_affichage }}</td>
+              <td>{{ l.quantite_demandee_unites_affichage }}</td>
+              <td class="text-muted">{{ l.motif_article|default:"—" }}</td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="4" class="text-center text-muted py-4">Aucune ligne.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body p-4">
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="mb-3">
+        <label class="form-label">Sélectionner le Directeur DAA</label>
+        <select class="form-select" name="directeur_daa_id" required>
+          <option value="" selected disabled>— Choisir —</option>
+          {% for u in directeurs_daa %}
+            <option value="{{ u.id }}">{{ u.email }} — {{ u.prenom }} {{ u.nom }}</option>
+          {% empty %}
+            <option value="" disabled>Aucun Directeur DAA actif trouvé.</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="d-flex justify-content-end gap-2">
+        <a class="btn btn-outline-secondary" href="{% url 'requisitions:detail' requisition.id %}">Annuler</a>
+        <button type="submit" class="btn btn-dark" {% if not directeurs_daa %}disabled{% endif %}>
+          Transférer
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,629 @@
+{% load static %}
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% firstof APP_NAME "SYSDAA" %}{% block title %}{% endblock %}</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'theme.css' %}">
+
+  {% block extra_css %}{% endblock %}
+</head>
+
+<body class="sys-app">
+
+{% with rn=ROLE_NAME %}
+{% with rm=request.resolver_match %}
+
+<header class="sys-topbar">
+  <div class="container sys-topbar__inner">
+
+    <div class="sys-topbar__left">
+      {% if user.is_authenticated and rn != "Directeur de direction" %}
+        <button class="btn sys-mobile-menu-btn d-lg-none"
+                type="button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#sysSidebarMobile"
+                aria-controls="sysSidebarMobile"
+                aria-label="Ouvrir le menu">
+          <span class="sys-mobile-menu-btn__bars"></span>
+        </button>
+      {% endif %}
+
+      <a class="sys-brand" href="{% url 'core:home' %}">
+        <img class="sys-brand__logo" src="{% static 'icons/mef.png' %}" alt="Logo MEF">
+        <div class="sys-brand__lines">
+          <span class="sys-brand__line1">Ministère de l'Économie et des Finances</span>
+          <span class="sys-brand__line2">Direction Générale du Budget / DAA</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="sys-topbar__right">
+      {% if user.is_authenticated %}
+
+        <div class="dropdown">
+          <button class="sys-topiconbtn position-relative"
+                  id="topbarNotifBtn"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                  data-live-url="{% url 'notifications:notifications_live' %}"
+                  aria-expanded="false"
+                  title="Notifications"
+                  aria-label="Notifications">
+            <img src="{% static 'icons/notification.svg' %}" alt="Notifications" width="18" height="18">
+
+            <span id="topbarNotifBadge"
+                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-danger {% if notif_unread_count|default:0|add:0 <= 0 %}d-none{% endif %}">
+              {% if notif_unread_count|default:0|add:0 > 0 %}
+                {{ notif_unread_count }}
+              {% else %}
+                0
+              {% endif %}
+              <span class="visually-hidden">notifications non lues</span>
+            </span>
+          </button>
+
+          <div class="dropdown-menu dropdown-menu-end p-0 overflow-hidden" style="min-width: 360px;">
+            <div class="px-3 py-2 border-bottom fw-bold">
+              Notifications
+            </div>
+
+            <div id="topbarNotifEmpty"
+                 class="px-3 py-3 text-muted small">
+              Chargement...
+            </div>
+
+            <div id="topbarNotifList" class="list-group list-group-flush">
+            </div>
+
+            <div class="px-3 py-2 border-top text-center">
+              <a class="small fw-semibold text-decoration-none" href="{% url 'notifications:liste' %}">
+                Voir toutes les notifications
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="dropdown sys-user-menu">
+          <button class="sys-user-btn"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                  aria-label="Menu utilisateur">
+
+            <span class="sys-user-avatar">
+              {{ user.prenom|default:"U"|first }}{{ user.nom|default:""|first }}
+            </span>
+
+            <span class="sys-user-info d-none d-md-flex">
+              <span class="sys-user-name">{{ user.prenom }} {{ user.nom }}</span>
+              <span class="sys-user-role">{{ rn|default:"" }}</span>
+            </span>
+
+            <span class="sys-user-chevron d-none d-md-inline-block" aria-hidden="true"></span>
+          </button>
+
+          <ul class="dropdown-menu dropdown-menu-end sys-user-dropdown">
+            <li><hr class="dropdown-divider"></li>
+
+            <li>
+              <a class="dropdown-item sys-user-dropdown__item"
+                 href="{% url 'core:password_change' %}">
+                <img src="{% static 'icons/parametre.svg' %}" alt="" width="16" height="16">
+                <span>Paramètres</span>
+              </a>
+            </li>
+
+            <li><hr class="dropdown-divider"></li>
+
+            <li>
+              <form action="{% url 'logout' %}" method="post" class="m-0">
+                {% csrf_token %}
+                <button type="submit" class="dropdown-item sys-user-dropdown__item text-danger">
+                  <img src="{% static 'icons/deconnexion.png' %}" alt="" width="16" height="16">
+                  <span>Déconnexion</span>
+                </button>
+              </form>
+            </li>
+          </ul>
+        </div>
+
+      {% else %}
+        {% if not rm or rm.view_name != "two_factor:login" %}
+          <a class="sys-topiconbtn sys-topiconbtn--primary"
+             href="{% url 'custom_login' %}"
+             title="Connexion"
+             aria-label="Connexion">
+            <img src="{% static 'icons/connexion.png' %}" alt="Connexion" width="20" height="20">
+          </a>
+        {% endif %}
+      {% endif %}
+    </div>
+
+  </div>
+</header>
+
+<main class="sys-layout">
+  <div class="{% if user.is_authenticated and rn != 'Directeur de direction' %}sys-shell{% else %}py-4{% endif %}">
+
+    {% if user.is_authenticated and rn != "Directeur de direction" %}
+      <aside class="sys-sidebar d-none d-lg-block" id="sysSidebar">
+        <div class="sys-sidebar__card">
+
+          <button
+            type="button"
+            class="sys-sidebar__pin"
+            id="sidebarPinBtn"
+            aria-label="Épingler le menu latéral"
+            aria-pressed="false"
+            title="Épingler le menu">
+            <span class="sys-sidebar__pin-icon" aria-hidden="true"></span>
+          </button>
+
+          <nav class="sys-sidenav" aria-label="Menu principal">
+
+            <a class="sys-navlink {% if rm and rm.namespace == 'core' and rm.url_name in 'dashboard dashboard_secretaire dashboard_direction dashboard_admin' %}is-active{% endif %}"
+               href="{% url 'core:home' %}">
+              <span class="sys-navlink__icon">
+                <img src="{% static 'icons/tableau-de-bord.png' %}" alt="">
+              </span>
+              <span class="sys-navlink__label">Tableau de bord</span>
+            </a>
+
+            {% if rn == "Gestionnaire des ressources matérielles" or rn == "Directeur DAA" %}
+              <div class="sys-navsection">Gestion</div>
+
+              <button class="sys-navlink is-toggle {% if rm and rm.namespace == 'articles' %}is-active{% endif %}"
+                      type="button"
+                      data-bs-toggle="collapse"
+                      data-bs-target="#navArticles"
+                      aria-expanded="{% if rm and rm.namespace == 'articles' %}true{% else %}false{% endif %}"
+                      aria-controls="navArticles">
+                <span class="sys-navlink__icon">
+                  <img src="{% static 'icons/article.png' %}" alt="">
+                </span>
+                <span class="sys-navlink__label">Articles</span>
+                <span class="sys-caret" aria-hidden="true"></span>
+              </button>
+              <div class="collapse {% if rm and rm.namespace == 'articles' %}show{% endif %}" id="navArticles">
+                <div class="sys-subnav">
+                  <a class="sys-sublink {% if rm and rm.namespace == 'articles' and rm.url_name == 'liste' %}is-active{% endif %}"
+                     href="{% url 'articles:liste' %}">
+                    <span class="sys-sublink__label">Liste</span>
+                  </a>
+                  <a class="sys-sublink {% if rm and rm.namespace == 'articles' and rm.url_name == 'creer' %}is-active{% endif %}"
+                     href="{% url 'articles:creer' %}">
+                    <span class="sys-sublink__label">Créer</span>
+                  </a>
+                  <div class="sys-subdivider"></div>
+                  <a class="sys-sublink {% if rm and rm.namespace == 'articles' and rm.url_name == 'categories' %}is-active{% endif %}"
+                     href="{% url 'articles:categories' %}">
+                    <span class="sys-sublink__label">Liste des Catégories</span>
+                  </a>
+                  <a class="sys-sublink {% if rm and rm.namespace == 'articles' and rm.url_name == 'categorie_creer' %}is-active{% endif %}"
+                     href="{% url 'articles:categorie_creer' %}">
+                    <span class="sys-sublink__label">Créer catégorie</span>
+                  </a>
+                </div>
+              </div>
+
+              <button class="sys-navlink is-toggle {% if rm and rm.namespace == 'fournisseurs' %}is-active{% endif %}"
+                      type="button"
+                      data-bs-toggle="collapse"
+                      data-bs-target="#navFournisseurs"
+                      aria-expanded="{% if rm and rm.namespace == 'fournisseurs' %}true{% else %}false{% endif %}"
+                      aria-controls="navFournisseurs">
+                <span class="sys-navlink__icon">
+                  <img src="{% static 'icons/fournisseur.png' %}" alt="">
+                </span>
+                <span class="sys-navlink__label">Fournisseurs</span>
+                <span class="sys-caret" aria-hidden="true"></span>
+              </button>
+              <div class="collapse {% if rm and rm.namespace == 'fournisseurs' %}show{% endif %}" id="navFournisseurs">
+                <div class="sys-subnav">
+                  <a class="sys-sublink {% if rm and rm.namespace == 'fournisseurs' and rm.url_name == 'liste' %}is-active{% endif %}"
+                     href="{% url 'fournisseurs:liste' %}">
+                    <span class="sys-sublink__label">Liste</span>
+                  </a>
+                  <a class="sys-sublink {% if rm and rm.namespace == 'fournisseurs' and rm.url_name == 'creer' %}is-active{% endif %}"
+                     href="{% url 'fournisseurs:creer' %}">
+                    <span class="sys-sublink__label">Créer</span>
+                  </a>
+                </div>
+              </div>
+
+              <a class="sys-navlink {% if rm and rm.namespace == 'requisitions' %}is-active{% endif %}"
+                 href="{% url 'requisitions:liste' %}">
+                <span class="sys-navlink__icon">
+                  <img src="{% static 'icons/requisition.png' %}" alt="">
+                </span>
+                <span class="sys-navlink__label">Réquisitions</span>
+              </a>
+
+              <button class="sys-navlink is-toggle {% if rm and rm.namespace == 'mouvements_stock' %}is-active{% endif %}"
+                      type="button"
+                      data-bs-toggle="collapse"
+                      data-bs-target="#navMouvements"
+                      aria-expanded="{% if rm and rm.namespace == 'mouvements_stock' %}true{% else %}false{% endif %}"
+                      aria-controls="navMouvements">
+                <span class="sys-navlink__icon">
+                  <img src="{% static 'icons/stock.png' %}" alt="">
+                </span>
+                <span class="sys-navlink__label">Stock & mouvements</span>
+                <span class="sys-caret" aria-hidden="true"></span>
+              </button>
+              <div class="collapse {% if rm and rm.namespace == 'mouvements_stock' %}show{% endif %}" id="navMouvements">
+                <div class="sys-subnav">
+                  <a class="sys-sublink {% if rm and rm.namespace == 'mouvements_stock' and rm.url_name == 'etat_stock' %}is-active{% endif %}"
+                     href="{% url 'mouvements_stock:etat_stock' %}">
+                    <span class="sys-sublink__label">État du stock</span>
+                  </a>
+                  <a class="sys-sublink {% if rm and rm.namespace == 'mouvements_stock' and rm.url_name == 'liste_mouvements' %}is-active{% endif %}"
+                     href="{% url 'mouvements_stock:liste_mouvements' %}">
+                    <span class="sys-sublink__label">Mouvements</span>
+                  </a>
+                  <div class="sys-subdivider"></div>
+                  <a class="sys-sublink {% if rm and rm.namespace == 'mouvements_stock' and rm.url_name == 'entree_stock' %}is-active{% endif %}"
+                     href="{% url 'mouvements_stock:entree_stock' %}">
+                    <span class="sys-sublink__label">Entrée</span>
+                  </a>
+                  <a class="sys-sublink {% if rm and rm.namespace == 'mouvements_stock' and rm.url_name == 'sortie_stock' %}is-active{% endif %}"
+                     href="{% url 'mouvements_stock:sortie_stock' %}">
+                    <span class="sys-sublink__label">Sortie</span>
+                  </a>
+                </div>
+              </div>
+
+              <a class="sys-navlink {% if rm and rm.namespace == 'rapports' %}is-active{% endif %}"
+                 href="{% url 'rapports:generer' %}">
+                <span class="sys-navlink__icon">
+                  <img src="{% static 'icons/rapport.png' %}" alt="">
+                </span>
+                <span class="sys-navlink__label">Rapports</span>
+              </a>
+            {% endif %}
+
+            {% if rn == "Secrétaire" %}
+              <div class="sys-navsection">Réquisitions</div>
+
+              <a class="sys-navlink {% if rm and rm.namespace == 'requisitions' and rm.url_name == 'creer' %}is-active{% endif %}"
+                 href="{% url 'requisitions:creer' %}">
+                <span class="sys-navlink__icon">
+                  <img src="{% static 'icons/requisition.png' %}" alt="">
+                </span>
+                <span class="sys-navlink__label">Créer une réquisition</span>
+              </a>
+
+              <a class="sys-navlink {% if rm and rm.namespace == 'requisitions' and rm.url_name == 'mes' %}is-active{% endif %}"
+                 href="{% url 'requisitions:mes' %}">
+                <span class="sys-navlink__icon">
+                  <img src="{% static 'icons/requisition.png' %}" alt="">
+                </span>
+                <span class="sys-navlink__label">Mes réquisitions</span>
+              </a>
+            {% endif %}
+
+            {% if rn == "Admin" or rn == "Administrateur système" or rn == "Super admin" %}
+              <div class="sys-navsection">Administration</div>
+
+              <button class="sys-navlink is-toggle {% if rm and rm.namespace == 'utilisateurs' %}is-active{% endif %}"
+                      type="button"
+                      data-bs-toggle="collapse"
+                      data-bs-target="#navUtilisateurs"
+                      aria-expanded="{% if rm and rm.namespace == 'utilisateurs' %}true{% else %}false{% endif %}"
+                      aria-controls="navUtilisateurs">
+                <span class="sys-navlink__icon">
+                  <img src="{% static 'icons/utilisateur.png' %}" alt="">
+                </span>
+                <span class="sys-navlink__label">Utilisateurs</span>
+                <span class="sys-caret" aria-hidden="true"></span>
+              </button>
+              <div class="collapse {% if rm and rm.namespace == 'utilisateurs' %}show{% endif %}" id="navUtilisateurs">
+                <div class="sys-subnav">
+                  <a class="sys-sublink {% if rm and rm.namespace == 'utilisateurs' and rm.url_name == 'liste' %}is-active{% endif %}"
+                     href="{% url 'utilisateurs:liste' %}">
+                    <span class="sys-sublink__label">Liste</span>
+                  </a>
+                  <a class="sys-sublink {% if rm and rm.namespace == 'utilisateurs' and rm.url_name == 'creer' %}is-active{% endif %}"
+                     href="{% url 'utilisateurs:creer' %}">
+                    <span class="sys-sublink__label">Créer</span>
+                  </a>
+                </div>
+              </div>
+
+              <a class="sys-navlink {% if rm and rm.namespace == 'configurations' %}is-active{% endif %}"
+                 href="{% url 'configurations:tableau' %}">
+                <span class="sys-navlink__icon">
+                  <img src="{% static 'icons/configuration.png' %}" alt="">
+                </span>
+                <span class="sys-navlink__label">Configurations</span>
+              </a>
+
+              <a class="sys-navlink {% if rm and rm.namespace == 'audit' %}is-active{% endif %}"
+                 href="{% url 'audit:liste' %}">
+                <span class="sys-navlink__icon">
+                  <img src="{% static 'icons/audit.png' %}" alt="">
+                </span>
+                <span class="sys-navlink__label">Audit</span>
+              </a>
+            {% endif %}
+
+          </nav>
+        </div>
+      </aside>
+    {% endif %}
+
+    <section class="sys-content">
+
+      {% block page_messages %}
+        {% if messages %}
+          <div class="sys-flash-stack" aria-live="polite" aria-atomic="true">
+            {% for m in messages %}
+              <div class="sys-flash sys-flash--{{ m.tags|default:'info' }} alert alert-dismissible fade show" role="alert">
+                <div class="sys-flash__icon" aria-hidden="true">
+                  {% if 'success' in m.tags %}
+                    ✓
+                  {% elif 'error' in m.tags or 'danger' in m.tags %}
+                    !
+                  {% elif 'warning' in m.tags %}
+                    !
+                  {% else %}
+                    i
+                  {% endif %}
+                </div>
+
+                <div class="sys-flash__body">
+                  <div class="sys-flash__title">
+                    {% if 'success' in m.tags %}
+                      Succès
+                    {% elif 'error' in m.tags or 'danger' in m.tags %}
+                      Erreur
+                    {% elif 'warning' in m.tags %}
+                      Attention
+                    {% else %}
+                      Information
+                    {% endif %}
+                  </div>
+                  <div class="sys-flash__text">{{ m }}</div>
+                </div>
+
+                <button type="button"
+                        class="sys-flash__close btn-close"
+                        data-bs-dismiss="alert"
+                        aria-label="Fermer"></button>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endblock %}
+
+      {% block content %}{% endblock %}
+    </section>
+
+  </div>
+</main>
+
+<footer class="sys-footer">
+  <div class="container">
+    <small class="text-muted">© {% now "Y" %} DGB - Tous droits réservés</small>
+  </div>
+</footer>
+
+{% if user.is_authenticated and rn != "Directeur de direction" %}
+<div class="offcanvas offcanvas-start" tabindex="-1" id="sysSidebarMobile" aria-labelledby="sysSidebarMobileLabel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="sysSidebarMobileLabel">Menu</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fermer"></button>
+  </div>
+
+  <div class="offcanvas-body">
+    <nav class="sys-sidenav" aria-label="Menu mobile">
+
+      <a class="sys-navlink {% if rm and rm.namespace == 'core' and rm.url_name in 'dashboard dashboard_secretaire dashboard_direction dashboard_admin' %}is-active{% endif %}"
+         href="{% url 'core:home' %}">
+        <span class="sys-navlink__icon">
+          <img src="{% static 'icons/tableau-de-bord.png' %}" alt="">
+        </span>
+        <span class="sys-navlink__label">Tableau de bord</span>
+      </a>
+
+      {% if rn == "Gestionnaire des ressources matérielles" or rn == "Directeur DAA" %}
+        <div class="sys-navsection">Gestion</div>
+
+        <button class="sys-navlink is-toggle {% if rm and rm.namespace == 'articles' %}is-active{% endif %}"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navArticlesMobile"
+                aria-expanded="{% if rm and rm.namespace == 'articles' %}true{% else %}false{% endif %}"
+                aria-controls="navArticlesMobile">
+          <span class="sys-navlink__icon">
+            <img src="{% static 'icons/article.png' %}" alt="">
+          </span>
+          <span class="sys-navlink__label">Articles</span>
+          <span class="sys-caret" aria-hidden="true"></span>
+        </button>
+        <div class="collapse {% if rm and rm.namespace == 'articles' %}show{% endif %}" id="navArticlesMobile">
+          <div class="sys-subnav">
+            <a class="sys-sublink {% if rm and rm.namespace == 'articles' and rm.url_name == 'liste' %}is-active{% endif %}"
+               href="{% url 'articles:liste' %}">
+              <span class="sys-sublink__label">Liste</span>
+            </a>
+            <a class="sys-sublink {% if rm and rm.namespace == 'articles' and rm.url_name == 'creer' %}is-active{% endif %}"
+               href="{% url 'articles:creer' %}">
+              <span class="sys-sublink__label">Créer</span>
+            </a>
+            <div class="sys-subdivider"></div>
+            <a class="sys-sublink {% if rm and rm.namespace == 'articles' and rm.url_name == 'categories' %}is-active{% endif %}"
+               href="{% url 'articles:categories' %}">
+              <span class="sys-sublink__label">Catégories</span>
+            </a>
+            <a class="sys-sublink {% if rm and rm.namespace == 'articles' and rm.url_name == 'categorie_creer' %}is-active{% endif %}"
+               href="{% url 'articles:categorie_creer' %}">
+              <span class="sys-sublink__label">Créer catégorie</span>
+            </a>
+          </div>
+        </div>
+
+        <button class="sys-navlink is-toggle {% if rm and rm.namespace == 'fournisseurs' %}is-active{% endif %}"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navFournisseursMobile"
+                aria-expanded="{% if rm and rm.namespace == 'fournisseurs' %}true{% else %}false{% endif %}"
+                aria-controls="navFournisseursMobile">
+          <span class="sys-navlink__icon">
+            <img src="{% static 'icons/fournisseur.png' %}" alt="">
+          </span>
+          <span class="sys-navlink__label">Fournisseurs</span>
+          <span class="sys-caret" aria-hidden="true"></span>
+        </button>
+        <div class="collapse {% if rm and rm.namespace == 'fournisseurs' %}show{% endif %}" id="navFournisseursMobile">
+          <div class="sys-subnav">
+            <a class="sys-sublink {% if rm and rm.namespace == 'fournisseurs' and rm.url_name == 'liste' %}is-active{% endif %}"
+               href="{% url 'fournisseurs:liste' %}">
+              <span class="sys-sublink__label">Liste</span>
+            </a>
+            <a class="sys-sublink {% if rm and rm.namespace == 'fournisseurs' and rm.url_name == 'creer' %}is-active{% endif %}"
+               href="{% url 'fournisseurs:creer' %}">
+              <span class="sys-sublink__label">Créer</span>
+            </a>
+          </div>
+        </div>
+
+        <a class="sys-navlink {% if rm and rm.namespace == 'requisitions' %}is-active{% endif %}"
+           href="{% url 'requisitions:liste' %}">
+          <span class="sys-navlink__icon">
+            <img src="{% static 'icons/requisition.png' %}" alt="">
+          </span>
+          <span class="sys-navlink__label">Réquisitions</span>
+        </a>
+
+        <button class="sys-navlink is-toggle {% if rm and rm.namespace == 'mouvements_stock' %}is-active{% endif %}"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navMouvementsMobile"
+                aria-expanded="{% if rm and rm.namespace == 'mouvements_stock' %}true{% else %}false{% endif %}"
+                aria-controls="navMouvementsMobile">
+          <span class="sys-navlink__icon">
+            <img src="{% static 'icons/stock.png' %}" alt="">
+          </span>
+          <span class="sys-navlink__label">Stock & mouvements</span>
+          <span class="sys-caret" aria-hidden="true"></span>
+        </button>
+        <div class="collapse {% if rm and rm.namespace == 'mouvements_stock' %}show{% endif %}" id="navMouvementsMobile">
+          <div class="sys-subnav">
+            <a class="sys-sublink {% if rm and rm.namespace == 'mouvements_stock' and rm.url_name == 'etat_stock' %}is-active{% endif %}"
+               href="{% url 'mouvements_stock:etat_stock' %}">
+              <span class="sys-sublink__label">État du stock</span>
+            </a>
+            <a class="sys-sublink {% if rm and rm.namespace == 'mouvements_stock' and rm.url_name == 'liste_mouvements' %}is-active{% endif %}"
+               href="{% url 'mouvements_stock:liste_mouvements' %}">
+              <span class="sys-sublink__label">Mouvements</span>
+            </a>
+            <div class="sys-subdivider"></div>
+            <a class="sys-sublink {% if rm and rm.namespace == 'mouvements_stock' and rm.url_name == 'entree_stock' %}is-active{% endif %}"
+               href="{% url 'mouvements_stock:entree_stock' %}">
+              <span class="sys-sublink__label">Entrée</span>
+            </a>
+            <a class="sys-sublink {% if rm and rm.namespace == 'mouvements_stock' and rm.url_name == 'sortie_stock' %}is-active{% endif %}"
+               href="{% url 'mouvements_stock:sortie_stock' %}">
+              <span class="sys-sublink__label">Sortie</span>
+            </a>
+          </div>
+        </div>
+
+        <a class="sys-navlink {% if rm and rm.namespace == 'rapports' %}is-active{% endif %}"
+           href="{% url 'rapports:generer' %}">
+          <span class="sys-navlink__icon">
+            <img src="{% static 'icons/rapport.png' %}" alt="">
+          </span>
+          <span class="sys-navlink__label">Rapports</span>
+        </a>
+      {% endif %}
+
+      {% if rn == "Secrétaire" %}
+        <div class="sys-navsection">Réquisitions</div>
+
+        <a class="sys-navlink {% if rm and rm.namespace == 'requisitions' and rm.url_name == 'creer' %}is-active{% endif %}"
+           href="{% url 'requisitions:creer' %}">
+          <span class="sys-navlink__icon">
+            <img src="{% static 'icons/requisition.png' %}" alt="">
+          </span>
+          <span class="sys-navlink__label">Créer une réquisition</span>
+        </a>
+
+        <a class="sys-navlink {% if rm and rm.namespace == 'requisitions' and rm.url_name == 'mes' %}is-active{% endif %}"
+           href="{% url 'requisitions:mes' %}">
+          <span class="sys-navlink__icon">
+            <img src="{% static 'icons/requisition.png' %}" alt="">
+          </span>
+          <span class="sys-navlink__label">Mes réquisitions</span>
+        </a>
+      {% endif %}
+
+      {% if rn == "Admin" or rn == "Administrateur système" or rn == "Super admin" %}
+        <div class="sys-navsection">Administration</div>
+
+        <button class="sys-navlink is-toggle {% if rm and rm.namespace == 'utilisateurs' %}is-active{% endif %}"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navUtilisateursMobile"
+                aria-expanded="{% if rm and rm.namespace == 'utilisateurs' %}true{% else %}false{% endif %}"
+                aria-controls="navUtilisateursMobile">
+          <span class="sys-navlink__icon">
+            <img src="{% static 'icons/utilisateur.png' %}" alt="">
+          </span>
+          <span class="sys-navlink__label">Utilisateurs</span>
+          <span class="sys-caret" aria-hidden="true"></span>
+        </button>
+        <div class="collapse {% if rm and rm.namespace == 'utilisateurs' %}show{% endif %}" id="navUtilisateursMobile">
+          <div class="sys-subnav">
+            <a class="sys-sublink {% if rm and rm.namespace == 'utilisateurs' and rm.url_name == 'liste' %}is-active{% endif %}"
+               href="{% url 'utilisateurs:liste' %}">
+              <span class="sys-sublink__label">Liste</span>
+            </a>
+            <a class="sys-sublink {% if rm and rm.namespace == 'utilisateurs' and rm.url_name == 'creer' %}is-active{% endif %}"
+               href="{% url 'utilisateurs:creer' %}">
+              <span class="sys-sublink__label">Créer</span>
+            </a>
+          </div>
+        </div>
+
+        <a class="sys-navlink {% if rm and rm.namespace == 'configurations' %}is-active{% endif %}"
+           href="{% url 'configurations:tableau' %}">
+          <span class="sys-navlink__icon">
+            <img src="{% static 'icons/configuration.png' %}" alt="">
+          </span>
+          <span class="sys-navlink__label">Configurations</span>
+        </a>
+
+        <a class="sys-navlink {% if rm and rm.namespace == 'audit' %}is-active{% endif %}"
+           href="{% url 'audit:liste' %}">
+          <span class="sys-navlink__icon">
+            <img src="{% static 'icons/audit.png' %}" alt="">
+          </span>
+          <span class="sys-navlink__label">Audit</span>
+        </a>
+      {% endif %}
+
+    </nav>
+  </div>
+</div>
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'sidebar.js' %}"></script>
+<script src="{% static 'message.js' %}"></script>
+<script src="{% static 'notifications/notifications.js' %}"></script>
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>
+{% endwith %}
+{% endwith %}

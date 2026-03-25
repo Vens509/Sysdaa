@@ -1,0 +1,44 @@
+{
+  "periode": {
+    "mois": 2,
+    "annee": 2001,
+    "start": "2001-02-01T00:00:00-05:00",
+    "end": "2001-03-01T00:00:00-05:00"
+  },
+  "stock": {
+    "entree": {
+      "nb_mouvements": 0,
+      "quantite": 0
+    },
+    "sortie": {
+      "nb_mouvements": 0,
+      "quantite": 0
+    },
+    "avec_requisition": {
+      "nb_mouvements": 0,
+      "quantite": 0
+    },
+    "sans_requisition": {
+      "nb_mouvements": 0,
+      "quantite": 0
+    },
+    "top_articles_sortie": []
+  },
+  "requisitions": {
+    "nb_traitees": 0,
+    "top_direction": {
+      "nom": "",
+      "nb": 0
+    },
+    "top_directions": [],
+    "lignes": {
+      "nb_lignes": 0,
+      "total_demandee": 0,
+      "total_livree": 0,
+      "satisfaction_pct": 0.0
+    },
+    "top_articles_demandes": [],
+    "top_articles_livres": []
+  },
+  "mouvements": []
+}

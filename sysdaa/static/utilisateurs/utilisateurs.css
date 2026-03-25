@@ -1,0 +1,744 @@
+/* static/utilisateurs/utilisateurs.css */
+
+/* =========================
+   Utilisateurs - premium local
+   Ne remplace pas theme.css
+   ========================= */
+
+:root{
+  --usr-form-max: 980px;
+  --usr-list-max: 1480px;
+  --usr-card-gap: 14px;
+}
+
+/* =========================
+   Largeurs globales
+   ========================= */
+
+/* Formulaires et pages standard : inchangés */
+.sys-content > .card{
+  max-width: var(--usr-form-max);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.sys-content > .alert{
+  max-width: var(--usr-form-max);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Liste utilisateurs : centrée mais plus large */
+.sys-content > .sys-pagehead,
+.sys-content > .sys-toolbar{
+  max-width: var(--usr-list-max);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.sys-content > .sys-toolbar + .card{
+  max-width: var(--usr-list-max);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* =========================
+   En-tête
+   ========================= */
+.sys-pagehead__title{
+  min-width: 0;
+}
+
+.sys-pagehead__actions .btn{
+  min-height: 44px;
+}
+
+/* =========================
+   Alertes
+   ========================= */
+.alert{
+  border-radius: 16px;
+}
+
+.alert-warning{
+  border: 1px solid rgba(245, 158, 11, .18);
+  background: rgba(255, 251, 235, .96);
+  color: #92400e;
+}
+
+.alert-danger{
+  border: 1px solid rgba(239, 68, 68, .18);
+  background: rgba(254, 242, 242, .96);
+  color: #991b1b;
+}
+
+.alert-info{
+  border: 1px solid rgba(59, 130, 246, .16);
+  background: rgba(239, 246, 255, .96);
+  color: #1d4ed8;
+}
+
+.alert-success{
+  border: 1px solid rgba(34, 197, 94, .16);
+  background: rgba(240, 253, 244, .96);
+  color: #166534;
+}
+
+/* =========================
+   Cartes formulaires
+   ========================= */
+.card .card-body{
+  padding: 24px;
+}
+
+.card form{
+  width: 100%;
+}
+
+.card hr{
+  border-color: rgba(215, 226, 242, .85);
+}
+
+.card .row.g-3{
+  --bs-gutter-x: 1.2rem;
+  --bs-gutter-y: 1rem;
+}
+
+/* =========================
+   Champs
+   ========================= */
+form input[type="text"],
+form input[type="email"],
+form input[type="password"],
+form input[type="number"],
+form input[type="tel"],
+form input[type="url"],
+form select,
+form textarea{
+  width: 100%;
+}
+
+.card form input[type="text"],
+.card form input[type="email"],
+.card form input[type="password"],
+.card form input[type="number"],
+.card form input[type="tel"],
+.card form input[type="url"],
+.card form select,
+.card form textarea{
+  display: block;
+  width: 100%;
+  min-height: 46px;
+  padding: .62rem .82rem;
+  border: 1px solid var(--sys-border);
+  border-radius: 14px;
+  background: rgba(255,255,255,.98);
+  color: var(--sys-text);
+  box-shadow: none;
+  transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.card form textarea{
+  min-height: 110px;
+  resize: vertical;
+}
+
+.card form input:focus,
+.card form select:focus,
+.card form textarea:focus{
+  outline: none;
+  border-color: rgba(37, 99, 235, .40);
+  box-shadow: 0 0 0 .22rem rgba(37, 99, 235, .10);
+  background: #fff;
+}
+
+.card form input::placeholder,
+.card form textarea::placeholder{
+  color: #94a3b8;
+  opacity: 1;
+}
+
+.text-danger.small,
+.small.text-danger{
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.helptext,
+.card form ul{
+  margin-top: .5rem;
+  color: var(--sys-muted);
+  font-size: .92rem;
+}
+
+.card form ul{
+  padding-left: 1.2rem;
+}
+
+.card form input[type="checkbox"],
+.card form input[type="radio"]{
+  width: auto;
+  min-height: auto;
+}
+
+/* =========================
+   Toolbar recherche
+   ========================= */
+.sys-toolbar{
+  width: 100%;
+}
+
+.sys-toolbar form .form-label{
+  margin-bottom: .4rem;
+}
+
+.sys-toolbar input[name="q"]{
+  min-height: 48px;
+}
+
+.sys-toolbar .btn{
+  min-height: 48px;
+  white-space: nowrap;
+}
+
+/* =========================
+   Tableau utilisateurs - desktop/tablette
+   ========================= */
+.sys-content > .sys-toolbar + .card{
+  overflow: hidden;
+}
+
+.sys-content > .sys-toolbar + .card > .card-body{
+  padding: 0;
+}
+
+.table-responsive{
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  border-radius: inherit;
+}
+
+.table{
+  width: 100%;
+  min-width: 1220px;
+  margin-bottom: 0;
+  font-size: .95rem;
+  table-layout: auto;
+}
+
+.table thead th{
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: rgba(248, 251, 255, .98);
+  white-space: nowrap;
+}
+
+.table tbody td{
+  padding-top: .95rem;
+  padding-bottom: .95rem;
+}
+
+.table td,
+.table th{
+  vertical-align: middle;
+}
+
+.table td .badge{
+  font-size: .78rem;
+  font-weight: 700;
+  padding: .45rem .6rem;
+  border-radius: 999px;
+}
+
+.table .btn-sm{
+  min-height: 36px;
+  padding-left: .75rem;
+  padding-right: .75rem;
+  font-weight: 700;
+}
+
+.table td .d-inline-flex{
+  row-gap: .45rem;
+}
+
+.table thead th:nth-child(1),
+.table tbody td:nth-child(1){
+  min-width: 240px;
+}
+
+.table thead th:nth-child(2),
+.table tbody td:nth-child(2){
+  min-width: 190px;
+}
+
+.table thead th:nth-child(3),
+.table tbody td:nth-child(3){
+  min-width: 300px;
+}
+
+.table thead th:nth-child(4),
+.table tbody td:nth-child(4){
+  min-width: 220px;
+}
+
+.table thead th:nth-child(5),
+.table tbody td:nth-child(5){
+  min-width: 120px;
+}
+
+.table thead th:nth-child(6),
+.table tbody td:nth-child(6){
+  min-width: 320px;
+}
+
+/* =========================
+   Boutons
+   ========================= */
+.btn-outline-dark{
+  border-color: rgba(15, 23, 42, .18);
+}
+
+.btn-outline-dark:hover{
+  background: rgba(15, 23, 42, .94);
+  border-color: rgba(15, 23, 42, .94);
+}
+
+.btn-outline-secondary{
+  border-color: rgba(100, 116, 139, .26);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-secondary:hover,
+.btn-outline-warning:hover,
+.btn-outline-success:hover,
+.btn-outline-dark:hover{
+  box-shadow: var(--sys-shadow-xs);
+}
+
+/* =========================
+   Two-factor / login
+   ========================= */
+.tf-login-form{
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.tf-login-form input[type="text"],
+.tf-login-form input[type="email"],
+.tf-login-form input[type="password"],
+.tf-login-form input[type="number"],
+.tf-login-form input[type="tel"],
+.tf-login-form input[type="url"],
+.tf-login-form select,
+.tf-login-form textarea{
+  display: block;
+  width: 100%;
+  min-height: 46px;
+  padding: .575rem .75rem;
+  border: 1px solid var(--sys-border);
+  border-radius: var(--sys-radius-sm);
+  background: #fff;
+}
+
+.tf-login-form input:focus,
+.tf-login-form select:focus,
+.tf-login-form textarea:focus{
+  outline: none;
+  border-color: rgba(59, 130, 246, .55);
+  box-shadow: 0 0 0 .20rem rgba(59, 130, 246, .16);
+}
+
+/* =========================
+   Responsive
+   ========================= */
+@media (max-width: 1399.98px){
+  :root{
+    --usr-list-max: 1340px;
+  }
+}
+
+@media (max-width: 1199.98px){
+  .sys-content > .sys-pagehead,
+  .sys-content > .sys-toolbar,
+  .sys-content > .sys-toolbar + .card{
+    max-width: 100%;
+  }
+
+  .table{
+    min-width: 1080px;
+  }
+}
+
+@media (max-width: 991.98px){
+  .card .card-body{
+    padding: 18px;
+  }
+
+  .sys-toolbar{
+    padding: 14px;
+  }
+
+  .sys-toolbar .btn{
+    min-height: 44px;
+  }
+
+  .table{
+    min-width: 980px;
+    font-size: .92rem;
+  }
+}
+
+@media (max-width: 767.98px){
+  .sys-pagehead{
+    margin-bottom: 14px;
+  }
+
+  .sys-pagehead__actions{
+    width: 100%;
+  }
+
+  .sys-pagehead__actions .btn{
+    width: 100%;
+  }
+
+  .card .card-body{
+    padding: 16px;
+  }
+
+  .card .row.g-3{
+    --bs-gutter-x: .9rem;
+    --bs-gutter-y: .9rem;
+  }
+
+  .sys-toolbar form .col-lg-4{
+    display: grid !important;
+    gap: .5rem;
+  }
+
+  .table{
+    min-width: 820px;
+  }
+
+  .table td .d-inline-flex{
+    width: 100%;
+    justify-content: flex-start !important;
+    flex-wrap: wrap;
+  }
+
+  .table td .d-inline-flex .btn,
+  .table td .d-inline-flex form{
+    flex: 1 1 calc(50% - .5rem);
+  }
+
+  .table td .d-inline-flex form .btn{
+    width: 100%;
+  }
+}
+
+/* =========================
+   Mobile premium : tableau -> cartes
+   ========================= */
+@media (max-width: 575.98px){
+  .sys-content > .alert,
+  .sys-content > .sys-toolbar,
+  .sys-content > .card{
+    border-radius: 18px;
+  }
+
+  .card .card-body{
+    padding: 14px;
+  }
+
+  .sys-toolbar{
+    padding: 12px;
+  }
+
+  .sys-toolbar form{
+    row-gap: .75rem;
+  }
+
+  .sys-toolbar .btn,
+  .sys-pagehead__actions .btn{
+    width: 100%;
+  }
+
+  .sys-content > .sys-toolbar + .card{
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+    overflow: visible;
+  }
+
+  .sys-content > .sys-toolbar + .card > .card-body{
+    padding: 0;
+    background: transparent;
+  }
+
+  .sys-content > .sys-toolbar + .card .table-responsive{
+    overflow: visible;
+    background: transparent;
+  }
+
+  .sys-content > .sys-toolbar + .card table,
+  .sys-content > .sys-toolbar + .card thead,
+  .sys-content > .sys-toolbar + .card tbody,
+  .sys-content > .sys-toolbar + .card th,
+  .sys-content > .sys-toolbar + .card td,
+  .sys-content > .sys-toolbar + .card tr{
+    display: block;
+    width: 100%;
+  }
+
+  .sys-content > .sys-toolbar + .card table{
+    min-width: 0;
+    background: transparent;
+  }
+
+  .sys-content > .sys-toolbar + .card thead{
+    display: none;
+  }
+
+  .sys-content > .sys-toolbar + .card tbody{
+    display: grid;
+    gap: var(--usr-card-gap);
+  }
+
+  .sys-content > .sys-toolbar + .card tbody tr{
+    background: var(--sys-surface);
+    border: 1px solid var(--sys-border);
+    border-radius: 20px;
+    box-shadow: var(--sys-shadow-sm);
+    padding: 12px 12px 10px;
+    overflow: hidden;
+  }
+
+  .sys-content > .sys-toolbar + .card tbody td{
+    display: grid;
+    grid-template-columns: 118px minmax(0, 1fr);
+    gap: 10px;
+    align-items: start;
+    min-width: 0 !important;
+    padding: .5rem 0;
+    border: 0;
+    white-space: normal !important;
+    text-align: left !important;
+  }
+
+  .sys-content > .sys-toolbar + .card tbody td::before{
+    font-size: .78rem;
+    font-weight: 800;
+    letter-spacing: .01em;
+    color: var(--sys-muted);
+    text-transform: none;
+    content: "";
+  }
+
+  .sys-content > .sys-toolbar + .card tbody td:nth-child(1)::before{ content: "Email"; }
+  .sys-content > .sys-toolbar + .card tbody td:nth-child(2)::before{ content: "Nom"; }
+  .sys-content > .sys-toolbar + .card tbody td:nth-child(3)::before{ content: "Direction"; }
+  .sys-content > .sys-toolbar + .card tbody td:nth-child(4)::before{ content: "Rôle"; }
+  .sys-content > .sys-toolbar + .card tbody td:nth-child(5)::before{ content: "Statut"; }
+  .sys-content > .sys-toolbar + .card tbody td:nth-child(6)::before{ content: "Actions"; }
+
+  .sys-content > .sys-toolbar + .card tbody td:nth-child(1){
+    padding-top: .1rem;
+  }
+
+  .sys-content > .sys-toolbar + .card tbody td:nth-child(1) > *{
+    font-weight: 800;
+    color: var(--sys-text);
+    word-break: break-word;
+  }
+
+  .sys-content > .sys-toolbar + .card tbody td:nth-child(6){
+    grid-template-columns: 1fr;
+    gap: .6rem;
+    padding-top: .8rem;
+  }
+
+  .sys-content > .sys-toolbar + .card tbody td:nth-child(6)::before{
+    content: "Actions";
+  }
+
+  .sys-content > .sys-toolbar + .card tbody td:nth-child(6) .d-inline-flex{
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: 1fr;
+    gap: .55rem !important;
+    justify-content: stretch !important;
+  }
+
+  .sys-content > .sys-toolbar + .card tbody td:nth-child(6) .d-inline-flex .btn,
+  .sys-content > .sys-toolbar + .card tbody td:nth-child(6) .d-inline-flex form,
+  .sys-content > .sys-toolbar + .card tbody td:nth-child(6) .d-inline-flex form .btn{
+    width: 100%;
+  }
+
+  .sys-content > .sys-toolbar + .card tbody td:nth-child(6) .btn-sm{
+    min-height: 40px;
+  }
+
+  .sys-content > .sys-toolbar + .card tbody tr:has(td[colspan]){
+    padding: 18px 14px;
+  }
+
+  .sys-content > .sys-toolbar + .card tbody tr:has(td[colspan]) td{
+    grid-template-columns: 1fr;
+    text-align: center !important;
+    padding: .2rem 0;
+  }
+
+  .sys-content > .sys-toolbar + .card tbody tr:has(td[colspan]) td::before{
+    display: none;
+  }
+
+  .helptext,
+  .card form ul{
+    font-size: .88rem;
+  }
+}
+
+/* =========================
+   Password Security Premium
+   ========================= */
+
+#sys-toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+#sys-password-helper {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border: 1px solid #e9ecef;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+}
+
+#sys-password-strength-text,
+#sys-password-match-text {
+  font-size: 0.86rem;
+  line-height: 1.4;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+}
+
+#sys-password-strength-text {
+  margin-bottom: 8px;
+  color: #334155;
+}
+
+#sys-password-match-text {
+  margin-top: 10px;
+  color: #64748b;
+}
+
+#sys-password-strength-bar-wrap {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: #e9ecef;
+  overflow: hidden;
+  position: relative;
+}
+
+#sys-password-strength-bar {
+  width: 0;
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.25s ease, background-color 0.25s ease;
+  background: #cbd5e1;
+}
+
+input[type="password"] {
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+input[type="password"]:focus {
+  border-color: #194993;
+  box-shadow: 0 0 0 0.18rem rgba(25, 73, 147, 0.12);
+}
+
+.sys-pwd-ok {
+  border-color: #198754 !important;
+  box-shadow: 0 0 0 0.18rem rgba(25, 135, 84, 0.12) !important;
+}
+
+.sys-pwd-error {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 0.18rem rgba(220, 53, 69, 0.12) !important;
+  background-color: #fff8f8 !important;
+}
+
+.sys-pwd-warning {
+  border-color: #fd7e14 !important;
+  box-shadow: 0 0 0 0.18rem rgba(253, 126, 20, 0.12) !important;
+}
+
+.sys-security-toast {
+  min-width: 280px;
+  max-width: 360px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16);
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.4;
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  backdrop-filter: blur(6px);
+}
+
+.sys-security-toast--warning {
+  background: #fff7ed;
+  color: #9a3412;
+  border: 1px solid #fed7aa;
+}
+
+.sys-security-toast--error {
+  background: #fff1f2;
+  color: #9f1239;
+  border: 1px solid #fecdd3;
+}
+
+.sys-security-toast--success {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+@media (max-width: 768px) {
+  #sys-toast-container {
+    top: auto;
+    right: 12px;
+    left: 12px;
+    bottom: 12px;
+  }
+
+  .sys-security-toast {
+    min-width: 100%;
+    max-width: 100%;
+  }
+
+  #sys-password-helper {
+    padding: 12px 13px;
+    border-radius: 12px;
+  }
+}

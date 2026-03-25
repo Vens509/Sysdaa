@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %} - Créer{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'requisitions/requisitions.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="sys-pagehead">
+  <div class="sys-pagehead__title">
+    <h1 class="sys-h1">Créer une réquisition</h1>
+    <p class="sys-subtitle">
+      Renseignez le motif global puis ajoutez les articles à demander.
+    </p>
+  </div>
+  <div class="sys-pagehead__actions">
+    <a class="btn btn-outline-secondary" href="{% url 'requisitions:mes' %}">Retour</a>
+  </div>
+</div>
+
+<form method="post" class="card" id="reqForm" novalidate>
+  {% csrf_token %}
+
+  <div class="card-body p-4">
+
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="mb-4">
+      <label class="form-label" for="{{ form.motif_global.id_for_label }}">{{ form.motif_global.label }}</label>
+      {{ form.motif_global }}
+      {% if form.motif_global.errors %}
+        <div class="text-danger small mt-1">{{ form.motif_global.errors|striptags }}</div>
+      {% endif %}
+    </div>
+
+    <div class="alert alert-light border mb-4 req-form-guide">
+      <div class="fw-semibold mb-1">Règles de saisie</div>
+      <div class="small mb-1">
+        Pour chaque article, vous pouvez demander soit <strong>Unité</strong>, soit le
+        <strong>conditionnement principal de stockage</strong> quand cet article n’est pas stocké à l’unité.
+      </div>
+      <div class="small text-muted">
+        Exemple : si un article est stocké en <strong>sachet</strong>, la liste affichera
+        <strong>Unité</strong> et <strong>Sachet</strong>. Le système convertira automatiquement la quantité.
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="h6 mb-0 fw-bold">Articles</h2>
+      <button id="btnAddLine" type="button" class="btn btn-outline-primary btn-sm">
+        Ajouter article
+      </button>
+    </div>
+
+    {{ formset.management_form }}
+
+    {% if formset.non_form_errors %}
+      <div class="alert alert-danger">{{ formset.non_form_errors }}</div>
+    {% endif %}
+
+    <div id="formsetContainer" class="d-flex flex-column gap-3">
+
+      {% for f in formset %}
+        <div class="border rounded-3 p-3 formset-item req-line-card js-req-line">
+
+          {% for hidden in f.hidden_fields %}
+            {{ hidden }}
+          {% endfor %}
+
+          <button type="button" class="sys-row-remove js-remove-row" title="Supprimer">
+            <img src="{% static 'icons/supprimer.png' %}" class="sys-row-remove__img" alt="Supprimer">
+          </button>
+
+          <div class="row g-3 mt-1">
+
+            <div class="col-xl-4 col-lg-4">
+              <label class="form-label" for="{{ f.article.id_for_label }}">{{ f.article.label }}</label>
+              {{ f.article }}
+              <div class="form-text js-stock-help">Sélectionnez un article.</div>
+              {% if f.article.errors %}
+                <div class="text-danger small mt-1">{{ f.article.errors|striptags }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-xl-3 col-lg-3">
+              <label class="form-label" for="{{ f.unite_demandee.id_for_label }}">{{ f.unite_demandee.label }}</label>
+              {{ f.unite_demandee }}
+              <div class="form-text js-unit-help">
+                Choisissez <strong>Unité</strong> ou le conditionnement de stockage.
+              </div>
+              {% if f.unite_demandee.errors %}
+                <div class="text-danger small mt-1">{{ f.unite_demandee.errors|striptags }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-xl-2 col-lg-2">
+              <label class="form-label" for="{{ f.quantite_demandee.id_for_label }}">{{ f.quantite_demandee.label }}</label>
+              {{ f.quantite_demandee }}
+              <div class="form-text js-qty-help d-none">Il y a pas cette quantité en stock</div>
+              {% if f.quantite_demandee.errors %}
+                <div class="text-danger small mt-1">{{ f.quantite_demandee.errors|striptags }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-xl-3 col-lg-3">
+              <label class="form-label" for="{{ f.motif_article.id_for_label }}">{{ f.motif_article.label }}</label>
+              {{ f.motif_article }}
+              {% if f.motif_article.errors %}
+                <div class="text-danger small mt-1">{{ f.motif_article.errors|striptags }}</div>
+              {% endif %}
+            </div>
+
+          </div>
+
+          <div class="req-line-meta mt-3">
+            <div class="small text-muted js-line-summary">
+              Sélectionnez un article pour afficher son conditionnement disponible.
+            </div>
+          </div>
+
+          <div class="d-none">
+            {{ f.DELETE }}
+          </div>
+
+        </div>
+      {% endfor %}
+
+    </div>
+
+    <div id="emptyFormTemplate" class="d-none">
+
+      <div class="border rounded-3 p-3 formset-item req-line-card js-req-line">
+
+        {% for hidden in formset.empty_form.hidden_fields %}
+          {{ hidden }}
+        {% endfor %}
+
+        <button type="button" class="sys-row-remove js-remove-row" title="Supprimer">
+          <img src="{% static 'icons/supprimer.png' %}" class="sys-row-remove__img" alt="Supprimer">
+        </button>
+
+        <div class="row g-3 mt-1">
+
+          <div class="col-xl-4 col-lg-4">
+            <label class="form-label" for="{{ formset.empty_form.article.id_for_label }}">{{ formset.empty_form.article.label }}</label>
+            {{ formset.empty_form.article }}
+            <div class="form-text js-stock-help">Sélectionnez un article.</div>
+          </div>
+
+          <div class="col-xl-3 col-lg-3">
+            <label class="form-label" for="{{ formset.empty_form.unite_demandee.id_for_label }}">{{ formset.empty_form.unite_demandee.label }}</label>
+            {{ formset.empty_form.unite_demandee }}
+            <div class="form-text js-unit-help">
+              Choisissez <strong>Unité</strong> ou le conditionnement de stockage.
+            </div>
+          </div>
+
+          <div class="col-xl-2 col-lg-2">
+            <label class="form-label" for="{{ formset.empty_form.quantite_demandee.id_for_label }}">{{ formset.empty_form.quantite_demandee.label }}</label>
+            {{ formset.empty_form.quantite_demandee }}
+            <div class="form-text js-qty-help d-none">Il y a pas cette quantité en stock</div>
+          </div>
+
+          <div class="col-xl-3 col-lg-3">
+            <label class="form-label" for="{{ formset.empty_form.motif_article.id_for_label }}">{{ formset.empty_form.motif_article.label }}</label>
+            {{ formset.empty_form.motif_article }}
+          </div>
+
+        </div>
+
+        <div class="req-line-meta mt-3">
+          <div class="small text-muted js-line-summary">
+            Sélectionnez un article pour afficher son conditionnement disponible.
+          </div>
+        </div>
+
+        <div class="d-none">
+          {{ formset.empty_form.DELETE }}
+        </div>
+
+      </div>
+
+    </div>
+
+    <hr class="my-4">
+
+    <div class="d-flex gap-2 flex-wrap">
+      <button class="btn btn-primary" type="submit">Enregistrer</button>
+      <a href="{% url 'requisitions:mes' %}" class="btn btn-outline-secondary">Annuler</a>
+    </div>
+
+  </div>
+</form>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'requisitions/requisition-form.js' %}"></script>
+{% endblock %}

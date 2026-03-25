@@ -1,0 +1,44 @@
+[
+  {
+    "model": "utilisateurs.role",
+    "pk": 1,
+    "fields": {
+      "nom_role": "Secrétaire"
+    }
+  },
+  {
+    "model": "utilisateurs.role",
+    "pk": 2,
+    "fields": {
+      "nom_role": "Gestionnaire des ressources matérielles"
+    }
+  },
+  {
+    "model": "utilisateurs.role",
+    "pk": 3,
+    "fields": {
+      "nom_role": "Directeur de direction"
+    }
+  },
+  {
+    "model": "utilisateurs.role",
+    "pk": 4,
+    "fields": {
+      "nom_role": "Directeur DAA"
+    }
+  },
+  {
+    "model": "utilisateurs.role",
+    "pk": 5,
+    "fields": {
+      "nom_role": "Administrateur système"
+    }
+  },
+  {
+    "model": "utilisateurs.role",
+    "pk": 6,
+    "fields": {
+      "nom_role": "Assistant de directeur"
+    }
+  }
+]

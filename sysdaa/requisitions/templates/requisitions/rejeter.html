@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %} - Rejeter{% endblock %}
+{% block content %}
+
+<div class="sys-pagehead">
+  <div class="sys-pagehead__title">
+    <h1 class="sys-h1">{{ titre|default:"Rejeter" }}</h1>
+    <p class="sys-subtitle">REQ-{{ requisition.id }} • Direction : {{ requisition.direction_demandeuse }}</p>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body p-4">
+    <div class="text-muted small">Motif global</div>
+    <div class="fw-semibold">{{ requisition.motif_global|default:"—" }}</div>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-dark">
+          <tr>
+            <th>Article</th>
+            <th>Demande utilisateur</th>
+            <th>Équivalent réel demandé</th>
+            <th>Motif</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for l in requisition.lignes.all %}
+            <tr>
+              <td class="fw-semibold">{{ l.article.nom }}</td>
+              <td>{{ l.quantite_demandee_affichage }}</td>
+              <td>{{ l.quantite_demandee_unites_affichage }}</td>
+              <td class="text-muted">{{ l.motif_article|default:"—" }}</td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="4" class="text-center text-muted py-4">Aucune ligne.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body p-4">
+    <div class="alert alert-danger">
+      <div class="fw-semibold">Attention</div>
+      <div class="text-muted">Le rejet notifie la secrétaire.</div>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label">Motif du rejet (optionnel)</label>
+        <textarea class="form-control" name="motif" rows="4"
+                  placeholder="Motif du rejet…"></textarea>
+      </div>
+
+      <div class="d-flex justify-content-end gap-2">
+        <a class="btn btn-outline-secondary" href="{% url 'requisitions:detail' requisition.id %}">Annuler</a>
+        <button type="submit" class="btn btn-danger">Rejeter</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
