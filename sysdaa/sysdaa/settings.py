@@ -1,18 +1,22 @@
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+from django.contrib.messages import constants as messages
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Charger le fichier .env
 load_dotenv(BASE_DIR / ".env")
 
+# -------------------------------------------------------------------
+# Base
+# -------------------------------------------------------------------
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "CHANGE_ME_IN_PROD")
-DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
+DEBUG = os.environ.get("DJANGO_DEBUG", "0") == "1"
 
 ALLOWED_HOSTS = [
     h.strip()
-    for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
+    for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",")
     if h.strip()
 ]
 
@@ -22,6 +26,13 @@ CSRF_TRUSTED_ORIGINS = [
     if u.strip()
 ]
 
+# Si jamais vous laissez vide en développement local
+if DEBUG and not ALLOWED_HOSTS:
+    ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+
+# -------------------------------------------------------------------
+# Applications
+# -------------------------------------------------------------------
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -51,21 +62,27 @@ INSTALLED_APPS = [
     "fournisseurs",
 ]
 
+# -------------------------------------------------------------------
+# Middleware
+# -------------------------------------------------------------------
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django_otp.middleware.OTPMiddleware',
-    'core.middleware.RequireVerifiedUserMiddleware',
-    'configurations.middleware.AutoAnneeFiscaleMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django_otp.middleware.OTPMiddleware",
+    "core.middleware.RequireVerifiedUserMiddleware",
+    "configurations.middleware.AutoAnneeFiscaleMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
 ROOT_URLCONF = "sysdaa.urls"
 
+# -------------------------------------------------------------------
+# Templates
+# -------------------------------------------------------------------
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -90,6 +107,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "sysdaa.wsgi.application"
 
+# -------------------------------------------------------------------
+# Base de données
+# -------------------------------------------------------------------
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -102,6 +122,9 @@ DATABASES = {
     }
 }
 
+# -------------------------------------------------------------------
+# Validation mots de passe
+# -------------------------------------------------------------------
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
@@ -109,11 +132,17 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
+# -------------------------------------------------------------------
+# Internationalisation
+# -------------------------------------------------------------------
 LANGUAGE_CODE = "fr"
 TIME_ZONE = "America/Port-au-Prince"
 USE_I18N = True
 USE_TZ = True
 
+# -------------------------------------------------------------------
+# Fichiers statiques et médias
+# -------------------------------------------------------------------
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
@@ -121,17 +150,33 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+# -------------------------------------------------------------------
+# Modèle utilisateur
+# -------------------------------------------------------------------
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "utilisateurs.Utilisateur"
 
+# -------------------------------------------------------------------
+# Sites framework
+# -------------------------------------------------------------------
 SITE_ID = int(os.environ.get("DJANGO_SITE_ID", "1"))
 
-# Auth
+# -------------------------------------------------------------------
+# Authentification
+# -------------------------------------------------------------------
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "core:home"
 LOGOUT_REDIRECT_URL = "/login/"
+
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-SESSION_COOKIE_AGE = 60 * 60 * 8  # Deconnexion apres 8 heures
+SESSION_COOKIE_AGE = int(os.environ.get("DJANGO_SESSION_COOKIE_AGE", str(60 * 60 * 5)))
+
+# Cookies
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
 
 # -------------------------------------------------------------------
 # SMTP / Email
@@ -191,8 +236,31 @@ TWO_FACTOR_SMS_GATEWAY = None
 TWO_FACTOR_CALL_GATEWAY = None
 
 # -------------------------------------------------------------------
+# Sécurité production
+# -------------------------------------------------------------------
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = "DENY"
+SECURE_REFERRER_POLICY = "same-origin"
+
+# Redirection HTTPS uniquement si le site tourne réellement en SSL
+SECURE_SSL_REDIRECT = os.environ.get("DJANGO_SECURE_SSL_REDIRECT", "0") == "1"
+
+# HSTS : à activer seulement quand HTTPS marche parfaitement partout
+SECURE_HSTS_SECONDS = int(os.environ.get("DJANGO_SECURE_HSTS_SECONDS", "0"))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = os.environ.get("DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS", "0") == "1"
+SECURE_HSTS_PRELOAD = os.environ.get("DJANGO_SECURE_HSTS_PRELOAD", "0") == "1"
+
+# Si Apache est derrière un proxy/reverse proxy HTTPS
+USE_X_FORWARDED_HOST = os.environ.get("DJANGO_USE_X_FORWARDED_HOST", "0") == "1"
+if os.environ.get("DJANGO_SECURE_PROXY_SSL_HEADER", "0") == "1":
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# -------------------------------------------------------------------
 # Logging
 # -------------------------------------------------------------------
+LOG_DIR = BASE_DIR / "logs"
+LOG_DIR.mkdir(exist_ok=True)
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -207,28 +275,36 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "standard",
             "level": "DEBUG" if DEBUG else "INFO",
-        }
+        },
+        "file": {
+            "class": "logging.FileHandler",
+            "filename": LOG_DIR / "sysdaa.log",
+            "formatter": "standard",
+            "level": "INFO",
+        },
     },
     "loggers": {
         "django": {
-            "handlers": ["console"],
+            "handlers": ["console", "file"],
             "level": "INFO",
             "propagate": True,
         },
         "two_factor": {
-            "handlers": ["console"],
+            "handlers": ["console", "file"],
             "level": "INFO",
             "propagate": False,
         },
         "django_otp": {
-            "handlers": ["console"],
+            "handlers": ["console", "file"],
             "level": "INFO",
             "propagate": False,
         },
     },
 }
-from django.contrib.messages import constants as messages
 
+# -------------------------------------------------------------------
+# Messages
+# -------------------------------------------------------------------
 MESSAGE_TAGS = {
     messages.ERROR: "danger",
 }
