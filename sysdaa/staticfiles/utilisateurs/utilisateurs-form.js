@@ -77,10 +77,6 @@
             }
             setLockedSelect(directionSelect, true);
 
-            if (directionHelp) {
-                directionHelp.textContent = "Direction imposée automatiquement pour ce rôle.";
-            }
-
             if (hiddenDirectorInput) {
                 hiddenDirectorInput.value = "";
             }

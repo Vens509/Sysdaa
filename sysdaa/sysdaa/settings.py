@@ -42,7 +42,7 @@ if SOCKET_DEFAULT_TIMEOUT > 0:
 # Base
 # -------------------------------------------------------------------
 SECRET_KEY = env_str("DJANGO_SECRET_KEY", "CHANGE_ME_IN_PROD")
-DEBUG = env_bool("DJANGO_DEBUG", True)
+DEBUG = env_bool("DJANGO_DEBUG", False)
 
 ALLOWED_HOSTS = [
     h.strip()
@@ -211,8 +211,8 @@ EMAIL_BACKEND = env_str(
     "DJANGO_EMAIL_BACKEND",
     "core.email_backend.EmailBackend",
 )
-EMAIL_HOST = env_str("DJANGO_EMAIL_HOST", "smtp.gmail.com")
-EMAIL_PORT = env_int("DJANGO_EMAIL_PORT", 587)
+EMAIL_HOST = env_str("DJANGO_EMAIL_HOST", "smtp.budget.gouv.ht")
+EMAIL_PORT = env_int("DJANGO_EMAIL_PORT", 25)
 EMAIL_USE_TLS = env_bool("DJANGO_EMAIL_USE_TLS", True)
 EMAIL_USE_SSL = env_bool("DJANGO_EMAIL_USE_SSL", False)
 EMAIL_HOST_USER = env_str("DJANGO_EMAIL_HOST_USER", "")

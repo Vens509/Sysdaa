@@ -33,11 +33,31 @@
   Chart.defaults.color = "#425166";
   Chart.defaults.plugins.legend.labels.boxWidth = 10;
 
-  function resetChart(canvas) {
-    const existingChart = Chart.getChart(canvas);
-    if (existingChart) {
-      existingChart.destroy();
+  const chartInstances = new Map();
+
+  function destroyChart(canvas) {
+    if (!canvas) return;
+
+    const existing =
+      chartInstances.get(canvas.id) || Chart.getChart(canvas);
+
+    if (existing) {
+      existing.destroy();
+      chartInstances.delete(canvas.id);
     }
+  }
+
+  function saveChartInstance(canvas, instance) {
+    if (!canvas || !instance) return;
+    chartInstances.set(canvas.id, instance);
+  }
+
+  function debounce(fn, delay = 180) {
+    let timer = null;
+    return function debounced(...args) {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn.apply(this, args), delay);
+    };
   }
 
   const valuePercentLabelPlugin = {
@@ -93,7 +113,11 @@
 
         ctx.fillStyle = "rgba(255,255,255,0.95)";
         ctx.beginPath();
-        ctx.roundRect(x, y, boxWidth, boxHeight, 6);
+        if (typeof ctx.roundRect === "function") {
+          ctx.roundRect(x, y, boxWidth, boxHeight, 6);
+        } else {
+          ctx.rect(x, y, boxWidth, boxHeight);
+        }
         ctx.fill();
 
         ctx.fillStyle = "#16324f";
@@ -108,55 +132,101 @@
     }
   };
 
-  function baseOptions() {
+  function getCommonPlugins() {
+    return {
+      legend: {
+        position: "bottom"
+      },
+      tooltip: {
+        backgroundColor: "rgba(18, 32, 51, 0.95)",
+        titleColor: "#fff",
+        bodyColor: "#fff",
+        padding: 12,
+        cornerRadius: 10
+      }
+    };
+  }
+
+  function getPieTooltipCallbacks() {
+    return {
+      label(context) {
+        const dataset = context.dataset?.data || [];
+        const total = dataset.reduce(
+          (sum, value) => sum + (Number(value) || 0),
+          0
+        );
+        const value = Number(context.raw) || 0;
+        const percent = total ? Math.round((value / total) * 100) : 0;
+        return `${context.label || ""} : ${value} (${percent}%)`;
+      }
+    };
+  }
+
+  function lineOptions() {
     return {
       responsive: true,
       maintainAspectRatio: false,
-      resizeDelay: 180,
-      animation: {
-        duration: 500
+      resizeDelay: 200,
+      animation: false,
+      normalized: true,
+      plugins: getCommonPlugins(),
+      interaction: {
+        mode: "index",
+        intersect: false
       },
-      transitions: {
-        resize: {
-          animation: {
-            duration: 0
+      scales: {
+        x: {
+          grid: {
+            display: false
           }
-        }
-      },
-      plugins: {
-        legend: {
-          position: "bottom"
         },
-        tooltip: {
-          backgroundColor: "rgba(18, 32, 51, 0.95)",
-          titleColor: "#fff",
-          bodyColor: "#fff",
-          padding: 12,
-          cornerRadius: 10,
-          callbacks: {
-            label(context) {
-              const dataset = context.dataset?.data || [];
-              const total = dataset.reduce(
-                (sum, value) => sum + (Number(value) || 0),
-                0
-              );
-              const value = Number(context.raw) || 0;
-              const percent = total ? Math.round((value / total) * 100) : 0;
-              return `${context.label || ""} : ${value} (${percent}%)`;
-            }
+        y: {
+          beginAtZero: true,
+          ticks: {
+            precision: 0
+          },
+          grid: {
+            color: COLORS.grid
           }
         }
       }
     };
   }
 
+  function roundChartOptions(cutoutValue = undefined) {
+    const options = {
+      responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: 1,
+      resizeDelay: 200,
+      animation: false,
+      normalized: true,
+      layout: {
+        padding: 8
+      },
+      plugins: {
+        ...getCommonPlugins(),
+        tooltip: {
+          ...getCommonPlugins().tooltip,
+          callbacks: getPieTooltipCallbacks()
+        }
+      }
+    };
+
+    if (cutoutValue !== undefined) {
+      options.cutout = cutoutValue;
+    }
+
+    return options;
+  }
+
   function renderUsersDaily() {
     const canvas = document.getElementById("chartAdminUsersDaily");
     if (!canvas) return;
 
-    resetChart(canvas);
+    destroyChart(canvas);
 
-    new Chart(canvas, {
+    const chart = new Chart(canvas, {
       type: "line",
       data: {
         labels,
@@ -173,39 +243,19 @@
           }
         ]
       },
-      options: {
-        ...baseOptions(),
-        interaction: {
-          mode: "index",
-          intersect: false
-        },
-        scales: {
-          x: {
-            grid: {
-              display: false
-            }
-          },
-          y: {
-            beginAtZero: true,
-            ticks: {
-              precision: 0
-            },
-            grid: {
-              color: COLORS.grid
-            }
-          }
-        }
-      }
+      options: lineOptions()
     });
+
+    saveChartInstance(canvas, chart);
   }
 
   function renderAuditLevels() {
     const canvas = document.getElementById("chartAuditLevels");
     if (!canvas) return;
 
-    resetChart(canvas);
+    destroyChart(canvas);
 
-    new Chart(canvas, {
+    const chart = new Chart(canvas, {
       type: "doughnut",
       data: {
         labels: auditLevels.labels || [],
@@ -225,21 +275,20 @@
           }
         ]
       },
-      options: {
-        ...baseOptions(),
-        cutout: "68%"
-      },
+      options: roundChartOptions("68%"),
       plugins: [valuePercentLabelPlugin]
     });
+
+    saveChartInstance(canvas, chart);
   }
 
   function renderAuditActions() {
     const canvas = document.getElementById("chartAuditActions");
     if (!canvas) return;
 
-    resetChart(canvas);
+    destroyChart(canvas);
 
-    new Chart(canvas, {
+    const chart = new Chart(canvas, {
       type: "pie",
       data: {
         labels: auditActions.labels || [],
@@ -260,14 +309,30 @@
           }
         ]
       },
-      options: {
-        ...baseOptions()
-      },
+      options: roundChartOptions(),
       plugins: [valuePercentLabelPlugin]
     });
+
+    saveChartInstance(canvas, chart);
   }
 
-  renderUsersDaily();
-  renderAuditLevels();
-  renderAuditActions();
+  function renderAllCharts() {
+    renderUsersDaily();
+    renderAuditLevels();
+    renderAuditActions();
+  }
+
+  const rerenderOnResize = debounce(() => {
+    renderAllCharts();
+  }, 220);
+
+  window.addEventListener("resize", rerenderOnResize);
+
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+      rerenderOnResize();
+    }
+  });
+
+  renderAllCharts();
 })();
