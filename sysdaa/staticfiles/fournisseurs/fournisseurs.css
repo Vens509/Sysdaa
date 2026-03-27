@@ -1,0 +1,54 @@
+.sys-listflush{
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.sys-listflush .list-group-item{
+  border-color: rgba(201,219,255,.75);
+}
+
+.sys-card-soft {
+  border-radius: 18px;
+}
+
+.sys-link-strong {
+  color: #194993;
+  font-weight: 700;
+}
+
+.sys-link-strong:hover {
+  text-decoration: underline !important;
+}
+
+.sys-pill-count {
+  background: rgba(25, 73, 147, 0.1);
+  color: #194993;
+  border: 1px solid rgba(25, 73, 147, 0.18);
+  min-width: 36px;
+}
+
+.sys-section-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #1d2a44;
+  margin-bottom: 1rem;
+}
+
+.sys-kv {
+  padding: 0.85rem 0;
+  border-bottom: 1px solid rgba(201, 219, 255, 0.75);
+}
+
+.sys-kv__label {
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  color: #6c7a90;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.sys-kv__value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1d2a44;
+}

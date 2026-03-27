@@ -1,0 +1,362 @@
+/* =========================================================
+   NOTIFICATIONS — PREMIUM
+   ========================================================= */
+
+.notif-page {
+  animation: notifFadeIn 0.22s ease;
+}
+
+@keyframes notifFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- Header actions ---------- */
+
+.sys-pagehead__actions .badge {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+}
+
+#toggleDeleteModeBtn {
+  min-height: 40px;
+  border-radius: 999px;
+  font-weight: 800;
+  padding-inline: 1rem;
+}
+
+/* ---------- Toolbar filtres ---------- */
+
+.sys-toolbar form .form-label {
+  font-size: 0.83rem;
+  font-weight: 800;
+  margin-bottom: 0.42rem;
+}
+
+.sys-toolbar .form-control,
+.sys-toolbar .form-select {
+  min-height: 46px;
+  border-radius: 14px;
+}
+
+.sys-toolbar .btn {
+  min-height: 46px;
+  font-weight: 800;
+}
+
+/* ---------- Card principale ---------- */
+
+.notif-card {
+  border-radius: 22px;
+  overflow: hidden;
+}
+
+.notif-card .card-body {
+  padding: 0;
+}
+
+/* ---------- Barre mode suppression ---------- */
+
+#deleteModeToolbar {
+  background:
+    linear-gradient(90deg, rgba(220, 53, 69, 0.08), rgba(220, 53, 69, 0.02));
+  border-bottom: 1px solid rgba(220, 53, 69, 0.14);
+  padding: 1rem 1.1rem;
+}
+
+#deleteModeToolbar .fw-semibold {
+  font-size: 0.94rem;
+}
+
+#deleteModeToolbar .btn {
+  border-radius: 999px;
+  font-weight: 800;
+  min-height: 38px;
+}
+
+/* ---------- Liste notifications ---------- */
+
+.notif-list {
+  background: transparent;
+}
+
+.notif-item {
+  position: relative;
+  padding: 1rem 1.1rem;
+  border: 0;
+  border-bottom: 1px solid rgba(215, 226, 242, 0.7);
+  background: rgba(255, 255, 255, 0.78);
+  transition:
+    background 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.14s ease,
+    border-color 0.18s ease;
+}
+
+.notif-item:last-child {
+  border-bottom: 0;
+}
+
+.notif-item:hover {
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.05);
+}
+
+/* ---------- Bloc gauche ---------- */
+
+.notif-main {
+  min-width: 260px;
+}
+
+.notif-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.3rem;
+}
+
+.notif-title {
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: var(--sys-text);
+  line-height: 1.3;
+}
+
+.notif-date {
+  color: var(--sys-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.notif-message {
+  margin-top: 0.65rem;
+  color: #243247;
+  font-size: 0.94rem;
+  line-height: 1.55;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* ---------- Badges ---------- */
+
+.notif-badge {
+  min-height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.notif-badge--req {
+  background: #eef2ff;
+  color: #4338ca;
+  border: 1px solid #c7d2fe;
+}
+
+.notif-badge--new {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.notif-badge--read {
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #dbe4ee;
+}
+
+.notif-badge--priority {
+  background: #fff1f2;
+  color: #be123c;
+  border: 1px solid #fecdd3;
+  margin-top: 0.8rem;
+}
+
+/* ---------- Checkbox suppression ---------- */
+
+.notif-select-box {
+  width: 32px;
+  min-width: 32px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 0.15rem;
+}
+
+.notif-checkbox {
+  width: 1.08rem;
+  height: 1.08rem;
+  cursor: pointer;
+  border-radius: 0.3rem;
+  border-color: #cbd5e1;
+  box-shadow: none !important;
+}
+
+.notif-checkbox:checked {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+/*--------Supprimé tout et supprimé lu----*/
+
+.pagination .page-link {
+  border-radius: 999px;
+  margin: 0 4px;
+  border: 1px solid var(--sys-border);
+  color: var(--sys-text);
+  font-weight: 700;
+}
+
+.pagination .page-item.active .page-link {
+  background: linear-gradient(180deg, #a78bfa, #8b5cf6);
+  border-color: #8b5cf6;
+  color: #fff;
+}
+
+.pagination .page-link:hover {
+  background: rgba(139, 92, 246, 0.08);
+  border-color: rgba(139, 92, 246, 0.24);
+}
+
+/* ---------- Notification cochée ---------- */
+
+.notif-item:has(.notif-checkbox:checked) {
+  background: linear-gradient(90deg, rgba(220, 53, 69, 0.07), rgba(255, 255, 255, 0.94));
+  box-shadow: inset 4px 0 0 #dc3545;
+}
+
+.notif-item:has(.notif-checkbox:checked) .notif-title {
+  color: #7f1d1d;
+}
+
+/* ---------- Notification non lue ---------- */
+
+.notif-item--unread {
+  background:
+    linear-gradient(90deg, rgba(37, 99, 235, 0.04), rgba(255, 255, 255, 0.88));
+}
+
+.notif-item--unread .notif-title {
+  color: #0f172a;
+}
+
+/* ---------- Empty state ---------- */
+
+.notif-empty-wrap {
+  padding: 1.35rem;
+}
+
+.notif-empty-wrap .sys-empty {
+  border-radius: 18px;
+  padding: 2rem 1rem;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 991.98px) {
+  .notif-item {
+    padding: 0.95rem 0.95rem;
+  }
+
+  #deleteModeToolbar {
+    padding: 0.9rem;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .sys-pagehead__actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .sys-pagehead__actions .badge,
+  .sys-pagehead__actions .btn {
+    width: 100%;
+  }
+
+  .notif-item {
+    border-bottom: 1px solid rgba(215, 226, 242, 0.9);
+  }
+
+  .notif-main {
+    min-width: 0;
+  }
+
+  .notif-title {
+    font-size: 0.94rem;
+  }
+
+  .notif-message {
+    font-size: 0.91rem;
+  }
+
+  .notif-select-box {
+    padding-top: 0.05rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .notif-item {
+    padding: 0.9rem 0.85rem;
+  }
+
+  .notif-title-row {
+    gap: 0.42rem;
+  }
+
+  .notif-badge {
+    white-space: normal;
+    text-align: left;
+  }
+
+  #deleteModeToolbar .d-flex {
+    width: 100%;
+  }
+
+  #deleteModeToolbar .btn {
+    width: 100%;
+  }
+}
+
+.notif-item--clickable {
+  cursor: pointer;
+  transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.notif-item--clickable:hover {
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow:
+    inset 0 0 0 1px rgba(37, 99, 235, 0.08),
+    0 8px 22px rgba(15, 23, 42, 0.04);
+  transform: translateY(-1px);
+}
+
+.notif-item--unread.notif-item--clickable::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 14px;
+  bottom: 14px;
+  width: 4px;
+  border-radius: 999px;
+  background: #2563eb;
+}

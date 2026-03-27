@@ -1,0 +1,168 @@
+/* L'app Articles s'appuie sur theme.css.
+   Ici on met uniquement des ajustements spécifiques si nécessaire. */
+
+.table td,
+.table th {
+  vertical-align: middle;
+}
+
+.badge {
+  font-weight: 700;
+}
+
+.sys-fieldhead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.sys-mini-add-btn {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #cfd7e6;
+  background: #fff;
+  color: #194993;
+  border-radius: 10px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 18px rgba(25, 73, 147, 0.08);
+  transition: all 0.18s ease;
+}
+
+.sys-mini-add-btn:hover {
+  background: #194993;
+  color: #fff;
+  border-color: #194993;
+  transform: translateY(-1px);
+}
+
+.sys-mini-add-btn.is-active {
+  background: #194993;
+  color: #fff;
+  border-color: #194993;
+}
+
+.sys-toggle-field > [hidden] {
+  display: none !important;
+}
+
+#id_fournisseurs {
+  min-height: 170px;
+}
+
+#id_fournisseurs_libres {
+  resize: vertical;
+  min-height: 170px;
+}
+
+.sys-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #5e6b84;
+  margin-bottom: 0.35rem;
+}
+
+.sys-value {
+  font-size: 1rem;
+  color: #1b2430;
+  font-weight: 600;
+}
+
+.sys-divider {
+  border: 0;
+  border-top: 1px solid #e8edf5;
+  margin: 1rem 0 1.15rem;
+}
+
+.article-inline-summary {
+  margin-top: 0.45rem;
+  color: #194993;
+  font-weight: 600;
+}
+
+.article-helper-box {
+  margin-top: 1rem;
+  border: 1px solid #d9e5fb;
+  background: linear-gradient(180deg, #f8fbff 0%, #f2f7ff 100%);
+  border-radius: 16px;
+  padding: 1rem 1rem 0.9rem;
+  box-shadow: 0 10px 24px rgba(25, 73, 147, 0.06);
+}
+
+.article-helper-box__title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #194993;
+  margin-bottom: 0.45rem;
+}
+
+.article-helper-box__text {
+  font-size: 0.93rem;
+  color: #31425b;
+  line-height: 1.55;
+  margin-bottom: 0.4rem;
+}
+
+.article-helper-box__text:last-child {
+  margin-bottom: 0;
+}
+
+.is-readonly-field {
+  background-color: #eef4ff !important;
+  border-color: #cfe0ff !important;
+  color: #194993 !important;
+  font-weight: 700;
+}
+
+.table td .small.text-muted {
+  line-height: 1.35;
+}
+
+.card .alert-info,
+.card .alert-warning,
+.card .alert-light {
+  border-radius: 14px;
+}
+
+.sys-empty {
+  padding: 0.6rem 0;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+@media (max-width: 991.98px) {
+  .article-helper-box {
+    padding: 0.9rem;
+  }
+}
+
+/* Mobile : boutons d'actions en pile si l'écran est étroit */
+@media (max-width: 575.98px) {
+  .d-flex.flex-wrap.gap-2 {
+    width: 100%;
+  }
+
+  .d-flex.flex-wrap.gap-2 .btn {
+    width: 100%;
+  }
+
+  .sys-fieldhead {
+    align-items: flex-start;
+  }
+
+  .article-helper-box__text {
+    font-size: 0.9rem;
+  }
+
+  .sys-value {
+    font-size: 0.96rem;
+  }
+}

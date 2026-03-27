@@ -1,34 +1,63 @@
 from pathlib import Path
 import os
+import socket
+
 from dotenv import load_dotenv
 from django.contrib.messages import constants as messages
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+print("==========SYsdaa setting charge==================")
 
 # Charger le fichier .env
 load_dotenv(BASE_DIR / ".env")
 
+
+def env_str(name, default=""):
+    return os.environ.get(name, default).strip()
+
+
+def env_int(name, default=0):
+    value = os.environ.get(name, str(default))
+    try:
+        return int(str(value).strip())
+    except (TypeError, ValueError):
+        return default
+
+
+def env_bool(name, default=False):
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return str(value).strip().lower() in {"1", "true", "yes", "on"}
+
+
+# -------------------------------------------------------------------
+# Réseau / timeout
+# -------------------------------------------------------------------
+SOCKET_DEFAULT_TIMEOUT = env_int("DJANGO_SOCKET_TIMEOUT", 10)
+if SOCKET_DEFAULT_TIMEOUT > 0:
+    socket.setdefaulttimeout(SOCKET_DEFAULT_TIMEOUT)
+
 # -------------------------------------------------------------------
 # Base
 # -------------------------------------------------------------------
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "CHANGE_ME_IN_PROD")
-DEBUG = os.environ.get("DJANGO_DEBUG", "0") == "1"
+SECRET_KEY = env_str("DJANGO_SECRET_KEY", "CHANGE_ME_IN_PROD")
+DEBUG = env_bool("DJANGO_DEBUG", True)
 
 ALLOWED_HOSTS = [
     h.strip()
-    for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",")
+    for h in env_str("DJANGO_ALLOWED_HOSTS", "").split(",")
     if h.strip()
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     u.strip()
-    for u in os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",")
+    for u in env_str("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",")
     if u.strip()
 ]
 
-# Si jamais vous laissez vide en développement local
 if DEBUG and not ALLOWED_HOSTS:
-    ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+    ALLOWED_HOSTS = ["10.3.26.105", "localhost"]
 
 # -------------------------------------------------------------------
 # Applications
@@ -41,15 +70,12 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sites",
-
     "django_otp",
     "django_otp.plugins.otp_totp",
     "django_otp.plugins.otp_static",
     "django_otp.plugins.otp_email",
-
     "two_factor",
     "two_factor.plugins.email",
-
     "utilisateurs",
     "core",
     "mouvements_stock",
@@ -113,12 +139,12 @@ WSGI_APPLICATION = "sysdaa.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("POSTGRES_DB", "sysdaa"),
-        "USER": os.environ.get("POSTGRES_USER", "postgres"),
-        "PASSWORD": os.environ.get("POSTGRES_PASSWORD", ""),
-        "HOST": os.environ.get("POSTGRES_HOST", "127.0.0.1"),
-        "PORT": os.environ.get("POSTGRES_PORT", "5432"),
-        "CONN_MAX_AGE": int(os.environ.get("POSTGRES_CONN_MAX_AGE", "60")),
+        "NAME": env_str("POSTGRES_DB", "sysdaa"),
+        "USER": env_str("POSTGRES_USER", "postgres"),
+        "PASSWORD": env_str("POSTGRES_PASSWORD", ""),
+        "HOST": env_str("POSTGRES_HOST", "127.0.0.1"),
+        "PORT": env_str("POSTGRES_PORT", "5432"),
+        "CONN_MAX_AGE": env_int("POSTGRES_CONN_MAX_AGE", 60),
     }
 }
 
@@ -159,7 +185,7 @@ AUTH_USER_MODEL = "utilisateurs.Utilisateur"
 # -------------------------------------------------------------------
 # Sites framework
 # -------------------------------------------------------------------
-SITE_ID = int(os.environ.get("DJANGO_SITE_ID", "1"))
+SITE_ID = env_int("DJANGO_SITE_ID", 1)
 
 # -------------------------------------------------------------------
 # Authentification
@@ -169,48 +195,47 @@ LOGIN_REDIRECT_URL = "core:home"
 LOGOUT_REDIRECT_URL = "/login/"
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-SESSION_COOKIE_AGE = int(os.environ.get("DJANGO_SESSION_COOKIE_AGE", str(60 * 60 * 5)))
+SESSION_COOKIE_AGE = env_int("DJANGO_SESSION_COOKIE_AGE", 60 * 60 * 5)
 
-# Cookies
 SESSION_COOKIE_HTTPONLY = True
-CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SAMESITE = "Lax"
+
+CSRF_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SAMESITE = "Lax"
 
 # -------------------------------------------------------------------
 # SMTP / Email
 # -------------------------------------------------------------------
-EMAIL_BACKEND = os.environ.get(
+EMAIL_BACKEND = env_str(
     "DJANGO_EMAIL_BACKEND",
-    "django.core.mail.backends.smtp.EmailBackend",
+    "core.email_backend.EmailBackend",
 )
+EMAIL_HOST = env_str("DJANGO_EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = env_int("DJANGO_EMAIL_PORT", 587)
+EMAIL_USE_TLS = env_bool("DJANGO_EMAIL_USE_TLS", True)
+EMAIL_USE_SSL = env_bool("DJANGO_EMAIL_USE_SSL", False)
+EMAIL_HOST_USER = env_str("DJANGO_EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = env_str("DJANGO_EMAIL_HOST_PASSWORD", "")
+EMAIL_TIMEOUT = env_int("DJANGO_EMAIL_TIMEOUT", SOCKET_DEFAULT_TIMEOUT)
 
-EMAIL_HOST = os.environ.get("DJANGO_EMAIL_HOST", "smtp.gmail.com")
-EMAIL_PORT = int(os.environ.get("DJANGO_EMAIL_PORT", "587"))
-EMAIL_USE_TLS = os.environ.get("DJANGO_EMAIL_USE_TLS", "1") == "1"
-EMAIL_USE_SSL = os.environ.get("DJANGO_EMAIL_USE_SSL", "0") == "1"
-
-EMAIL_HOST_USER = os.environ.get("DJANGO_EMAIL_HOST_USER", "")
-EMAIL_HOST_PASSWORD = os.environ.get("DJANGO_EMAIL_HOST_PASSWORD", "")
-
-DEFAULT_FROM_EMAIL = os.environ.get(
+DEFAULT_FROM_EMAIL = env_str(
     "DJANGO_DEFAULT_FROM_EMAIL",
     EMAIL_HOST_USER or "no-reply@sysdaa.local",
 )
-SERVER_EMAIL = os.environ.get("DJANGO_SERVER_EMAIL", DEFAULT_FROM_EMAIL)
+SERVER_EMAIL = env_str("DJANGO_SERVER_EMAIL", DEFAULT_FROM_EMAIL)
 
 # -------------------------------------------------------------------
 # OTP Email
 # -------------------------------------------------------------------
 OTP_EMAIL_SENDER = DEFAULT_FROM_EMAIL
-OTP_EMAIL_SUBJECT = os.environ.get(
+OTP_EMAIL_SUBJECT = env_str(
     "OTP_EMAIL_SUBJECT",
     "Code de vérification SYSDAA",
 )
-OTP_EMAIL_TOKEN_VALIDITY = int(os.environ.get("OTP_EMAIL_TOKEN_VALIDITY", "300"))
-OTP_EMAIL_COOLDOWN_DURATION = int(os.environ.get("OTP_EMAIL_COOLDOWN_DURATION", "60"))
-OTP_EMAIL_THROTTLE_FACTOR = int(os.environ.get("OTP_EMAIL_THROTTLE_FACTOR", "1"))
+OTP_EMAIL_TOKEN_VALIDITY = env_int("OTP_EMAIL_TOKEN_VALIDITY", 300)
+OTP_EMAIL_COOLDOWN_DURATION = env_int("OTP_EMAIL_COOLDOWN_DURATION", 60)
+OTP_EMAIL_THROTTLE_FACTOR = env_int("OTP_EMAIL_THROTTLE_FACTOR", 1)
 
 OTP_EMAIL_BODY_TEMPLATE = (
     "Bonjour,\n\n"
@@ -223,15 +248,15 @@ OTP_EMAIL_BODY_TEMPLATE = (
 # Two-factor
 # -------------------------------------------------------------------
 TWO_FACTOR_PATCH_ADMIN = False
-TWO_FACTOR_LOGIN_TIMEOUT = int(os.environ.get("TWO_FACTOR_LOGIN_TIMEOUT", "600"))
-TWO_FACTOR_REMEMBER_COOKIE_AGE = int(
-    os.environ.get("TWO_FACTOR_REMEMBER_COOKIE_AGE", str(60 * 60 * 24 * 30))
+TWO_FACTOR_LOGIN_TIMEOUT = env_int("TWO_FACTOR_LOGIN_TIMEOUT", 600)
+TWO_FACTOR_REMEMBER_COOKIE_AGE = env_int(
+    "TWO_FACTOR_REMEMBER_COOKIE_AGE",
+    60 * 60 * 24 * 30,
 )
 TWO_FACTOR_REMEMBER_COOKIE_SECURE = not DEBUG
 TWO_FACTOR_REMEMBER_COOKIE_HTTPONLY = True
 TWO_FACTOR_REMEMBER_COOKIE_SAMESITE = "Lax"
 
-# Email seulement
 TWO_FACTOR_SMS_GATEWAY = None
 TWO_FACTOR_CALL_GATEWAY = None
 
@@ -242,17 +267,13 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
 SECURE_REFERRER_POLICY = "same-origin"
 
-# Redirection HTTPS uniquement si le site tourne réellement en SSL
-SECURE_SSL_REDIRECT = os.environ.get("DJANGO_SECURE_SSL_REDIRECT", "0") == "1"
+SECURE_SSL_REDIRECT = env_bool("DJANGO_SECURE_SSL_REDIRECT", False)
+SECURE_HSTS_SECONDS = env_int("DJANGO_SECURE_HSTS_SECONDS", 0)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool("DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS", False)
+SECURE_HSTS_PRELOAD = env_bool("DJANGO_SECURE_HSTS_PRELOAD", False)
 
-# HSTS : à activer seulement quand HTTPS marche parfaitement partout
-SECURE_HSTS_SECONDS = int(os.environ.get("DJANGO_SECURE_HSTS_SECONDS", "0"))
-SECURE_HSTS_INCLUDE_SUBDOMAINS = os.environ.get("DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS", "0") == "1"
-SECURE_HSTS_PRELOAD = os.environ.get("DJANGO_SECURE_HSTS_PRELOAD", "0") == "1"
-
-# Si Apache est derrière un proxy/reverse proxy HTTPS
-USE_X_FORWARDED_HOST = os.environ.get("DJANGO_USE_X_FORWARDED_HOST", "0") == "1"
-if os.environ.get("DJANGO_SECURE_PROXY_SSL_HEADER", "0") == "1":
+USE_X_FORWARDED_HOST = env_bool("DJANGO_USE_X_FORWARDED_HOST", False)
+if env_bool("DJANGO_SECURE_PROXY_SSL_HEADER", False):
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # -------------------------------------------------------------------
