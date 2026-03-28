@@ -34,6 +34,10 @@ def _article_est_disponible(article: Article) -> bool:
     return int(article.stock_actuel or 0) > 0
 
 
+def _normaliser_categorie_filtre(value: str | None) -> str:
+    return " ".join(str(value or "").strip().casefold().split())
+
+
 def _choices_unites_pour_article(article: Article | None) -> list[tuple[str, str]]:
     if article is None:
         return [("Unité", "Unité")]
@@ -51,6 +55,7 @@ def _choices_unites_pour_article(article: Article | None) -> list[tuple[str, str
 
 def _build_article_meta(article: Article) -> dict:
     unite_article = _normaliser_libelle_unite(article.unite)
+    categorie_libelle = getattr(article.categorie, "libelle", "") or ""
     unites_autorisees = ["Unité"]
 
     if not article.est_stocke_par_unite and unite_article != "Unité":
@@ -59,7 +64,9 @@ def _build_article_meta(article: Article) -> dict:
     return {
         "id": article.pk,
         "nom": article.nom,
-        "categorie": getattr(article.categorie, "libelle", ""),
+        "nom_normalise": " ".join((article.nom or "").strip().casefold().split()),
+        "categorie": categorie_libelle,
+        "categorie_key": _normaliser_categorie_filtre(categorie_libelle),
         "unite_principale": unite_article,
         "unite_base": article.unite_base,
         "quantite_par_conditionnement": int(article.quantite_par_conditionnement or 1),
@@ -134,6 +141,13 @@ class RequisitionUpdateForm(forms.ModelForm):
 
 
 class LigneRequisitionForm(forms.ModelForm):
+    categorie_article = forms.ChoiceField(
+        label="Catégorie",
+        choices=[("", "Toutes catégories")],
+        required=False,
+        widget=forms.Select(),
+    )
+
     unite_demandee = forms.ChoiceField(
         label="Conditionnement demandé",
         choices=[("Unité", "Unité")],
@@ -162,6 +176,21 @@ class LigneRequisitionForm(forms.ModelForm):
         self.fields["quantite_demandee"].label = "Quantité demandée"
         self.fields["motif_article"].label = "Motif (optionnel)"
 
+        categories_uniques: list[str] = []
+        categories_vues: set[str] = set()
+        for a in articles:
+            libelle = (getattr(a.categorie, "libelle", "") or "").strip()
+            cle = _normaliser_categorie_filtre(libelle)
+            if not libelle or not cle or cle in categories_vues:
+                continue
+            categories_vues.add(cle)
+            categories_uniques.append(libelle)
+
+        self.fields["categorie_article"].choices = [
+            ("", "Toutes catégories"),
+            *[(lib, lib) for lib in categories_uniques],
+        ]
+
         article_meta_map = {str(a.pk): _build_article_meta(a) for a in articles}
         self.fields["article"].widget.attrs["data-article-meta-map"] = json.dumps(
             article_meta_map,
@@ -182,17 +211,38 @@ class LigneRequisitionForm(forms.ModelForm):
             choices.append((a.pk, label))
 
         self.fields["article"].choices = choices
+        self.fields["article"].widget.attrs["data-search-placeholder"] = (
+            "Rechercher un article..."
+        )
+        self.fields["article"].widget.attrs["data-empty-search-message"] = (
+            "Aucun article trouvé pour cette saisie."
+        )
 
         article_courant = None
+        categorie_initiale = ""
+
         if self.is_bound:
             article_id = self.data.get(self.add_prefix("article"))
+            categorie_postee = (
+                self.data.get(self.add_prefix("categorie_article")) or ""
+            ).strip()
+
             if article_id:
                 try:
-                    article_courant = Article.objects.get(pk=article_id)
+                    article_courant = Article.objects.select_related("categorie").get(pk=article_id)
                 except Article.DoesNotExist:
                     article_courant = None
+
+            if categorie_postee:
+                categorie_initiale = categorie_postee
+            elif article_courant and article_courant.categorie_id:
+                categorie_initiale = getattr(article_courant.categorie, "libelle", "") or ""
+
         elif self.instance and self.instance.pk and self.instance.article_id:
             article_courant = self.instance.article
+            categorie_initiale = getattr(article_courant.categorie, "libelle", "") or ""
+
+        self.fields["categorie_article"].initial = categorie_initiale
 
         self.fields["unite_demandee"].choices = _choices_unites_pour_article(article_courant)
         self.fields["unite_demandee"].widget.attrs["data-default-value"] = (
@@ -223,6 +273,16 @@ class LigneRequisitionForm(forms.ModelForm):
 
         article = cleaned.get("article")
         qd = cleaned.get("quantite_demandee")
+        categorie_article = (cleaned.get("categorie_article") or "").strip()
+
+        if article is not None and categorie_article:
+            categorie_article_libelle = (getattr(article.categorie, "libelle", "") or "").strip()
+            if _normaliser_categorie_filtre(categorie_article_libelle) != _normaliser_categorie_filtre(categorie_article):
+                self.add_error(
+                    "article",
+                    "Cet article ne correspond pas à la catégorie choisie.",
+                )
+                return cleaned
 
         if article is None or _is_blank(qd):
             return cleaned

@@ -57,6 +57,7 @@
       qpc: parseInt(opt.dataset.articleQpc || "1", 10) || 1,
       stockUnites: parseInt(opt.dataset.stockUnites || "0", 10) || 0,
       stockAffichage: normalizeText(opt.dataset.stockAffichage || "0 unité") || "0 unité",
+      rupture: String(opt.dataset.stockRupture || "0") === "1",
     };
   }
 
@@ -197,6 +198,59 @@
     }
   }
 
+  function syncMotifUI(form) {
+    const motifSelect = qs("#id_motif_sortie_selection", form);
+    const motifAutreWrap = qs("#motif-autre-wrap", form);
+    const motifAutreInput = qs("#id_motif_sortie_autre", form);
+    const motifHidden = qs("#id_motif_sortie", form);
+
+    if (!motifSelect || !motifHidden) return;
+
+    const selected = normalizeText(motifSelect.value);
+
+    if (selected === "Autres") {
+      showElement(motifAutreWrap);
+      motifHidden.value = normalizeText(motifAutreInput ? motifAutreInput.value : "");
+      return;
+    }
+
+    hideElement(motifAutreWrap);
+    if (motifAutreInput) {
+      motifAutreInput.value = "";
+    }
+    motifHidden.value = selected;
+  }
+
+  function syncSortieAvailability(form) {
+    const articleSelect = qs("#id_article", form);
+    const quantiteInput = qs("#id_quantite", form);
+    const submitBtn = qs("#btn-enregistrer-sortie", form);
+    const indisponibleInfo = qs("#article-indisponible-info", form);
+
+    if (!articleSelect || !submitBtn) return;
+
+    const article = getArticleData(articleSelect);
+    const hasArticle = !!article;
+
+    if (!hasArticle) {
+      hideElement(indisponibleInfo);
+      submitBtn.disabled = false;
+      if (quantiteInput) quantiteInput.disabled = false;
+      return;
+    }
+
+    if (article.rupture || article.stockUnites <= 0) {
+      showElement(indisponibleInfo);
+      submitBtn.disabled = true;
+      if (quantiteInput) quantiteInput.disabled = true;
+      return;
+    }
+
+    hideElement(indisponibleInfo);
+    submitBtn.disabled = false;
+    if (quantiteInput) quantiteInput.disabled = false;
+  }
+
   function syncSummary(form) {
     const articleSelect = qs("#id_article", form);
     const conditionnementSelect = qs("#id_conditionnement_operation", form);
@@ -281,6 +335,8 @@
     const libreInput = qs("#id_conditionnement_operation_libre", form);
     const quantiteInput = qs("#id_quantite", form);
     const qpcInput = qs("#id_quantite_par_conditionnement_operation", form);
+    const motifSelect = qs("#id_motif_sortie_selection", form);
+    const motifAutreInput = qs("#id_motif_sortie_autre", form);
 
     if (!articleSelect || !conditionnementSelect || !quantiteInput || !qpcInput) {
       return;
@@ -288,6 +344,8 @@
 
     function refreshAll() {
       syncConditionnementUI(form);
+      syncMotifUI(form);
+      syncSortieAvailability(form);
       syncSummary(form);
     }
 
@@ -309,6 +367,18 @@
     if (libreInput) {
       libreInput.addEventListener("input", function () {
         syncSummary(form);
+      });
+    }
+
+    if (motifSelect) {
+      motifSelect.addEventListener("change", function () {
+        syncMotifUI(form);
+      });
+    }
+
+    if (motifAutreInput) {
+      motifAutreInput.addEventListener("input", function () {
+        syncMotifUI(form);
       });
     }
 

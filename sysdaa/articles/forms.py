@@ -71,23 +71,6 @@ class ArticleForm(forms.ModelForm):
         ),
     )
 
-    stock_initial_saisi = forms.IntegerField(
-        min_value=0,
-        label="Quantité initiale à enregistrer",
-        widget=forms.NumberInput(
-            attrs={
-                "class": "form-control",
-                "min": 0,
-                "step": 1,
-                "placeholder": "Ex. 10",
-            }
-        ),
-        help_text=(
-            "Saisir le nombre de conditionnements à enregistrer. "
-            "Ex. 10 boîtes, 5 douzaines, 30 unités."
-        ),
-    )
-
     stock_minimal_saisi = forms.IntegerField(
         min_value=1,
         label="Seuil minimal d’alerte",
@@ -158,7 +141,9 @@ class ArticleForm(forms.ModelForm):
         self.fields["fournisseurs"].queryset = Fournisseur.objects.all().order_by("nom")
 
         article_verrouille = bool(
-            self.instance and self.instance.pk and self.instance.stock_initial_est_verrouille()
+            self.instance
+            and self.instance.pk
+            and (self.instance.a_historique_mouvements() or self.instance.a_historique_requisitions())
         )
 
         if self.instance and self.instance.pk:
@@ -167,33 +152,19 @@ class ArticleForm(forms.ModelForm):
             )
 
             qpc = int(self.instance.quantite_par_conditionnement or 1)
-
-            stock_initial_affichable = (
-                self.instance.stock_initial // qpc
-                if qpc and self.instance.stock_initial % qpc == 0
-                else self.instance.stock_initial
-            )
             stock_minimal_affichable = (
                 self.instance.stock_minimal // qpc
                 if qpc and self.instance.stock_minimal % qpc == 0
                 else self.instance.stock_minimal
             )
-
-            self.fields["stock_initial_saisi"].initial = stock_initial_affichable
             self.fields["stock_minimal_saisi"].initial = stock_minimal_affichable or 1
         else:
-            self.fields["stock_initial_saisi"].initial = 0
             self.fields["stock_minimal_saisi"].initial = 1
 
         if article_verrouille:
-            self.fields["stock_initial_saisi"].disabled = True
             self.fields["unite"].disabled = True
             self.fields["quantite_par_conditionnement"].disabled = True
 
-            self.fields["stock_initial_saisi"].help_text = (
-                "Le stock initial est désormais piloté par le système "
-                "car cet article a déjà un historique."
-            )
             self.fields["unite"].help_text = (
                 "Le conditionnement principal ne peut plus être modifié "
                 "car cet article a déjà un historique."
@@ -255,14 +226,6 @@ class ArticleForm(forms.ModelForm):
             raise forms.ValidationError("Veuillez renseigner le conditionnement principal.")
         return unite
 
-    def clean_stock_initial_saisi(self) -> int:
-        valeur = self.cleaned_data.get("stock_initial_saisi")
-        if valeur is None:
-            return 0
-        if valeur < 0:
-            raise forms.ValidationError("La quantité initiale ne peut pas être négative.")
-        return valeur
-
     def clean_stock_minimal_saisi(self) -> int:
         valeur = self.cleaned_data.get("stock_minimal_saisi")
         if valeur is None:
@@ -301,13 +264,12 @@ class ArticleForm(forms.ModelForm):
         if historique_sensible:
             unite = _normaliser_libelle_unite(self.instance.unite or "")
             qpc = int(self.instance.quantite_par_conditionnement or 1)
-            stock_initial_unites = int(self.instance.stock_initial or 0)
             stock_minimal_saisi = int(cleaned_data.get("stock_minimal_saisi") or 0)
             stock_minimal_unites = stock_minimal_saisi * qpc
+            stock_initial_unites = int(self.instance.stock_initial or 0)
         else:
             unite = _normaliser_libelle_unite(cleaned_data.get("unite") or "")
             qpc_saisi = int(cleaned_data.get("quantite_par_conditionnement") or 0)
-            stock_initial_saisi = int(cleaned_data.get("stock_initial_saisi") or 0)
             stock_minimal_saisi = int(cleaned_data.get("stock_minimal_saisi") or 0)
 
             qpc_imposee = self._quantite_imposee_par_unite(unite)
@@ -335,7 +297,7 @@ class ArticleForm(forms.ModelForm):
                     )
                     qpc = 1
 
-            stock_initial_unites = stock_initial_saisi * qpc
+            stock_initial_unites = 0 if not self.instance or not self.instance.pk else int(self.instance.stock_initial or 0)
             stock_minimal_unites = stock_minimal_saisi * qpc
 
         cleaned_data["unite"] = unite
@@ -351,11 +313,13 @@ class ArticleForm(forms.ModelForm):
         article.unite = self.cleaned_data["unite"]
         article.unite_base = "Unité"
         article.quantite_par_conditionnement = self.cleaned_data["quantite_par_conditionnement"]
-        article.stock_initial = self.cleaned_data["stock_initial"]
         article.stock_minimal = self.cleaned_data["stock_minimal"]
 
-        if not article.pk:
-            article.stock_actuel = article.stock_initial
+        if article.pk:
+            article.stock_initial = int(article.stock_initial or 0)
+        else:
+            article.stock_initial = 0
+            article.stock_actuel = 0
 
         if commit:
             article.full_clean()

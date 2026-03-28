@@ -43,9 +43,11 @@
         Pour chaque article, vous pouvez demander soit <strong>Unité</strong>, soit le
         <strong>conditionnement principal de stockage</strong> quand cet article n’est pas stocké à l’unité.
       </div>
+      <div class="small mb-1">
+        Le petit champ <strong>Catégorie</strong> filtre les articles de la ligne courante.
+      </div>
       <div class="small text-muted">
-        Exemple : si un article est stocké en <strong>sachet</strong>, la liste affichera
-        <strong>Unité</strong> et <strong>Sachet</strong>. Le système convertira automatiquement la quantité.
+        Cliquez sur la <strong>loupe</strong> pour passer du champ “Choisir” à la recherche intelligente par texte.
       </div>
     </div>
 
@@ -77,16 +79,62 @@
 
           <div class="row g-3 mt-1">
 
-            <div class="col-xl-4 col-lg-4">
+            <div class="col-xl-2 col-lg-3">
+              <label class="form-label" for="{{ f.categorie_article.id_for_label }}">{{ f.categorie_article.label }}</label>
+              {{ f.categorie_article }}
+              {% if f.categorie_article.errors %}
+                <div class="text-danger small mt-1">{{ f.categorie_article.errors|striptags }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-xl-4 col-lg-5">
               <label class="form-label" for="{{ f.article.id_for_label }}">{{ f.article.label }}</label>
-              {{ f.article }}
+
+              <div class="position-relative">
+                <div class="input-group js-article-select-wrap">
+                  {{ f.article }}
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary js-toggle-article-search"
+                    title="Rechercher un article"
+                    aria-label="Rechercher un article">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                      <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.867-3.834ZM12 6.5a5.5 5.5 0 1 1-11 0a5.5 5.5 0 0 1 11 0Z"/>
+                    </svg>
+                  </button>
+                </div>
+
+                <div class="d-none js-article-search-wrap">
+                  <div class="input-group">
+                    <input
+                      type="text"
+                      class="form-control js-article-search-input"
+                      placeholder="Tapez pour rechercher un article">
+                    <button
+                      type="button"
+                      class="btn btn-outline-secondary js-toggle-article-search"
+                      title="Revenir à la liste"
+                      aria-label="Revenir à la liste">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                        <path d="M15 8a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 0 1-.708.708l-4-4a.498.498 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 7.5H14.5A.5.5 0 0 1 15 8"/>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <div
+                    class="list-group shadow-sm mt-2 d-none js-article-search-results"
+                    style="max-height: 240px; overflow-y: auto;">
+                  </div>
+                </div>
+              </div>
+
               <div class="form-text js-stock-help">Sélectionnez un article.</div>
               {% if f.article.errors %}
                 <div class="text-danger small mt-1">{{ f.article.errors|striptags }}</div>
               {% endif %}
             </div>
 
-            <div class="col-xl-3 col-lg-3">
+            <div class="col-xl-2 col-lg-4">
               <label class="form-label" for="{{ f.unite_demandee.id_for_label }}">{{ f.unite_demandee.label }}</label>
               {{ f.unite_demandee }}
               <div class="form-text js-unit-help">
@@ -97,7 +145,7 @@
               {% endif %}
             </div>
 
-            <div class="col-xl-2 col-lg-2">
+            <div class="col-xl-2 col-lg-3">
               <label class="form-label" for="{{ f.quantite_demandee.id_for_label }}">{{ f.quantite_demandee.label }}</label>
               {{ f.quantite_demandee }}
               <div class="form-text js-qty-help d-none">Il y a pas cette quantité en stock</div>
@@ -106,7 +154,7 @@
               {% endif %}
             </div>
 
-            <div class="col-xl-3 col-lg-3">
+            <div class="col-xl-2 col-lg-12">
               <label class="form-label" for="{{ f.motif_article.id_for_label }}">{{ f.motif_article.label }}</label>
               {{ f.motif_article }}
               {% if f.motif_article.errors %}
@@ -145,13 +193,56 @@
 
         <div class="row g-3 mt-1">
 
-          <div class="col-xl-4 col-lg-4">
+          <div class="col-xl-2 col-lg-3">
+            <label class="form-label" for="{{ formset.empty_form.categorie_article.id_for_label }}">{{ formset.empty_form.categorie_article.label }}</label>
+            {{ formset.empty_form.categorie_article }}
+          </div>
+
+          <div class="col-xl-4 col-lg-5">
             <label class="form-label" for="{{ formset.empty_form.article.id_for_label }}">{{ formset.empty_form.article.label }}</label>
-            {{ formset.empty_form.article }}
+
+            <div class="position-relative">
+              <div class="input-group js-article-select-wrap">
+                {{ formset.empty_form.article }}
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary js-toggle-article-search"
+                  title="Rechercher un article"
+                  aria-label="Rechercher un article">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.867-3.834ZM12 6.5a5.5 5.5 0 1 1-11 0a5.5 5.5 0 0 1 11 0Z"/>
+                  </svg>
+                </button>
+              </div>
+
+              <div class="d-none js-article-search-wrap">
+                <div class="input-group">
+                  <input
+                    type="text"
+                    class="form-control js-article-search-input"
+                    placeholder="Tapez pour rechercher un article">
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary js-toggle-article-search"
+                    title="Revenir à la liste"
+                    aria-label="Revenir à la liste">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                      <path d="M15 8a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 0 1-.708.708l-4-4a.498.498 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 7.5H14.5A.5.5 0 0 1 15 8"/>
+                    </svg>
+                  </button>
+                </div>
+
+                <div
+                  class="list-group shadow-sm mt-2 d-none js-article-search-results"
+                  style="max-height: 240px; overflow-y: auto;">
+                </div>
+              </div>
+            </div>
+
             <div class="form-text js-stock-help">Sélectionnez un article.</div>
           </div>
 
-          <div class="col-xl-3 col-lg-3">
+          <div class="col-xl-2 col-lg-4">
             <label class="form-label" for="{{ formset.empty_form.unite_demandee.id_for_label }}">{{ formset.empty_form.unite_demandee.label }}</label>
             {{ formset.empty_form.unite_demandee }}
             <div class="form-text js-unit-help">
@@ -159,13 +250,13 @@
             </div>
           </div>
 
-          <div class="col-xl-2 col-lg-2">
+          <div class="col-xl-2 col-lg-3">
             <label class="form-label" for="{{ formset.empty_form.quantite_demandee.id_for_label }}">{{ formset.empty_form.quantite_demandee.label }}</label>
             {{ formset.empty_form.quantite_demandee }}
             <div class="form-text js-qty-help d-none">Il y a pas cette quantité en stock</div>
           </div>
 
-          <div class="col-xl-3 col-lg-3">
+          <div class="col-xl-2 col-lg-12">
             <label class="form-label" for="{{ formset.empty_form.motif_article.id_for_label }}">{{ formset.empty_form.motif_article.label }}</label>
             {{ formset.empty_form.motif_article }}
           </div>

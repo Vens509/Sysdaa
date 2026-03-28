@@ -168,6 +168,29 @@
       </div>
     {% endif %}
 
+
+    {% if rapport.extra_context.categorie_filtre_label or rapport.filters_text %}
+      <div class="rp-report-focus">
+        <div class="rp-report-focus__title">Rapport généré selon les filtres</div>
+
+        <div class="rp-report-focus__chips">
+          {% if rapport.extra_context.categorie_filtre_label %}
+            <span class="rp-report-chip rp-report-chip--primary">
+              Catégorie : {{ rapport.extra_context.categorie_filtre_label }}
+            </span>
+          {% endif %}
+
+          {% for item in rapport.filters_text %}
+            {% if rapport.extra_context.categorie_filtre_label and item != "Catégorie : "|add:rapport.extra_context.categorie_filtre_label and item != "Catégorie filtrée : "|add:rapport.extra_context.categorie_filtre_label %}
+              <span class="rp-report-chip">{{ item }}</span>
+            {% elif not rapport.extra_context.categorie_filtre_label %}
+              <span class="rp-report-chip">{{ item }}</span>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
     <div class="rp-table-tools">
       <div class="rp-table-tools__left">
         <div class="rp-table-tools__title">Résultats du rapport</div>

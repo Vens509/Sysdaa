@@ -13,7 +13,7 @@
       {% if mode == "edit" %}Modifier l’article{% else %}Créer un article{% endif %}
     </h1>
     <p class="sys-subtitle">
-      Renseignez les informations essentielles de l’article et son stock de départ.
+      Renseignez les informations essentielles de l’article. La quantité sera ajoutée plus tard via une entrée de stock.
     </p>
   </div>
 
@@ -165,19 +165,6 @@
             </div>
 
             <div class="col-md-6">
-              <label class="form-label" for="{{ form.stock_initial_saisi.id_for_label }}">
-                Quantité initiale à enregistrer
-              </label>
-              {{ form.stock_initial_saisi }}
-              {% if form.stock_initial_saisi.errors %}
-                <div class="text-danger small mt-1">{{ form.stock_initial_saisi.errors|striptags }}</div>
-              {% endif %}
-              {% if form.stock_initial_saisi.help_text %}
-                <div class="form-text">{{ form.stock_initial_saisi.help_text }}</div>
-              {% endif %}
-            </div>
-
-            <div class="col-md-6">
               <label class="form-label" for="{{ form.stock_minimal_saisi.id_for_label }}">
                 Seuil minimal d’alerte
               </label>
@@ -199,6 +186,7 @@
                   </div>
                 </div>
               </div>
+            
             {% endif %}
 
             <div class="col-12">

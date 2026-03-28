@@ -234,7 +234,22 @@ class Article(models.Model):
     def stock_initial_est_verrouille(self) -> bool:
         if not self.pk:
             return False
-        return self.a_historique_mouvements() or self.a_historique_requisitions()
+        return True
+
+    def peut_initialiser_stock_depuis_entree(self) -> bool:
+        if not self.pk:
+            return False
+        return (
+            int(self.stock_initial or 0) == 0
+            and int(self.stock_actuel or 0) == 0
+            and not self.mouvements.exists()
+        )
+
+    def autoriser_mise_a_jour_systeme_stock_initial(self) -> None:
+        self._autoriser_mise_a_jour_systeme_stock_initial = True
+
+    def mise_a_jour_systeme_stock_initial_autorisee(self) -> bool:
+        return bool(getattr(self, "_autoriser_mise_a_jour_systeme_stock_initial", False))
 
     @staticmethod
     def _quantite_imposee_par_unite(unite: str) -> int | None:
@@ -280,32 +295,44 @@ class Article(models.Model):
                     "veuillez préciser combien d’unités contient ce conditionnement."
                 )
 
-        if self.pk:
+        if self.pk is None:
+            if int(self.stock_initial or 0) != 0:
+                erreurs["stock_initial"] = (
+                    "Le stock initial n’est plus saisi à la création de l’article. "
+                    "Il sera initialisé automatiquement lors de la première entrée de stock."
+                )
+
+            if int(self.stock_actuel or 0) != 0:
+                erreurs["stock_actuel"] = (
+                    "Le stock actuel d’un nouvel article doit démarrer à 0."
+                )
+        else:
             ancien = (
                 Article.objects.filter(pk=self.pk)
                 .only("stock_initial", "unite", "quantite_par_conditionnement")
                 .first()
             )
 
-            if ancien is not None and self.stock_initial_est_verrouille():
-                if int(self.stock_initial) != int(ancien.stock_initial):
+            if ancien is not None:
+                stock_initial_modifie = int(self.stock_initial or 0) != int(ancien.stock_initial or 0)
+                if stock_initial_modifie and not self.mise_a_jour_systeme_stock_initial_autorisee():
                     erreurs["stock_initial"] = (
-                        "Le stock initial ne peut plus être modifié "
-                        "car cet article a déjà un historique de mouvements ou de réquisitions."
+                        "Le stock initial est désormais piloté par le système. "
+                        "Il est défini automatiquement lors de la première entrée de stock."
                     )
 
-            if ancien is not None and self.stock_initial_est_verrouille():
-                if self.unite != ancien.unite:
-                    erreurs["unite"] = (
-                        "Le conditionnement principal ne peut plus être modifié "
-                        "car cet article a déjà un historique de mouvements ou de réquisitions."
-                    )
+                if self.a_historique_mouvements() or self.a_historique_requisitions():
+                    if self.unite != ancien.unite:
+                        erreurs["unite"] = (
+                            "Le conditionnement principal ne peut plus être modifié "
+                            "car cet article a déjà un historique de mouvements ou de réquisitions."
+                        )
 
-                if int(self.quantite_par_conditionnement or 0) != int(ancien.quantite_par_conditionnement or 0):
-                    erreurs["quantite_par_conditionnement"] = (
-                        "La quantité par conditionnement ne peut plus être modifiée "
-                        "car cet article a déjà un historique de mouvements ou de réquisitions."
-                    )
+                    if int(self.quantite_par_conditionnement or 0) != int(ancien.quantite_par_conditionnement or 0):
+                        erreurs["quantite_par_conditionnement"] = (
+                            "La quantité par conditionnement ne peut plus être modifiée "
+                            "car cet article a déjà un historique de mouvements ou de réquisitions."
+                        )
 
         if erreurs:
             raise ValidationError(erreurs)
@@ -320,6 +347,11 @@ class Article(models.Model):
             self.quantite_par_conditionnement = qpc_imposee
 
         if self.pk is None:
-            self.stock_actuel = self.stock_initial
+            self.stock_initial = 0
+            self.stock_actuel = 0
 
-        super().save(*args, **kwargs)
+        try:
+            super().save(*args, **kwargs)
+        finally:
+            if hasattr(self, "_autoriser_mise_a_jour_systeme_stock_initial"):
+                delattr(self, "_autoriser_mise_a_jour_systeme_stock_initial")

@@ -37,11 +37,16 @@
       </div>
     {% endif %}
 
+    {{ form.motif_sortie }}
+
     <div class="row g-3">
 
       <div class="col-md-8">
         <label class="form-label" for="{{ form.article.id_for_label }}">Article</label>
         {{ form.article }}
+        <div class="form-text">
+          Les articles en rupture de stock sont affichés comme indisponibles et ne sont pas sélectionnables.
+        </div>
         {% if form.article.errors %}
           <div class="text-danger small mt-1">
             {% for err in form.article.errors %}
@@ -76,28 +81,23 @@
       </div>
 
       <div class="col-md-6">
-        <label class="form-label" for="{{ form.quantite_par_conditionnement_operation.id_for_label }}">
-          Nombre d’unités dans 1 conditionnement utilisé
-        </label>
-        {{ form.quantite_par_conditionnement_operation }}
-        <small class="text-muted">
-          Cette valeur est gérée automatiquement.
-        </small>
-        {% if form.quantite_par_conditionnement_operation.errors %}
+        <label class="form-label" for="{{ form.motif_sortie_selection.id_for_label }}">Motif de la sortie</label>
+        {{ form.motif_sortie_selection }}
+        {% if form.motif_sortie_selection.errors %}
           <div class="text-danger small mt-1">
-            {% for err in form.quantite_par_conditionnement_operation.errors %}
+            {% for err in form.motif_sortie_selection.errors %}
               <div>{{ err }}</div>
             {% endfor %}
           </div>
         {% endif %}
       </div>
 
-      <div class="col-12">
-        <label class="form-label" for="{{ form.motif_sortie.id_for_label }}">Motif de la sortie</label>
-        {{ form.motif_sortie }}
-        {% if form.motif_sortie.errors %}
+      <div class="col-12" id="motif-autre-wrap" hidden>
+        <label class="form-label" for="{{ form.motif_sortie_autre.id_for_label }}">Précisez le motif</label>
+        {{ form.motif_sortie_autre }}
+        {% if form.motif_sortie_autre.errors %}
           <div class="text-danger small mt-1">
-            {% for err in form.motif_sortie.errors %}
+            {% for err in form.motif_sortie_autre.errors %}
               <div>{{ err }}</div>
             {% endfor %}
           </div>
@@ -122,6 +122,10 @@
         Équivalent réel : —
       </div>
 
+      <div id="article-indisponible-info" class="small text-danger fw-semibold mt-1" hidden>
+        Cet article est indisponible car il est en rupture de stock.
+      </div>
+
     </div>
 
   </div>
@@ -133,7 +137,7 @@
       Annuler
     </a>
 
-    <button type="submit" class="btn btn-danger">
+    <button type="submit" class="btn btn-danger" id="btn-enregistrer-sortie">
       Enregistrer la sortie
     </button>
 

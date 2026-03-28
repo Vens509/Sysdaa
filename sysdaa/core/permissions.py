@@ -36,15 +36,6 @@ ROLES_DIRECTION: Set[str] = {
     ROLE_ASSISTANT_DIRECTEUR,
 }
 
-# Rôles pour lesquels on force la double authentification OTP
-ROLES_OTP_OBLIGATOIRE: Set[str] = {
-    ROLE_GESTIONNAIRE,
-    ROLE_SECRETAIRE,
-    ROLE_ADMIN_SYSTEME,
-    ROLE_SUPER_ADMIN,
-    ROLE_SUPER_ADMIN_ALT,
-}
-
 
 def is_authenticated(user) -> bool:
     return bool(user and getattr(user, "is_authenticated", False))
@@ -91,10 +82,14 @@ def has_role(user, allowed_roles: Iterable[str]) -> bool:
 def otp_required_for_user(user) -> bool:
     """
     Retourne True si ce profil doit obligatoirement passer par l'OTP.
+
+    Nouvelle règle métier :
+    - tous les utilisateurs authentifiés du système doivent passer par l'OTP
+    - un utilisateur non connecté ne passe pas par l'OTP
     """
     if not is_authenticated(user):
         return False
-    return role_name(user) in ROLES_OTP_OBLIGATOIRE
+    return True
 
 
 def role_required(*allowed_roles: str, message: str = "Accès refusé : rôle non autorisé."):

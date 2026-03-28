@@ -40,9 +40,17 @@
 
   function getRowElements(row) {
     return {
+      categorySelect: row.querySelector(
+        `select[name^="${formsetPrefix}-"][name$="-categorie_article"]`
+      ),
       articleSelect: row.querySelector(
         `select[name^="${formsetPrefix}-"][name$="-article"]`
       ),
+      articleSelectWrap: row.querySelector(".js-article-select-wrap"),
+      articleSearchWrap: row.querySelector(".js-article-search-wrap"),
+      articleSearchInput: row.querySelector(".js-article-search-input"),
+      articleSearchResults: row.querySelector(".js-article-search-results"),
+      articleSearchButtons: row.querySelectorAll(".js-toggle-article-search"),
       uniteSelect: row.querySelector(
         `select[name^="${formsetPrefix}-"][name$="-unite_demandee"]`
       ),
@@ -70,6 +78,18 @@
       articleSelect.dataset.articleMetaMap ||
       "{}";
     return safeParseJSON(raw, {});
+  }
+
+  function getAllArticlesMeta(articleSelect) {
+    const metaMap = getArticleMetaMap(articleSelect);
+    return Object.keys(metaMap)
+      .map((key) => metaMap[key])
+      .filter(Boolean)
+      .sort((a, b) =>
+        String(a.nom || "").localeCompare(String(b.nom || ""), "fr", {
+          sensitivity: "base",
+        })
+      );
   }
 
   function getArticleMeta(articleSelect) {
@@ -117,7 +137,8 @@
   function fillUniteOptions(uniteSelect, articleMeta, selectedValue) {
     if (!uniteSelect) return;
 
-    const currentSelected = String(selectedValue || uniteSelect.value || "Unité").trim() || "Unité";
+    const currentSelected =
+      String(selectedValue || uniteSelect.value || "Unité").trim() || "Unité";
     clearSelectOptions(uniteSelect);
 
     const allowed = getDefaultAllowedUnits(articleMeta);
@@ -150,17 +171,15 @@
       return "Sélectionnez un article.";
     }
 
-    const conditionnement =
-      articleMeta.libelle_conditionnement ||
-      articleMeta.resume_conditionnement ||
-      articleMeta.unite_principale ||
-      "—";
-
-    if (articleMeta.est_disponible) {
-      return `Article disponible. Conditionnement : ${conditionnement}.`;
+    const stock = Number(articleMeta.stock_actuel_unites || 0);
+    if (stock <= 0) {
+      return "Stock actuel : 0 unité.";
     }
 
-    return `Article indisponible. Conditionnement : ${conditionnement}.`;
+    return (
+      `Stock actuel : ${stock} ${pluralize(stock, "unité", "unités")}. ` +
+      `${articleMeta.resume_conditionnement || ""}`.trim()
+    );
   }
 
   function formatUnitHelp(articleMeta) {
@@ -168,33 +187,33 @@
       return "Choisissez Unité ou le conditionnement de stockage.";
     }
 
-    if (articleMeta.est_stocke_par_unite) {
-      return "Cet article est géré uniquement à l’unité.";
+    const allowed = getDefaultAllowedUnits(articleMeta);
+    if (allowed.length <= 1) {
+      return "Cet article se demande uniquement en Unité.";
     }
 
-    const allowed = getDefaultAllowedUnits(articleMeta).join(" / ");
-    return `Choix disponibles : ${allowed}.`;
+    return `Choix autorisés : ${allowed.join(" ou ")}.`;
   }
 
-  function computeEquivalentUnits(articleMeta, unite, qty) {
-    if (!articleMeta) return 0;
-
-    const quantity = Number(qty || 0);
-    if (!Number.isFinite(quantity) || quantity <= 0) return 0;
+  function computeEquivalentUnits(articleMeta, unite, quantity) {
+    const qty = Number(quantity || 0);
+    if (!articleMeta || !Number.isFinite(qty) || qty <= 0) {
+      return 0;
+    }
 
     const qpc = Number(articleMeta.quantite_par_conditionnement || 1);
     const normalizedUnit = normalizeText(unite);
     const normalizedMain = normalizeText(articleMeta.unite_principale || "");
 
     if (!normalizedUnit || normalizedUnit === "unité" || normalizedUnit === "unite") {
-      return quantity;
+      return qty;
     }
 
     if (normalizedUnit === normalizedMain) {
-      return quantity * qpc;
+      return qty * qpc;
     }
 
-    return quantity;
+    return qty;
   }
 
   function labelWithPlural(unit, qty) {
@@ -238,6 +257,254 @@
 
   function refreshSubmitState() {
     setSubmitState(formHasBlockingError());
+  }
+
+  function articleMatchesCategory(meta, categoryValue) {
+    const wanted = normalizeText(categoryValue);
+    if (!wanted) return true;
+    return normalizeText(meta?.categorie_key || meta?.categorie || "") === wanted;
+  }
+
+  function articleMatchesSearch(meta, searchValue) {
+    const term = normalizeText(searchValue);
+    if (!term) return true;
+
+    const articleName = normalizeText(meta?.nom || "");
+    return articleName.startsWith(term);
+  }
+
+  function getSelectedArticleIds(exceptRow = null) {
+    const ids = new Set();
+
+    const rows = Array.from(container.querySelectorAll(".formset-item"));
+    rows.forEach((row) => {
+      if (exceptRow && row === exceptRow) return;
+
+      const { articleSelect, deleteInput } = getRowElements(row);
+      if (deleteInput && deleteInput.checked) return;
+      if (!articleSelect) return;
+
+      const value = String(articleSelect.value || "").trim();
+      if (value) {
+        ids.add(value);
+      }
+    });
+
+    return ids;
+  }
+
+  function isArticleAlreadyUsed(articleId, currentRow) {
+    if (!articleId) return false;
+    return getSelectedArticleIds(currentRow).has(String(articleId));
+  }
+
+  function getFilteredArticles(articleSelect, categoryValue, searchValue) {
+    return getAllArticlesMeta(articleSelect).filter((meta) => {
+      return (
+        articleMatchesCategory(meta, categoryValue) &&
+        articleMatchesSearch(meta, searchValue)
+      );
+    });
+  }
+
+  function syncCategoryWithSelection(row) {
+    const { categorySelect, articleSelect } = getRowElements(row);
+    if (!categorySelect || !articleSelect) return;
+
+    const articleMeta = getArticleMeta(articleSelect);
+    if (!articleMeta) return;
+
+    const categoryLabel = String(articleMeta.categorie || "").trim();
+    if (!categoryLabel) return;
+
+    const hasOption = Array.from(categorySelect.options).some(
+      (opt) => normalizeText(opt.value) === normalizeText(categoryLabel)
+    );
+    if (hasOption) {
+      categorySelect.value = categoryLabel;
+    }
+  }
+
+  function refreshArticleOptions(row) {
+    const { categorySelect, articleSelect } = getRowElements(row);
+    if (!articleSelect) return;
+
+    const categoryValue = categorySelect ? String(categorySelect.value || "").trim() : "";
+    const selectedValue = String(articleSelect.value || "").trim();
+    const selectedInOtherRows = getSelectedArticleIds(row);
+    const articles = getFilteredArticles(articleSelect, categoryValue, "");
+
+    clearSelectOptions(articleSelect);
+    articleSelect.appendChild(buildOption("", "Sélectionnez un article", !selectedValue));
+
+    articles.forEach((meta) => {
+      const labelBase = `${meta.nom} — ${meta.libelle_conditionnement || meta.resume_conditionnement || "—"}`;
+      const isOut = Number(meta.stock_actuel_unites || 0) <= 0;
+      const isAlreadySelectedElsewhere = selectedInOtherRows.has(String(meta.id));
+
+      let label = labelBase;
+      if (isOut) {
+        label = `${labelBase} — Indisponible`;
+      } else if (isAlreadySelectedElsewhere) {
+        label = `${labelBase} — Déjà choisi`;
+      }
+
+      const option = buildOption(
+        String(meta.id),
+        label,
+        selectedValue === String(meta.id)
+      );
+
+      option.dataset.baseLabel = labelBase;
+      option.dataset.outOfStock = isOut ? "1" : "0";
+      option.dataset.alreadySelected = isAlreadySelectedElsewhere ? "1" : "0";
+      option.disabled = isOut || isAlreadySelectedElsewhere;
+
+      articleSelect.appendChild(option);
+    });
+
+    const currentOption = articleSelect.options[articleSelect.selectedIndex];
+    if (!currentOption || (currentOption.disabled && currentOption.value !== selectedValue) || !currentOption.value) {
+      const selectedMeta = selectedValue ? getArticleMetaMap(articleSelect)[selectedValue] : null;
+      if (
+        selectedMeta &&
+        articleMatchesCategory(selectedMeta, categoryValue) &&
+        selectedMeta.est_disponible &&
+        !selectedInOtherRows.has(String(selectedMeta.id))
+      ) {
+        articleSelect.value = selectedValue;
+      } else {
+        articleSelect.value = "";
+      }
+    }
+  }
+
+  function refreshAllArticleOptions() {
+    const rows = Array.from(container.querySelectorAll(".formset-item"));
+    rows.forEach((row) => {
+      refreshArticleOptions(row);
+    });
+  }
+
+  function hideSearchResults(resultsEl) {
+    if (!resultsEl) return;
+    resultsEl.innerHTML = "";
+    resultsEl.classList.add("d-none");
+  }
+
+  function renderSearchResults(row) {
+    const {
+      categorySelect,
+      articleSelect,
+      articleSearchInput,
+      articleSearchResults,
+    } = getRowElements(row);
+
+    if (!articleSelect || !articleSearchInput || !articleSearchResults) return;
+
+    const categoryValue = categorySelect ? String(categorySelect.value || "").trim() : "";
+    const searchValue = String(articleSearchInput.value || "").trim();
+
+    if (!searchValue) {
+      hideSearchResults(articleSearchResults);
+      return;
+    }
+
+    const selectedInOtherRows = getSelectedArticleIds(row);
+    const items = getFilteredArticles(articleSelect, categoryValue, searchValue);
+
+    articleSearchResults.innerHTML = "";
+
+    if (!items.length) {
+      const empty = document.createElement("div");
+      empty.className = "list-group-item text-muted small";
+      empty.textContent =
+        articleSelect.getAttribute("data-empty-search-message") || "Aucun article trouvé.";
+      articleSearchResults.appendChild(empty);
+      articleSearchResults.classList.remove("d-none");
+      return;
+    }
+
+    items.slice(0, 20).forEach((meta) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "list-group-item list-group-item-action";
+
+      const isOut = Number(meta.stock_actuel_unites || 0) <= 0;
+      const isAlreadySelectedElsewhere = selectedInOtherRows.has(String(meta.id));
+
+      if (isOut || isAlreadySelectedElsewhere) {
+        btn.classList.add("disabled");
+        btn.disabled = true;
+      }
+
+      let statusHtml = "";
+      if (isOut) {
+        statusHtml = `<div class="small text-danger">Indisponible</div>`;
+      } else if (isAlreadySelectedElsewhere) {
+        statusHtml = `<div class="small text-warning">Déjà choisi sur une autre ligne</div>`;
+      } else {
+        statusHtml = `<div class="small text-success">Stock actuel : ${meta.stock_actuel_unites || 0} unités</div>`;
+      }
+
+      btn.innerHTML = `
+        <div class="fw-semibold">${meta.nom}</div>
+        <div class="small text-muted">${meta.categorie || "Sans catégorie"} — ${meta.libelle_conditionnement || meta.resume_conditionnement || "—"}</div>
+        ${statusHtml}
+      `;
+
+      if (!isOut && !isAlreadySelectedElsewhere) {
+        btn.addEventListener("click", function () {
+          articleSelect.value = String(meta.id);
+          syncCategoryWithSelection(row);
+
+          articleSearchInput.value = meta.nom;
+          hideSearchResults(articleSearchResults);
+
+          const { uniteSelect } = getRowElements(row);
+          if (uniteSelect) {
+            uniteSelect.setAttribute("data-selected", "Unité");
+          }
+
+          refreshAllArticleOptions();
+          updateAllRowsState();
+        });
+      }
+
+      articleSearchResults.appendChild(btn);
+    });
+
+    articleSearchResults.classList.remove("d-none");
+  }
+
+  function enterSearchMode(row) {
+    const {
+      articleSelectWrap,
+      articleSearchWrap,
+      articleSearchInput,
+      articleSelect,
+    } = getRowElements(row);
+
+    if (!articleSelectWrap || !articleSearchWrap || !articleSearchInput || !articleSelect) return;
+
+    articleSelectWrap.classList.add("d-none");
+    articleSearchWrap.classList.remove("d-none");
+
+    const articleMeta = getArticleMeta(articleSelect);
+    articleSearchInput.value = articleMeta ? articleMeta.nom : "";
+    articleSearchInput.focus();
+    articleSearchInput.select();
+
+    renderSearchResults(row);
+  }
+
+  function exitSearchMode(row) {
+    const { articleSelectWrap, articleSearchWrap, articleSearchResults } = getRowElements(row);
+    if (!articleSelectWrap || !articleSearchWrap) return;
+
+    articleSearchWrap.classList.add("d-none");
+    articleSelectWrap.classList.remove("d-none");
+    hideSearchResults(articleSearchResults);
   }
 
   function renderLineSummary(row) {
@@ -309,6 +576,12 @@
       return true;
     }
 
+    if (isArticleAlreadyUsed(articleId, row)) {
+      showQtyHelp(qtyHelp, "Cet article est déjà choisi sur une autre ligne.");
+      refreshSubmitState();
+      return false;
+    }
+
     if (!articleMeta) {
       qtyInput.disabled = false;
       hideQtyHelp(qtyHelp);
@@ -357,40 +630,19 @@
     return true;
   }
 
-  function setArticleOptionStates(articleSelect) {
-    if (!articleSelect) return;
-
-    const metaMap = getArticleMetaMap(articleSelect);
-
-    Array.from(articleSelect.options).forEach((option) => {
-      const value = String(option.value || "").trim();
-      if (!value) return;
-
-      const meta = metaMap[value];
-      const stockUnites = Number(meta?.stock_actuel_unites || 0);
-      const isOut = stockUnites <= 0;
-
-      const baseLabel =
-        option.dataset.baseLabel ||
-        option.textContent.replace(/\s+—\s+Indisponible$/i, "").trim();
-
-      option.dataset.baseLabel = baseLabel;
-      option.textContent = isOut ? `${baseLabel} — Indisponible` : baseLabel;
-      option.dataset.outOfStock = isOut ? "1" : "0";
-      option.disabled = isOut;
-    });
-
-    const currentOption = articleSelect.options[articleSelect.selectedIndex];
-    if (currentOption && currentOption.disabled) {
-      articleSelect.value = "";
-    }
-  }
   function updateRowState(row) {
-    const { articleSelect, uniteSelect, qtyInput, qtyHelp } = getRowElements(row);
+    const {
+      articleSelect,
+      articleSearchInput,
+      articleSearchResults,
+      uniteSelect,
+      qtyInput,
+      qtyHelp,
+    } = getRowElements(row);
+
     if (!articleSelect || !uniteSelect || !qtyInput) return;
 
-    setArticleOptionStates(articleSelect);
-
+    const articleId = String(articleSelect.value || "").trim();
     const articleMeta = getArticleMeta(articleSelect);
     const selectedUnit =
       uniteSelect.getAttribute("data-selected") ||
@@ -400,9 +652,23 @@
 
     fillUniteOptions(uniteSelect, articleMeta, selectedUnit);
 
+    if (articleSearchInput) {
+      articleSearchInput.value = articleMeta ? articleMeta.nom : "";
+    }
+    hideSearchResults(articleSearchResults);
+
     if (!articleMeta) {
       qtyInput.disabled = false;
       hideQtyHelp(qtyHelp);
+      renderLineSummary(row);
+      refreshSubmitState();
+      return;
+    }
+
+    if (isArticleAlreadyUsed(articleId, row)) {
+      qtyInput.value = "";
+      qtyInput.disabled = true;
+      showQtyHelp(qtyHelp, "Cet article est déjà choisi sur une autre ligne.");
       renderLineSummary(row);
       refreshSubmitState();
       return;
@@ -426,17 +692,94 @@
     refreshSubmitState();
   }
 
+  function updateAllRowsState() {
+    const rows = Array.from(container.querySelectorAll(".formset-item"));
+    rows.forEach((row) => updateRowState(row));
+  }
+
   function attachRowEvents(row) {
-    const { articleSelect, uniteSelect, qtyInput, removeBtn } = getRowElements(row);
+    if (row.dataset.reqRowBound === "1") {
+      updateRowState(row);
+      return;
+    }
 
-    if (articleSelect) {
-      setArticleOptionStates(articleSelect);
+    row.dataset.reqRowBound = "1";
 
-      articleSelect.addEventListener("change", function () {
+    const {
+      categorySelect,
+      articleSelect,
+      articleSearchInput,
+      articleSearchResults,
+      articleSearchButtons,
+      uniteSelect,
+      qtyInput,
+      removeBtn,
+    } = getRowElements(row);
+
+    if (categorySelect) {
+      categorySelect.addEventListener("change", function () {
+        refreshArticleOptions(row);
+
         if (uniteSelect) {
           uniteSelect.setAttribute("data-selected", "Unité");
         }
-        updateRowState(row);
+
+        const currentMeta = getArticleMeta(articleSelect);
+        if (!currentMeta && articleSearchInput) {
+          articleSearchInput.value = "";
+        }
+
+        renderSearchResults(row);
+        updateAllRowsState();
+      });
+    }
+
+    if (articleSelect) {
+      articleSelect.addEventListener("change", function () {
+        syncCategoryWithSelection(row);
+
+        if (uniteSelect) {
+          uniteSelect.setAttribute("data-selected", "Unité");
+        }
+
+        refreshAllArticleOptions();
+        updateAllRowsState();
+      });
+
+      refreshArticleOptions(row);
+    }
+
+    articleSearchButtons.forEach((btn) => {
+      btn.addEventListener("click", function () {
+        const { articleSearchWrap } = getRowElements(row);
+        if (articleSearchWrap && articleSearchWrap.classList.contains("d-none")) {
+          enterSearchMode(row);
+        } else {
+          exitSearchMode(row);
+        }
+      });
+    });
+
+    if (articleSearchInput) {
+      articleSearchInput.addEventListener("input", function () {
+        renderSearchResults(row);
+      });
+
+      articleSearchInput.addEventListener("focus", function () {
+        renderSearchResults(row);
+      });
+
+      articleSearchInput.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          exitSearchMode(row);
+        }
+      });
+    }
+
+    if (articleSearchResults) {
+      articleSearchResults.addEventListener("mousedown", function (event) {
+        event.preventDefault();
       });
     }
 
@@ -546,6 +889,17 @@
         "La conversion réelle sera calculée automatiquement selon l’article choisi.";
     }
 
+    const articleSearchWrap = clone.querySelector(".js-article-search-wrap");
+    const articleSelectWrap = clone.querySelector(".js-article-select-wrap");
+    const articleSearchInput = clone.querySelector(".js-article-search-input");
+    const articleSearchResults = clone.querySelector(".js-article-search-results");
+
+    if (articleSearchWrap) articleSearchWrap.classList.add("d-none");
+    if (articleSelectWrap) articleSelectWrap.classList.remove("d-none");
+    if (articleSearchInput) articleSearchInput.value = "";
+    hideSearchResults(articleSearchResults);
+
+    clone.dataset.reqRowBound = "0";
     return clone;
   }
 
@@ -556,6 +910,8 @@
     container.appendChild(row);
     refreshIndexes();
     attachRowEvents(row);
+    refreshAllArticleOptions();
+    updateAllRowsState();
     refreshSubmitState();
   }
 
@@ -563,25 +919,46 @@
     const rows = Array.from(container.querySelectorAll(".formset-item"));
 
     if (rows.length <= 1) {
-      const { articleSelect, uniteSelect, qtyInput, motifInput, deleteInput, qtyHelp } =
-        getRowElements(row);
+      const {
+        categorySelect,
+        articleSelect,
+        articleSearchInput,
+        articleSearchResults,
+        articleSearchWrap,
+        articleSelectWrap,
+        uniteSelect,
+        qtyInput,
+        motifInput,
+        deleteInput,
+        qtyHelp,
+      } = getRowElements(row);
 
+      if (categorySelect) categorySelect.value = "";
       if (articleSelect) articleSelect.value = "";
+      if (articleSearchInput) articleSearchInput.value = "";
+      if (articleSearchWrap) articleSearchWrap.classList.add("d-none");
+      if (articleSelectWrap) articleSelectWrap.classList.remove("d-none");
+      hideSearchResults(articleSearchResults);
+
       if (uniteSelect) {
         clearSelectOptions(uniteSelect);
         uniteSelect.appendChild(buildOption("Unité", "Unité", true));
         uniteSelect.disabled = true;
         uniteSelect.setAttribute("data-selected", "Unité");
       }
+
       if (qtyInput) {
         qtyInput.value = "";
         qtyInput.disabled = false;
       }
+
       if (motifInput) motifInput.value = "";
       if (deleteInput) deleteInput.checked = false;
 
+      refreshArticleOptions(row);
       hideQtyHelp(qtyHelp);
-      updateRowState(row);
+      refreshAllArticleOptions();
+      updateAllRowsState();
       refreshSubmitState();
       return;
     }
@@ -595,17 +972,33 @@
     refreshIndexes();
 
     Array.from(container.querySelectorAll(".formset-item")).forEach((item) => {
+      item.dataset.reqRowBound = "0";
       attachRowEvents(item);
     });
 
+    refreshAllArticleOptions();
+    updateAllRowsState();
     refreshSubmitState();
   }
+
+  document.addEventListener("click", function (event) {
+    const rows = Array.from(container.querySelectorAll(".formset-item"));
+    rows.forEach((row) => {
+      if (!row.contains(event.target)) {
+        const { articleSearchResults } = getRowElements(row);
+        hideSearchResults(articleSearchResults);
+      }
+    });
+  });
 
   addBtn.addEventListener("click", addRow);
 
   Array.from(container.querySelectorAll(".formset-item")).forEach((row) => {
     attachRowEvents(row);
   });
+
+  refreshAllArticleOptions();
+  updateAllRowsState();
 
   form.addEventListener("submit", function (event) {
     const rows = Array.from(container.querySelectorAll(".formset-item"));

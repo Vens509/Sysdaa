@@ -258,6 +258,9 @@ class RapportGenerationForm(forms.Form):
             cleaned_data["etat_requisition"] = ""
             etat_requisition = ""
 
+        # Le type "Demandes par catégorie d'article" doit rester inchangé :
+        # on ne rend pas la catégorie obligatoire et on ignore ce filtre
+        # pour ne pas modifier le comportement historique.
         if type_rapport == "categorie_article" and categorie is not None:
             cleaned_data["categorie"] = None
             categorie = None
@@ -269,18 +272,16 @@ class RapportGenerationForm(forms.Form):
             "periode": periode,
             "type_rapport": type_rapport,
             "utilise_mois": periode == "MENSUEL",
-            "utilise_categorie": cleaned_data.get("categorie") is not None,
+            "utilise_categorie": (
+                type_rapport == "stock_global" and cleaned_data.get("categorie") is not None
+            ),
             "utilise_direction": cleaned_data.get("direction") is not None,
             "utilise_etat_requisition": bool(cleaned_data.get("etat_requisition")),
             "mode_principal": (
                 "requisition_etat_direction"
                 if type_rapport == "stock_global" and bool(cleaned_data.get("etat_requisition"))
                 else "requisition_article"
-                if type_rapport == "stock_global"
-                and (
-                    cleaned_data.get("categorie") is not None
-                    or cleaned_data.get("direction") is not None
-                )
+                if type_rapport == "stock_global" and cleaned_data.get("direction") is not None
                 else type_rapport
             ),
         }

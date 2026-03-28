@@ -1,18 +1,18 @@
 from __future__ import annotations
 
 import os
+import re
+import unicodedata
 from dataclasses import dataclass
 from datetime import date, datetime, time
 from io import BytesIO
+from numbers import Number
 from urllib.parse import urlencode
 
 from django.core.exceptions import ValidationError
 from django.db.models import Count, Sum
 from django.http import HttpResponse
 from django.utils import timezone
-import re
-import unicodedata
-from numbers import Number
 
 from openpyxl import Workbook
 from openpyxl.drawing.image import Image as XLImage
@@ -145,7 +145,11 @@ def _period_for_filters(filters: ReportFilters) -> tuple[datetime, datetime, str
 
     annee_reelle = int(cfg.annee_debut) if mois >= 10 else int(cfg.annee_fin)
     start = _aware_start(date(annee_reelle, mois, 1))
-    end = _aware_start(date(annee_reelle + 1, 1, 1)) if mois == 12 else _aware_start(date(annee_reelle, mois + 1, 1))
+    end = (
+        _aware_start(date(annee_reelle + 1, 1, 1))
+        if mois == 12
+        else _aware_start(date(annee_reelle, mois + 1, 1))
+    )
     return start, end, f"{MOIS_LABELS[mois]} {annee_reelle}", annee_reelle, MOIS_LABELS[mois]
 
 
@@ -230,10 +234,12 @@ def _base_requisitions_queryset(
     qs = Requisition.objects.select_related(
         "soumetteur",
         "soumetteur__direction_affectee",
-    ).filter(**{
-        lookup_gte: date_debut,
-        lookup_lt: date_fin,
-    })
+    ).filter(
+        **{
+            lookup_gte: date_debut,
+            lookup_lt: date_fin,
+        }
+    )
 
     if filters.etat_requisition:
         qs = qs.filter(etat_requisition=filters.etat_requisition)
@@ -272,8 +278,12 @@ def _sum_by_article_map(*, qs, type_mouvement: str | None = None) -> dict[int, i
     if type_mouvement:
         qs = qs.filter(type_mouvement=type_mouvement)
 
-    data = qs.values("article_id").annotate(total=Sum("quantite"))
-    return {int(item["article_id"]): int(item["total"] or 0) for item in data if item["article_id"] is not None}
+    data = qs.values("article_id").annotate(total=Sum("quantite_unites"))
+    return {
+        int(item["article_id"]): int(item["total"] or 0)
+        for item in data
+        if item["article_id"] is not None
+    }
 
 
 def _safe_pct(numerateur: int, denominateur: int) -> str:
@@ -283,7 +293,7 @@ def _safe_pct(numerateur: int, denominateur: int) -> str:
 
 
 def _has_requisition_article_filters(filters: ReportFilters) -> bool:
-    return filters.categorie is not None or filters.direction is not None
+    return filters.direction is not None
 
 
 def _date_field_for_etat_requisition(etat_requisition: str) -> str:
@@ -298,6 +308,65 @@ def _date_field_for_etat_requisition(etat_requisition: str) -> str:
     return "date_preparation"
 
 
+def _apply_stock_global_filter_presentation(
+    data: GenericReportData,
+    filters: ReportFilters,
+) -> GenericReportData:
+    extra_context = dict(data.extra_context or {})
+    filters_text = []
+
+    existing_filters = list(data.filters_text or [])
+    categorie_standard = None
+
+    if filters.categorie is not None:
+        categorie_standard = f"Catégorie : {filters.categorie.libelle}"
+        extra_context["categorie_filtre_label"] = filters.categorie.libelle
+
+        filters_text.append(f"Catégorie filtrée : {filters.categorie.libelle}")
+
+    for item in existing_filters:
+        if categorie_standard and item == categorie_standard:
+            continue
+        if item not in filters_text:
+            filters_text.append(item)
+
+    if filters.categorie is not None:
+        if data.period_type == "ANNUEL":
+            subtitle = (
+                "Synthèse annuelle d'activité limitée aux articles de la catégorie sélectionnée, "
+                "avec calculs en unités réelles."
+            )
+        else:
+            subtitle = (
+                "État global du stock limité aux articles de la catégorie sélectionnée, "
+                "avec calculs en unités réelles."
+            )
+    else:
+        subtitle = data.subtitle
+
+    return GenericReportData(
+        report_type=data.report_type,
+        report_label=data.report_label,
+        period_type=data.period_type,
+        period_label=data.period_label,
+        title=data.title,
+        subtitle=subtitle,
+        annee_fiscale_label=data.annee_fiscale_label,
+        mois=data.mois,
+        mois_label=data.mois_label,
+        annee_reelle=data.annee_reelle,
+        date_debut=data.date_debut,
+        date_fin=data.date_fin,
+        date_export=data.date_export,
+        columns=data.columns,
+        rows=data.rows,
+        summary_cards=data.summary_cards,
+        export_filename_base=data.export_filename_base,
+        filters_text=filters_text,
+        extra_context=extra_context,
+    )
+
+
 def _generate_stock_global_monthly(
     filters: ReportFilters,
     *,
@@ -309,7 +378,6 @@ def _generate_stock_global_monthly(
 ):
     rows: list[ReportRow] = []
 
-    total_stock_final = 0
     nb_articles = 0
     nb_orange = 0
     nb_rouge = 0
@@ -393,7 +461,6 @@ def _generate_stock_global_monthly(
         )
 
         nb_articles += 1
-        total_stock_final += stock_final_periode
 
     cards = [
         SummaryCard("Articles", nb_articles),
@@ -404,7 +471,7 @@ def _generate_stock_global_monthly(
         SummaryCard("Alertes rouges", nb_rouge, "danger"),
     ]
 
-    return GenericReportData(
+    data = GenericReportData(
         report_type="stock_global",
         report_label=TYPE_RAPPORT_LABELS["stock_global"],
         period_type=filters.period_type,
@@ -418,13 +485,26 @@ def _generate_stock_global_monthly(
         date_debut=date_debut,
         date_fin=date_fin,
         date_export=timezone.localtime(),
-        columns=["Article", "Catégorie", "Stock initial", "Stock min.", "Entrées", "Sorties", "Stock final", "État"],
+        columns=[
+            "Article",
+            "Catégorie",
+            "Stock initial",
+            "Stock min.",
+            "Entrées",
+            "Sorties",
+            "Stock final",
+            "État",
+        ],
         rows=rows,
         summary_cards=cards,
         export_filename_base=f"rapport_stock_mensuel_{filters.configuration.code.replace('-', '_')}_{filters.mois or ''}",
         filters_text=_build_filters_text(filters),
-        extra_context={"export_querystring": _querystring_for_report(filters), "mode_logique": "stock"},
+        extra_context={
+            "export_querystring": _querystring_for_report(filters),
+            "mode_logique": "stock",
+        },
     )
+    return _apply_stock_global_filter_presentation(data, filters)
 
 
 def _generate_stock_global_annual(
@@ -438,32 +518,54 @@ def _generate_stock_global_annual(
 ):
     mouvements_qs = _base_mouvements_queryset(filters, date_debut, date_fin)
     lignes_qs = _base_lignes_queryset(filters, date_debut, date_fin)
-    req_creees_qs = _base_requisitions_queryset(filters, date_debut, date_fin, date_field="date_preparation")
-    req_traitees_qs = _base_requisitions_queryset(filters, date_debut, date_fin, date_field="date_livraison")
+    req_creees_qs = _base_requisitions_queryset(
+        filters,
+        date_debut,
+        date_fin,
+        date_field="date_preparation",
+    )
+    req_traitees_qs = _base_requisitions_queryset(
+        filters,
+        date_debut,
+        date_fin,
+        date_field="date_livraison",
+    )
 
     total_mouvements = mouvements_qs.count()
     total_entrees = int(
-        mouvements_qs.filter(type_mouvement=MouvementStock.TypeMouvement.ENTREE).aggregate(total=Sum("quantite"))["total"] or 0
+        mouvements_qs.filter(
+            type_mouvement=MouvementStock.TypeMouvement.ENTREE
+        ).aggregate(total=Sum("quantite_unites"))["total"]
+        or 0
     )
     total_sorties = int(
-        mouvements_qs.filter(type_mouvement=MouvementStock.TypeMouvement.SORTIE).aggregate(total=Sum("quantite"))["total"] or 0
+        mouvements_qs.filter(
+            type_mouvement=MouvementStock.TypeMouvement.SORTIE
+        ).aggregate(total=Sum("quantite_unites"))["total"]
+        or 0
     )
     total_sorties_manuelles = int(
         mouvements_qs.filter(
             type_mouvement=MouvementStock.TypeMouvement.SORTIE,
             requisition__isnull=True,
-        ).aggregate(total=Sum("quantite"))["total"] or 0
+        ).aggregate(total=Sum("quantite_unites"))["total"]
+        or 0
     )
     total_sorties_requisitions = int(
         mouvements_qs.filter(
             type_mouvement=MouvementStock.TypeMouvement.SORTIE,
             requisition__isnull=False,
-        ).aggregate(total=Sum("quantite"))["total"] or 0
+        ).aggregate(total=Sum("quantite_unites"))["total"]
+        or 0
     )
 
     nb_requisitions_creees = req_creees_qs.count()
-    nb_requisitions_traitees = req_traitees_qs.filter(etat_requisition=Requisition.ETAT_TRAITEE).count()
-    nb_requisitions_rejetees = req_creees_qs.filter(etat_requisition=Requisition.ETAT_REJETEE).count()
+    nb_requisitions_traitees = req_traitees_qs.filter(
+        etat_requisition=Requisition.ETAT_TRAITEE
+    ).count()
+    nb_requisitions_rejetees = req_creees_qs.filter(
+        etat_requisition=Requisition.ETAT_REJETEE
+    ).count()
     nb_requisitions_en_attente = req_creees_qs.exclude(
         etat_requisition__in=[Requisition.ETAT_TRAITEE, Requisition.ETAT_REJETEE]
     ).count()
@@ -495,7 +597,7 @@ def _generate_stock_global_annual(
     articles_sortis = list(
         mouvements_qs.filter(type_mouvement=MouvementStock.TypeMouvement.SORTIE)
         .values("article__nom", "article__categorie__libelle")
-        .annotate(total=Sum("quantite"))
+        .annotate(total=Sum("quantite_unites"))
         .order_by("-total", "article__nom")[:10]
     )
 
@@ -588,7 +690,7 @@ def _generate_stock_global_annual(
         SummaryCard("Taux de traitement", taux_traitement),
     ]
 
-    return GenericReportData(
+    data = GenericReportData(
         report_type="stock_global_annuel",
         report_label=TYPE_RAPPORT_LABELS["stock_global_annuel"],
         period_type=filters.period_type,
@@ -607,8 +709,12 @@ def _generate_stock_global_annual(
         summary_cards=cards,
         export_filename_base=f"rapport_annuel_activite_{filters.configuration.code.replace('-', '_')}",
         filters_text=_build_filters_text(filters),
-        extra_context={"export_querystring": _querystring_for_report(filters), "mode_logique": "stock_annuel"},
+        extra_context={
+            "export_querystring": _querystring_for_report(filters),
+            "mode_logique": "stock_annuel",
+        },
     )
+    return _apply_stock_global_filter_presentation(data, filters)
 
 
 def _generate_stock_global(filters: ReportFilters, *, date_debut, date_fin, period_label, annee_reelle, mois_label):
@@ -706,7 +812,10 @@ def _generate_requisition_article_breakdown(
         summary_cards=cards,
         export_filename_base=f"rapport_articles_filtres_{suffix}_{filters.configuration.code.replace('-', '_')}",
         filters_text=_build_filters_text(filters),
-        extra_context={"export_querystring": _querystring_for_report(filters), "mode_logique": "requisition_article"},
+        extra_context={
+            "export_querystring": _querystring_for_report(filters),
+            "mode_logique": "requisition_article",
+        },
     )
 
 
@@ -752,7 +861,10 @@ def _generate_requisition_state_direction_report(
     rows = []
     for item in data:
         direction_nom = item["soumetteur__direction_affectee__nom"] or "Sans direction"
-        agregats_lignes = lignes_par_direction.get(item["soumetteur__direction_affectee__nom"] or "", {})
+        agregats_lignes = lignes_par_direction.get(
+            item["soumetteur__direction_affectee__nom"] or "",
+            {},
+        )
         rows.append(
             ReportRow(
                 values=[
@@ -805,11 +917,22 @@ def _generate_requisition_state_direction_report(
         ],
         export_filename_base=f"rapport_etat_{suffix}_{filters.configuration.code.replace('-', '_')}",
         filters_text=_build_filters_text(filters),
-        extra_context={"export_querystring": _querystring_for_report(filters), "mode_logique": "requisition_etat_direction"},
+        extra_context={
+            "export_querystring": _querystring_for_report(filters),
+            "mode_logique": "requisition_etat_direction",
+        },
     )
 
 
-def _generate_categorie_report(filters: ReportFilters, *, date_debut, date_fin, period_label, annee_reelle, mois_label):
+def _generate_categorie_report(
+    filters: ReportFilters,
+    *,
+    date_debut,
+    date_fin,
+    period_label,
+    annee_reelle,
+    mois_label,
+):
     qs = _base_lignes_queryset(filters, date_debut, date_fin)
 
     data = (
@@ -865,7 +988,10 @@ def _generate_categorie_report(filters: ReportFilters, *, date_debut, date_fin, 
         summary_cards=cards,
         export_filename_base=f"rapport_categories_{suffix}_{filters.configuration.code.replace('-', '_')}",
         filters_text=_build_filters_text(filters),
-        extra_context={"export_querystring": _querystring_for_report(filters), "mode_logique": "categorie"},
+        extra_context={
+            "export_querystring": _querystring_for_report(filters),
+            "mode_logique": "categorie",
+        },
     )
 
 
@@ -916,21 +1042,37 @@ def _generate_direction_detail_report(
             summary_cards=[],
             export_filename_base=f"rapport_{mode}_{'annuel' if filters.period_type == 'ANNUEL' else 'mensuel'}_{filters.configuration.code.replace('-', '_')}",
             filters_text=_build_filters_text(filters),
-            extra_context={"export_querystring": _querystring_for_report(filters), "mode_logique": "direction"},
+            extra_context={
+                "export_querystring": _querystring_for_report(filters),
+                "mode_logique": "direction",
+            },
         )
 
     if mode == "direction_plus_demandeuse":
-        direction_totaux.sort(key=lambda x: (-int(x["quantite_totale"] or 0), x["requisition__soumetteur__direction_affectee__nom"] or ""))
+        direction_totaux.sort(
+            key=lambda x: (
+                -int(x["quantite_totale"] or 0),
+                x["requisition__soumetteur__direction_affectee__nom"] or "",
+            )
+        )
         direction_cible = direction_totaux[0]
         directions_cibles = [direction_cible["requisition__soumetteur__direction_affectee__nom"]]
     elif mode == "direction_moins_demandeuse":
-        direction_totaux.sort(key=lambda x: (int(x["quantite_totale"] or 0), x["requisition__soumetteur__direction_affectee__nom"] or ""))
+        direction_totaux.sort(
+            key=lambda x: (
+                int(x["quantite_totale"] or 0),
+                x["requisition__soumetteur__direction_affectee__nom"] or "",
+            )
+        )
         direction_cible = direction_totaux[0]
         directions_cibles = [direction_cible["requisition__soumetteur__direction_affectee__nom"]]
     else:
         directions_cibles = [
             item["requisition__soumetteur__direction_affectee__nom"]
-            for item in sorted(direction_totaux, key=lambda x: (x["requisition__soumetteur__direction_affectee__nom"] or ""))
+            for item in sorted(
+                direction_totaux,
+                key=lambda x: (x["requisition__soumetteur__direction_affectee__nom"] or ""),
+            )
         ]
 
     details_qs = (
@@ -1015,11 +1157,23 @@ def _generate_direction_detail_report(
         summary_cards=cards,
         export_filename_base=f"rapport_{mode}_{suffix}_{filters.configuration.code.replace('-', '_')}",
         filters_text=_build_filters_text(filters),
-        extra_context={"export_querystring": _querystring_for_report(filters), "mode_logique": "direction"},
+        extra_context={
+            "export_querystring": _querystring_for_report(filters),
+            "mode_logique": "direction",
+        },
     )
 
 
-def _generate_article_report(filters: ReportFilters, *, date_debut, date_fin, period_label, annee_reelle, mois_label, mode: str):
+def _generate_article_report(
+    filters: ReportFilters,
+    *,
+    date_debut,
+    date_fin,
+    period_label,
+    annee_reelle,
+    mois_label,
+    mode: str,
+):
     qs = _base_lignes_queryset(filters, date_debut, date_fin)
 
     data = (
@@ -1085,7 +1239,10 @@ def _generate_article_report(filters: ReportFilters, *, date_debut, date_fin, pe
         summary_cards=cards,
         export_filename_base=f"rapport_{mode}_{suffix}_{filters.configuration.code.replace('-', '_')}",
         filters_text=_build_filters_text(filters),
-        extra_context={"export_querystring": _querystring_for_report(filters), "mode_logique": "article"},
+        extra_context={
+            "export_querystring": _querystring_for_report(filters),
+            "mode_logique": "article",
+        },
     )
 
 
@@ -1093,8 +1250,8 @@ def generer_rapport(filters: ReportFilters) -> GenericReportData:
     date_debut, date_fin, period_label, annee_reelle, mois_label = _period_for_filters(filters)
 
     if filters.report_type == "stock_global":
-        if _has_requisition_article_filters(filters):
-            return _generate_requisition_article_breakdown(
+        if filters.etat_requisition:
+            return _generate_requisition_state_direction_report(
                 filters,
                 date_debut=date_debut,
                 date_fin=date_fin,
@@ -1103,8 +1260,8 @@ def generer_rapport(filters: ReportFilters) -> GenericReportData:
                 mois_label=mois_label,
             )
 
-        if filters.etat_requisition:
-            return _generate_requisition_state_direction_report(
+        if _has_requisition_article_filters(filters):
+            return _generate_requisition_article_breakdown(
                 filters,
                 date_debut=date_debut,
                 date_fin=date_fin,
@@ -1291,7 +1448,6 @@ def _build_total_row(data: GenericReportData):
     headers = list(data.columns)
     normalized_headers = [_normalize_total_label(col) for col in headers]
 
-    # On évite les tableaux de synthèse annuelle de type Bloc / Indicateur / Valeur
     if "bloc" in normalized_headers and "indicateur" in normalized_headers:
         return None
 
@@ -1358,6 +1514,7 @@ def _build_total_row(data: GenericReportData):
 
     return total_row if has_metric else None
 
+
 def exporter_rapport_excel(*, data: GenericReportData) -> HttpResponse:
     wb = Workbook()
     ws = wb.active
@@ -1418,7 +1575,15 @@ def exporter_rapport_excel(*, data: GenericReportData) -> HttpResponse:
     ws["A8"].alignment = Alignment(horizontal="left", vertical="center")
     ws["G7"].alignment = Alignment(horizontal="right", vertical="center")
 
+    categorie_filtre_label = (data.extra_context or {}).get("categorie_filtre_label")
     table_start_row = 10
+
+    if categorie_filtre_label:
+        ws.merge_cells(start_row=9, start_column=1, end_row=9, end_column=max_col)
+        ws["A9"] = f"Catégorie sélectionnée : {categorie_filtre_label}"
+        ws["A9"].font = Font(size=11, bold=True, color="194993")
+        ws["A9"].alignment = Alignment(horizontal="left", vertical="center")
+        table_start_row = 11
 
     for idx, title in enumerate(data.columns, start=1):
         cell = ws.cell(row=table_start_row, column=idx, value=title)
@@ -1428,6 +1593,7 @@ def exporter_rapport_excel(*, data: GenericReportData) -> HttpResponse:
         cell.border = border
 
     row_num = table_start_row + 1
+
     for report_row in data.rows:
         for idx, value in enumerate(report_row.values, start=1):
             display_value = value
@@ -1574,6 +1740,16 @@ def exporter_rapport_pdf(*, data: GenericReportData) -> HttpResponse:
         parent=style_meta_left,
         alignment=TA_RIGHT,
     )
+    style_filter = ParagraphStyle(
+        "FilterPdf",
+        parent=styles["BodyText"],
+        fontName="Helvetica-Bold",
+        fontSize=9,
+        leading=11,
+        alignment=TA_LEFT,
+        textColor=colors.HexColor("#194993"),
+        spaceAfter=4,
+    )
     style_header = ParagraphStyle(
         "HeaderPdf",
         parent=styles["BodyText"],
@@ -1660,11 +1836,19 @@ def exporter_rapport_pdf(*, data: GenericReportData) -> HttpResponse:
     elements.append(Paragraph(data.title, style_title))
     elements.append(Paragraph(data.subtitle, style_subtitle))
 
+    meta_left_rows = [
+        [Paragraph(f"Mois / Période : {data.period_label}", style_meta_left)],
+        [Paragraph(f"Année fiscale : {data.annee_fiscale_label}", style_meta_left)],
+    ]
+
+    categorie_filtre_label = (data.extra_context or {}).get("categorie_filtre_label")
+    if categorie_filtre_label:
+        meta_left_rows.append(
+            [Paragraph(f"Catégorie sélectionnée : {categorie_filtre_label}", style_filter)]
+        )
+
     meta_left = Table(
-        [
-            [Paragraph(f"Mois / Période : {data.period_label}", style_meta_left)],
-            [Paragraph(f"Année fiscale : {data.annee_fiscale_label}", style_meta_left)],
-        ],
+        meta_left_rows,
         colWidths=[78 * mm],
     )
     meta_left.setStyle(
@@ -1734,7 +1918,11 @@ def exporter_rapport_pdf(*, data: GenericReportData) -> HttpResponse:
             pdf_total_row.append(Paragraph(str(value), style))
         table_data.append(pdf_total_row)
 
-    report_table = Table(table_data, colWidths=_pdf_column_widths(len(data.columns)), repeatRows=1)
+    report_table = Table(
+        table_data,
+        colWidths=_pdf_column_widths(len(data.columns)),
+        repeatRows=1,
+    )
 
     table_styles = [
         ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#194993")),

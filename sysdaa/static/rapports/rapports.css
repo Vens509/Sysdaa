@@ -538,3 +538,47 @@
     width:100%;
   }
 }
+
+.rp-report-focus{
+  display:flex;
+  flex-direction:column;
+  gap:.65rem;
+  margin:0 0 1rem 0;
+  padding:.9rem 1rem;
+  border:1px solid var(--rp-border);
+  border-radius:16px;
+  background:linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+}
+
+.rp-report-focus__title{
+  color:var(--rp-primary);
+  font-size:.95rem;
+  font-weight:800;
+  line-height:1.2;
+}
+
+.rp-report-focus__chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.55rem;
+}
+
+.rp-report-chip{
+  display:inline-flex;
+  align-items:center;
+  min-height:36px;
+  padding:.5rem .85rem;
+  border-radius:999px;
+  border:1px solid var(--rp-border-strong);
+  background:#fff;
+  color:var(--rp-text);
+  font-size:.9rem;
+  font-weight:700;
+  line-height:1;
+}
+
+.rp-report-chip--primary{
+  background:rgba(25, 73, 147, .08);
+  border-color:rgba(25, 73, 147, .20);
+  color:var(--rp-primary);
+}

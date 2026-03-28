@@ -13,7 +13,7 @@ from configurations.services import (
 from .models import MouvementStock
 
 
-@dataclass(frozen=True)
+@dataclass(slots=True)
 class MouvementResult:
     mouvement_id: int
     nouveau_stock: int
@@ -81,9 +81,19 @@ def enregistrer_entree_stock(
     if stock_actuel is None:
         raise ValueError("Le champ stock_actuel est introuvable sur l'article.")
 
-    article_locked.stock_actuel = int(stock_actuel) + quantite_unites
+    initialiser_stock = article_locked.peut_initialiser_stock_depuis_entree()
+
+    if initialiser_stock:
+        article_locked.autoriser_mise_a_jour_systeme_stock_initial()
+        article_locked.stock_initial = quantite_unites
+        article_locked.stock_actuel = quantite_unites
+        update_fields = ["stock_initial", "stock_actuel"]
+    else:
+        article_locked.stock_actuel = int(stock_actuel) + quantite_unites
+        update_fields = ["stock_actuel"]
+
     article_locked.full_clean()
-    article_locked.save(update_fields=["stock_actuel"])
+    article_locked.save(update_fields=update_fields)
 
     mv = MouvementStock(
         article=article_locked,

@@ -21,6 +21,19 @@ CONDITIONNEMENTS_STANDARDS = [
     "Lot",
 ]
 
+MOTIFS_SORTIE_CHOICES = [
+    ("", "Sélectionnez un motif"),
+    ("Périmé", "Périmé"),
+    ("Endommagé", "Endommagé"),
+    ("Sorti pour un travail", "Sorti pour un travail"),
+    ("Perdu", "Perdu"),
+    ("Cassé", "Cassé"),
+    ("Volé", "Volé"),
+    ("Don", "Don"),
+    ("Transfert interne", "Transfert interne"),
+    ("Autres", "Autres"),
+]
+
 
 def _add_class(widget: forms.Widget, css: str) -> None:
     existing = (widget.attrs.get("class") or "").strip()
@@ -61,22 +74,32 @@ class ArticleSelectWidget(forms.Select):
                 article = None
 
             if article is not None:
+                stock_unites = int(article.stock_actuel or 0)
+
                 option["attrs"]["data-article-unite"] = (
                     _normalize_text(article.unite) or "Unité"
                 )
                 option["attrs"]["data-article-qpc"] = str(
                     int(article.quantite_par_conditionnement or 1)
                 )
-                option["attrs"]["data-stock-unites"] = str(
-                    int(article.stock_actuel or 0)
-                )
+                option["attrs"]["data-stock-unites"] = str(stock_unites)
                 option["attrs"]["data-stock-affichage"] = article.stock_actuel_affichage
+                option["attrs"]["data-stock-rupture"] = "1" if stock_unites <= 0 else "0"
+
+                if stock_unites <= 0:
+                    option["attrs"]["disabled"] = True
+                    option["attrs"]["class"] = (
+                        f'{option["attrs"].get("class", "")} option-indisponible'.strip()
+                    )
+                    option["label"] = f"{article.nom} — Indisponible (rupture de stock)"
 
         return option
 
 
 class ArticleChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj: Article) -> str:
+        if int(obj.stock_actuel or 0) <= 0:
+            return f"{obj.nom} — Indisponible (rupture de stock)"
         return obj.nom
 
 
@@ -247,6 +270,17 @@ class BaseMouvementStockForm(forms.Form):
             raise forms.ValidationError("La quantité doit être supérieure à 0.")
         return quantite
 
+    def clean_article(self):
+        article = self.cleaned_data.get("article")
+        if article is None:
+            return article
+
+        if int(article.stock_actuel or 0) <= 0 and isinstance(self, SortieStockForm):
+            raise forms.ValidationError(
+                "Cet article est indisponible car il est en rupture de stock."
+            )
+        return article
+
 
 class EntreeStockForm(BaseMouvementStockForm):
     autoriser_conditionnement_libre = True
@@ -286,30 +320,48 @@ class SortieStockForm(BaseMouvementStockForm):
         label="Quantité à sortir",
     )
 
-    motif_sortie = forms.CharField(
+    motif_sortie_selection = forms.ChoiceField(
         label="Motif de la sortie",
-        widget=forms.Textarea(attrs={"rows": 4}),
+        choices=MOTIFS_SORTIE_CHOICES,
+    )
+
+    motif_sortie_autre = forms.CharField(
+        required=False,
+        label="Précisez le motif",
+        widget=forms.Textarea(attrs={"rows": 3}),
         max_length=255,
+    )
+
+    motif_sortie = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput(),
     )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["motif_sortie"].widget.attrs.setdefault(
-            "placeholder",
-            "Précisez le motif de cette sortie hors réquisition...",
-        )
 
-    def clean_motif_sortie(self):
-        motif = _normalize_text(self.cleaned_data.get("motif_sortie"))
-        if not motif:
-            raise forms.ValidationError("Le motif de la sortie est obligatoire.")
-        return motif
+        self.fields["motif_sortie_autre"].widget.attrs.setdefault(
+            "placeholder",
+            "Précisez le motif de cette sortie...",
+        )
 
     def clean(self):
         cleaned_data = super().clean()
 
         article = cleaned_data.get("article")
         quantite = cleaned_data.get("quantite")
+        motif_selection = _normalize_text(cleaned_data.get("motif_sortie_selection"))
+        motif_autre = _normalize_text(cleaned_data.get("motif_sortie_autre"))
+
+        if not motif_selection:
+            self.add_error("motif_sortie_selection", "Veuillez choisir un motif.")
+        elif motif_selection == "Autres":
+            if not motif_autre:
+                self.add_error("motif_sortie_autre", "Veuillez préciser le motif.")
+            else:
+                cleaned_data["motif_sortie"] = motif_autre
+        else:
+            cleaned_data["motif_sortie"] = motif_selection
 
         if article is None or quantite in (None, ""):
             return cleaned_data
