@@ -1017,7 +1017,14 @@ def _generate_sortie_manuelle_report(
 
     for mouvement in mouvements:
         acteur = actor_map.get(mouvement.id)
+
         nom, prenom = _format_nom_prenom_utilisateur(acteur)
+
+        # ✅ fusion NOM + PRENOM
+        effectue_par = f"{nom} {prenom}".strip()
+        if effectue_par == "" or effectue_par == "- -":
+            effectue_par = "-"
+
         quantite_affichage = getattr(mouvement, "quantite_affichage", "") or mouvement.quantite_unites
         total_quantite_unites += int(mouvement.quantite_unites or 0)
 
@@ -1028,8 +1035,7 @@ def _generate_sortie_manuelle_report(
                     quantite_affichage,
                     timezone.localtime(mouvement.date_mouvement).strftime("%d/%m/%Y %H:%M"),
                     (mouvement.motif_sortie or "-").strip() or "-",
-                    nom,
-                    prenom,
+                    effectue_par,  # ✅ UN SEUL CHAMP
                 ]
             )
         )
@@ -1042,7 +1048,7 @@ def _generate_sortie_manuelle_report(
 
     subtitle = (
         "Liste des sorties manuelles enregistrées sur la période, avec la quantité sortie, "
-        "la date, le motif et l'identité de l'utilisateur ayant effectué l'opération."
+        "la date, le motif et l'utilisateur ayant effectué l'opération."
     )
 
     suffix = "annuel" if filters.period_type == "ANNUEL" else "mensuel"
@@ -1061,7 +1067,13 @@ def _generate_sortie_manuelle_report(
         date_debut=date_debut,
         date_fin=date_fin,
         date_export=timezone.localtime(),
-        columns=["Article", "Quantité", "Date de sortie", "Motif", "Nom", "Prénom"],
+        columns=[
+            "Article",
+            "Quantité",
+            "Date de sortie",
+            "Motif",
+            "Effectuée par",  # ✅ CHANGEMENT ICI
+        ],
         rows=rows,
         summary_cards=cards,
         export_filename_base=f"rapport_sortie_manuelle_{suffix}_{filters.configuration.code.replace('-', '_')}",
