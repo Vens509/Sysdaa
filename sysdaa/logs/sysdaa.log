@@ -2989,3 +2989,760 @@ Traceback (most recent call last):
     sock.connect(sa)
     ~~~~~~~~~~~~^^^^
 TimeoutError: timed out
+[2026-03-27 16:40:41,759] ERROR django.request: Internal Server Error: /account/login/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\generic\base.py", line 106, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\decorators\debug.py", line 143, in sensitive_post_parameters_wrapper
+    return view(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\decorators.py", line 192, in _view_wrapper
+    result = _process_exception(request, e)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\decorators.py", line 190, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\decorators\cache.py", line 80, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\core.py", line 426, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\formtools\wizard\views.py", line 250, in dispatch
+    response = super().dispatch(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\generic\base.py", line 145, in dispatch
+    return handler(request, *args, **kwargs)
+  File "C:\Sysdaa\sysdaa\core\views.py", line 901, in post
+    return super().post(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\core.py", line 156, in post
+    response = super().post(*args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\utils.py", line 162, in post
+    return super().post(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\formtools\wizard\views.py", line 311, in post
+    return self.render_next_step(form)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\formtools\wizard\views.py", line 329, in render_next_step
+    return self.render(new_form, **kwargs)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\sysdaa\core\views.py", line 848, in render
+    response = super().render(form, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\core.py", line 344, in render
+    self.get_device().generate_challenge()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django_otp\plugins\otp_email\models.py", line 67, in generate_challenge
+    message = self._deliver_token(extra_context)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django_otp\plugins\otp_email\models.py", line 103, in _deliver_token
+    self.send_mail(body, html_message=body_html)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django_otp\plugins\otp_email\models.py", line 116, in send_mail
+    send_mail(
+    ~~~~~~~~~^
+        str(settings.OTP_EMAIL_SUBJECT),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        **kwargs,
+        ^^^^^^^^^
+    )
+    ^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\deprecation.py", line 268, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\__init__.py", line 108, in send_mail
+    return mail.send()
+           ~~~~~~~~~^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\message.py", line 358, in send
+    return self.get_connection(fail_silently).send_messages([self])
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\backends\smtp.py", line 130, in send_messages
+    new_conn_created = self.open()
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\backends\smtp.py", line 88, in open
+    self.connection = self.connection_class(
+                      ~~~~~~~~~~~~~~~~~~~~~^
+        self.host, self.port, **connection_params
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\smtplib.py", line 262, in __init__
+    (code, msg) = self.connect(host, port)
+                  ~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\smtplib.py", line 348, in connect
+    self.sock = self._get_socket(host, port, self.timeout)
+                ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\smtplib.py", line 319, in _get_socket
+    return socket.create_connection((host, port), timeout,
+           ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+                                    self.source_address)
+                                    ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 870, in create_connection
+    raise exceptions[0]
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 855, in create_connection
+    sock.connect(sa)
+    ~~~~~~~~~~~~^^^^
+TimeoutError: timed out
+[2026-03-27 16:47:34,375] WARNING django.request: Not Found: /favicon.ico
+[2026-03-27 16:48:02,596] ERROR django.request: Internal Server Error: /account/login/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\generic\base.py", line 106, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\decorators\debug.py", line 143, in sensitive_post_parameters_wrapper
+    return view(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\decorators.py", line 192, in _view_wrapper
+    result = _process_exception(request, e)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\decorators.py", line 190, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\decorators\cache.py", line 80, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\core.py", line 426, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\formtools\wizard\views.py", line 250, in dispatch
+    response = super().dispatch(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\generic\base.py", line 145, in dispatch
+    return handler(request, *args, **kwargs)
+  File "C:\Sysdaa\sysdaa\core\views.py", line 901, in post
+    return super().post(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\core.py", line 156, in post
+    response = super().post(*args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\utils.py", line 162, in post
+    return super().post(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\formtools\wizard\views.py", line 311, in post
+    return self.render_next_step(form)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\formtools\wizard\views.py", line 329, in render_next_step
+    return self.render(new_form, **kwargs)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\sysdaa\core\views.py", line 848, in render
+    response = super().render(form, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\core.py", line 344, in render
+    self.get_device().generate_challenge()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django_otp\plugins\otp_email\models.py", line 67, in generate_challenge
+    message = self._deliver_token(extra_context)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django_otp\plugins\otp_email\models.py", line 103, in _deliver_token
+    self.send_mail(body, html_message=body_html)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django_otp\plugins\otp_email\models.py", line 116, in send_mail
+    send_mail(
+    ~~~~~~~~~^
+        str(settings.OTP_EMAIL_SUBJECT),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        **kwargs,
+        ^^^^^^^^^
+    )
+    ^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\deprecation.py", line 268, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\__init__.py", line 108, in send_mail
+    return mail.send()
+           ~~~~~~~~~^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\message.py", line 358, in send
+    return self.get_connection(fail_silently).send_messages([self])
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\backends\smtp.py", line 130, in send_messages
+    new_conn_created = self.open()
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\backends\smtp.py", line 88, in open
+    self.connection = self.connection_class(
+                      ~~~~~~~~~~~~~~~~~~~~~^
+        self.host, self.port, **connection_params
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\smtplib.py", line 262, in __init__
+    (code, msg) = self.connect(host, port)
+                  ~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\smtplib.py", line 348, in connect
+    self.sock = self._get_socket(host, port, self.timeout)
+                ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\smtplib.py", line 319, in _get_socket
+    return socket.create_connection((host, port), timeout,
+           ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+                                    self.source_address)
+                                    ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 870, in create_connection
+    raise exceptions[0]
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 855, in create_connection
+    sock.connect(sa)
+    ~~~~~~~~~~~~^^^^
+TimeoutError: timed out
+[2026-03-27 16:59:10,268] ERROR django.request: Internal Server Error: /account/login/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\generic\base.py", line 106, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\decorators\debug.py", line 143, in sensitive_post_parameters_wrapper
+    return view(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\decorators.py", line 192, in _view_wrapper
+    result = _process_exception(request, e)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\decorators.py", line 190, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\decorators\cache.py", line 80, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\core.py", line 426, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\formtools\wizard\views.py", line 250, in dispatch
+    response = super().dispatch(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\generic\base.py", line 145, in dispatch
+    return handler(request, *args, **kwargs)
+  File "C:\Sysdaa\sysdaa\core\views.py", line 901, in post
+    return super().post(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\core.py", line 156, in post
+    response = super().post(*args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\utils.py", line 162, in post
+    return super().post(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\formtools\wizard\views.py", line 311, in post
+    return self.render_next_step(form)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\formtools\wizard\views.py", line 329, in render_next_step
+    return self.render(new_form, **kwargs)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\sysdaa\core\views.py", line 848, in render
+    response = super().render(form, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\core.py", line 344, in render
+    self.get_device().generate_challenge()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django_otp\plugins\otp_email\models.py", line 67, in generate_challenge
+    message = self._deliver_token(extra_context)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django_otp\plugins\otp_email\models.py", line 103, in _deliver_token
+    self.send_mail(body, html_message=body_html)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django_otp\plugins\otp_email\models.py", line 116, in send_mail
+    send_mail(
+    ~~~~~~~~~^
+        str(settings.OTP_EMAIL_SUBJECT),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        **kwargs,
+        ^^^^^^^^^
+    )
+    ^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\deprecation.py", line 268, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\__init__.py", line 108, in send_mail
+    return mail.send()
+           ~~~~~~~~~^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\message.py", line 358, in send
+    return self.get_connection(fail_silently).send_messages([self])
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\backends\smtp.py", line 130, in send_messages
+    new_conn_created = self.open()
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\backends\smtp.py", line 88, in open
+    self.connection = self.connection_class(
+                      ~~~~~~~~~~~~~~~~~~~~~^
+        self.host, self.port, **connection_params
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\smtplib.py", line 262, in __init__
+    (code, msg) = self.connect(host, port)
+                  ~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\smtplib.py", line 348, in connect
+    self.sock = self._get_socket(host, port, self.timeout)
+                ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\smtplib.py", line 319, in _get_socket
+    return socket.create_connection((host, port), timeout,
+           ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+                                    self.source_address)
+                                    ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 870, in create_connection
+    raise exceptions[0]
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 855, in create_connection
+    sock.connect(sa)
+    ~~~~~~~~~~~~^^^^
+TimeoutError: timed out
+[2026-03-27 17:00:57,776] WARNING django.request: Not Found: /favicon.ico
+[2026-03-27 17:00:58,569] ERROR django.request: Internal Server Error: /account/login/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\generic\base.py", line 106, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\decorators\debug.py", line 143, in sensitive_post_parameters_wrapper
+    return view(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\decorators.py", line 192, in _view_wrapper
+    result = _process_exception(request, e)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\decorators.py", line 190, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\decorators\cache.py", line 80, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\core.py", line 426, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\formtools\wizard\views.py", line 250, in dispatch
+    response = super().dispatch(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\generic\base.py", line 145, in dispatch
+    return handler(request, *args, **kwargs)
+  File "C:\Sysdaa\sysdaa\core\views.py", line 901, in post
+    return super().post(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\core.py", line 156, in post
+    response = super().post(*args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\utils.py", line 162, in post
+    return super().post(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\formtools\wizard\views.py", line 311, in post
+    return self.render_next_step(form)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\formtools\wizard\views.py", line 329, in render_next_step
+    return self.render(new_form, **kwargs)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\sysdaa\core\views.py", line 848, in render
+    response = super().render(form, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\core.py", line 344, in render
+    self.get_device().generate_challenge()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django_otp\plugins\otp_email\models.py", line 67, in generate_challenge
+    message = self._deliver_token(extra_context)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django_otp\plugins\otp_email\models.py", line 103, in _deliver_token
+    self.send_mail(body, html_message=body_html)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django_otp\plugins\otp_email\models.py", line 116, in send_mail
+    send_mail(
+    ~~~~~~~~~^
+        str(settings.OTP_EMAIL_SUBJECT),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        **kwargs,
+        ^^^^^^^^^
+    )
+    ^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\deprecation.py", line 268, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\__init__.py", line 108, in send_mail
+    return mail.send()
+           ~~~~~~~~~^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\message.py", line 358, in send
+    return self.get_connection(fail_silently).send_messages([self])
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\backends\smtp.py", line 130, in send_messages
+    new_conn_created = self.open()
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\backends\smtp.py", line 88, in open
+    self.connection = self.connection_class(
+                      ~~~~~~~~~~~~~~~~~~~~~^
+        self.host, self.port, **connection_params
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\smtplib.py", line 262, in __init__
+    (code, msg) = self.connect(host, port)
+                  ~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\smtplib.py", line 348, in connect
+    self.sock = self._get_socket(host, port, self.timeout)
+                ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\smtplib.py", line 319, in _get_socket
+    return socket.create_connection((host, port), timeout,
+           ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+                                    self.source_address)
+                                    ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 870, in create_connection
+    raise exceptions[0]
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 855, in create_connection
+    sock.connect(sa)
+    ~~~~~~~~~~~~^^^^
+TimeoutError: timed out
+[2026-03-27 17:09:49,118] WARNING django.request: Not Found: /favicon.ico
+[2026-03-27 17:10:32,065] WARNING django.request: Not Found: /favicon.ico
+[2026-03-27 17:10:49,178] WARNING django.request: Not Found: /favicon.ico
+[2026-03-27 17:17:09,694] ERROR django.request: Internal Server Error: /utilisateurs/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return _redirect_to_login(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 24, in _redirect_to_login
+    resolved_login_url = resolve_url(login_url or settings.LOGIN_URL)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\shortcuts.py", line 184, in resolve_url
+    return reverse(to, args=args, kwargs=kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'utilisateurs.views._login_url' not found. 'utilisateurs.views._login_url' is not a valid view function or pattern name.
+[2026-03-27 17:17:26,342] ERROR django.request: Internal Server Error: /utilisateurs/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return _redirect_to_login(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 24, in _redirect_to_login
+    resolved_login_url = resolve_url(login_url or settings.LOGIN_URL)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\shortcuts.py", line 184, in resolve_url
+    return reverse(to, args=args, kwargs=kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'utilisateurs.views._login_url' not found. 'utilisateurs.views._login_url' is not a valid view function or pattern name.
+[2026-03-27 17:17:29,272] ERROR django.request: Internal Server Error: /utilisateurs/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return _redirect_to_login(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 24, in _redirect_to_login
+    resolved_login_url = resolve_url(login_url or settings.LOGIN_URL)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\shortcuts.py", line 184, in resolve_url
+    return reverse(to, args=args, kwargs=kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'utilisateurs.views._login_url' not found. 'utilisateurs.views._login_url' is not a valid view function or pattern name.
+[2026-03-27 17:17:30,163] ERROR django.request: Internal Server Error: /utilisateurs/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return _redirect_to_login(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 24, in _redirect_to_login
+    resolved_login_url = resolve_url(login_url or settings.LOGIN_URL)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\shortcuts.py", line 184, in resolve_url
+    return reverse(to, args=args, kwargs=kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'utilisateurs.views._login_url' not found. 'utilisateurs.views._login_url' is not a valid view function or pattern name.
+[2026-03-27 17:17:30,943] ERROR django.request: Internal Server Error: /utilisateurs/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return _redirect_to_login(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 24, in _redirect_to_login
+    resolved_login_url = resolve_url(login_url or settings.LOGIN_URL)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\shortcuts.py", line 184, in resolve_url
+    return reverse(to, args=args, kwargs=kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'utilisateurs.views._login_url' not found. 'utilisateurs.views._login_url' is not a valid view function or pattern name.
+[2026-03-27 17:17:31,519] ERROR django.request: Internal Server Error: /utilisateurs/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return _redirect_to_login(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 24, in _redirect_to_login
+    resolved_login_url = resolve_url(login_url or settings.LOGIN_URL)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\shortcuts.py", line 184, in resolve_url
+    return reverse(to, args=args, kwargs=kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'utilisateurs.views._login_url' not found. 'utilisateurs.views._login_url' is not a valid view function or pattern name.
+[2026-03-27 17:17:32,102] ERROR django.request: Internal Server Error: /utilisateurs/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return _redirect_to_login(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 24, in _redirect_to_login
+    resolved_login_url = resolve_url(login_url or settings.LOGIN_URL)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\shortcuts.py", line 184, in resolve_url
+    return reverse(to, args=args, kwargs=kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'utilisateurs.views._login_url' not found. 'utilisateurs.views._login_url' is not a valid view function or pattern name.
+[2026-03-27 17:17:32,649] ERROR django.request: Internal Server Error: /utilisateurs/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return _redirect_to_login(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 24, in _redirect_to_login
+    resolved_login_url = resolve_url(login_url or settings.LOGIN_URL)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\shortcuts.py", line 184, in resolve_url
+    return reverse(to, args=args, kwargs=kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'utilisateurs.views._login_url' not found. 'utilisateurs.views._login_url' is not a valid view function or pattern name.
+[2026-03-27 17:17:33,282] ERROR django.request: Internal Server Error: /utilisateurs/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return _redirect_to_login(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 24, in _redirect_to_login
+    resolved_login_url = resolve_url(login_url or settings.LOGIN_URL)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\shortcuts.py", line 184, in resolve_url
+    return reverse(to, args=args, kwargs=kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'utilisateurs.views._login_url' not found. 'utilisateurs.views._login_url' is not a valid view function or pattern name.
+[2026-03-27 17:17:34,754] ERROR django.request: Internal Server Error: /utilisateurs/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return _redirect_to_login(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 24, in _redirect_to_login
+    resolved_login_url = resolve_url(login_url or settings.LOGIN_URL)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\shortcuts.py", line 184, in resolve_url
+    return reverse(to, args=args, kwargs=kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'utilisateurs.views._login_url' not found. 'utilisateurs.views._login_url' is not a valid view function or pattern name.
+[2026-03-27 17:17:35,852] ERROR django.request: Internal Server Error: /utilisateurs/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return _redirect_to_login(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 24, in _redirect_to_login
+    resolved_login_url = resolve_url(login_url or settings.LOGIN_URL)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\shortcuts.py", line 184, in resolve_url
+    return reverse(to, args=args, kwargs=kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'utilisateurs.views._login_url' not found. 'utilisateurs.views._login_url' is not a valid view function or pattern name.
+[2026-03-27 17:17:36,620] ERROR django.request: Internal Server Error: /utilisateurs/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return _redirect_to_login(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 24, in _redirect_to_login
+    resolved_login_url = resolve_url(login_url or settings.LOGIN_URL)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\shortcuts.py", line 184, in resolve_url
+    return reverse(to, args=args, kwargs=kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'utilisateurs.views._login_url' not found. 'utilisateurs.views._login_url' is not a valid view function or pattern name.
+[2026-03-27 17:17:37,251] ERROR django.request: Internal Server Error: /utilisateurs/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return _redirect_to_login(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 24, in _redirect_to_login
+    resolved_login_url = resolve_url(login_url or settings.LOGIN_URL)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\shortcuts.py", line 184, in resolve_url
+    return reverse(to, args=args, kwargs=kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'utilisateurs.views._login_url' not found. 'utilisateurs.views._login_url' is not a valid view function or pattern name.
+[2026-03-27 17:17:37,795] ERROR django.request: Internal Server Error: /utilisateurs/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return _redirect_to_login(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 24, in _redirect_to_login
+    resolved_login_url = resolve_url(login_url or settings.LOGIN_URL)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\shortcuts.py", line 184, in resolve_url
+    return reverse(to, args=args, kwargs=kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'utilisateurs.views._login_url' not found. 'utilisateurs.views._login_url' is not a valid view function or pattern name.
+[2026-03-27 17:17:38,235] ERROR django.request: Internal Server Error: /utilisateurs/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return _redirect_to_login(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 24, in _redirect_to_login
+    resolved_login_url = resolve_url(login_url or settings.LOGIN_URL)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\shortcuts.py", line 184, in resolve_url
+    return reverse(to, args=args, kwargs=kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'utilisateurs.views._login_url' not found. 'utilisateurs.views._login_url' is not a valid view function or pattern name.
+[2026-03-27 17:17:38,517] ERROR django.request: Internal Server Error: /utilisateurs/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return _redirect_to_login(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 24, in _redirect_to_login
+    resolved_login_url = resolve_url(login_url or settings.LOGIN_URL)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\shortcuts.py", line 184, in resolve_url
+    return reverse(to, args=args, kwargs=kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'utilisateurs.views._login_url' not found. 'utilisateurs.views._login_url' is not a valid view function or pattern name.
+[2026-03-27 17:17:38,747] ERROR django.request: Internal Server Error: /utilisateurs/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return _redirect_to_login(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 24, in _redirect_to_login
+    resolved_login_url = resolve_url(login_url or settings.LOGIN_URL)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\shortcuts.py", line 184, in resolve_url
+    return reverse(to, args=args, kwargs=kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'utilisateurs.views._login_url' not found. 'utilisateurs.views._login_url' is not a valid view function or pattern name.
+[2026-03-27 17:17:38,949] ERROR django.request: Internal Server Error: /utilisateurs/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return _redirect_to_login(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 24, in _redirect_to_login
+    resolved_login_url = resolve_url(login_url or settings.LOGIN_URL)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\shortcuts.py", line 184, in resolve_url
+    return reverse(to, args=args, kwargs=kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'utilisateurs.views._login_url' not found. 'utilisateurs.views._login_url' is not a valid view function or pattern name.
+[2026-03-27 17:17:39,152] ERROR django.request: Internal Server Error: /utilisateurs/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return _redirect_to_login(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 24, in _redirect_to_login
+    resolved_login_url = resolve_url(login_url or settings.LOGIN_URL)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\shortcuts.py", line 184, in resolve_url
+    return reverse(to, args=args, kwargs=kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'utilisateurs.views._login_url' not found. 'utilisateurs.views._login_url' is not a valid view function or pattern name.
+[2026-03-27 17:17:39,355] ERROR django.request: Internal Server Error: /utilisateurs/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return _redirect_to_login(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 24, in _redirect_to_login
+    resolved_login_url = resolve_url(login_url or settings.LOGIN_URL)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\shortcuts.py", line 184, in resolve_url
+    return reverse(to, args=args, kwargs=kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'utilisateurs.views._login_url' not found. 'utilisateurs.views._login_url' is not a valid view function or pattern name.
+[2026-03-27 17:17:39,569] ERROR django.request: Internal Server Error: /utilisateurs/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return _redirect_to_login(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 24, in _redirect_to_login
+    resolved_login_url = resolve_url(login_url or settings.LOGIN_URL)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\shortcuts.py", line 184, in resolve_url
+    return reverse(to, args=args, kwargs=kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'utilisateurs.views._login_url' not found. 'utilisateurs.views._login_url' is not a valid view function or pattern name.
+[2026-03-27 17:17:39,810] ERROR django.request: Internal Server Error: /utilisateurs/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return _redirect_to_login(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\contrib\auth\decorators.py", line 24, in _redirect_to_login
+    resolved_login_url = resolve_url(login_url or settings.LOGIN_URL)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\shortcuts.py", line 184, in resolve_url
+    return reverse(to, args=args, kwargs=kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\urls\resolvers.py", line 842, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'utilisateurs.views._login_url' not found. 'utilisateurs.views._login_url' is not a valid view function or pattern name.
+[2026-03-27 17:20:54,082] INFO two_factor.views.core: User's authentication flow has timed out. The user has been redirected to the initial auth form.
+[2026-03-27 17:31:59,104] WARNING django.request: Not Found: /favicon.ico

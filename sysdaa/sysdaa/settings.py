@@ -212,7 +212,7 @@ EMAIL_BACKEND = env_str(
     "core.email_backend.EmailBackend",
 )
 EMAIL_HOST = env_str("DJANGO_EMAIL_HOST", "smtp.budget.gouv.ht")
-EMAIL_PORT = env_int("DJANGO_EMAIL_PORT", 25)
+EMAIL_PORT = env_int("DJANGO_EMAIL_PORT", 587)
 EMAIL_USE_TLS = env_bool("DJANGO_EMAIL_USE_TLS", True)
 EMAIL_USE_SSL = env_bool("DJANGO_EMAIL_USE_SSL", False)
 EMAIL_HOST_USER = env_str("DJANGO_EMAIL_HOST_USER", "")
