@@ -38,6 +38,7 @@ TYPE_RAPPORT_CHOICES = (
     ("direction_moins_demandeuse", "Direction la moins demandeuse"),
     ("article_plus_demande", "Article le plus demandé"),
     ("article_moins_demande", "Article le moins demandé"),
+    ("sortie_manuelle", "Sortie manuelle"),
 )
 
 
@@ -82,6 +83,8 @@ def _resolve_rapport_label(periode: str, type_rapport: str) -> str:
         return "Article le plus demandé"
     if type_rapport == "article_moins_demande":
         return "Article le moins demandé"
+    if type_rapport == "sortie_manuelle":
+        return "Sortie manuelle"
     return "Rapport analytique"
 
 
@@ -258,6 +261,12 @@ class RapportGenerationForm(forms.Form):
             cleaned_data["etat_requisition"] = ""
             etat_requisition = ""
 
+        if type_rapport == "sortie_manuelle":
+            cleaned_data["direction"] = None
+            cleaned_data["etat_requisition"] = ""
+            direction = None
+            etat_requisition = ""
+
         # Le type "Demandes par catégorie d'article" doit rester inchangé :
         # on ne rend pas la catégorie obligatoire et on ignore ce filtre
         # pour ne pas modifier le comportement historique.
@@ -273,7 +282,8 @@ class RapportGenerationForm(forms.Form):
             "type_rapport": type_rapport,
             "utilise_mois": periode == "MENSUEL",
             "utilise_categorie": (
-                type_rapport == "stock_global" and cleaned_data.get("categorie") is not None
+                type_rapport in {"stock_global", "sortie_manuelle"}
+                and cleaned_data.get("categorie") is not None
             ),
             "utilise_direction": cleaned_data.get("direction") is not None,
             "utilise_etat_requisition": bool(cleaned_data.get("etat_requisition")),

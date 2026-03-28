@@ -6241,3 +6241,31 @@ django.template.exceptions.TemplateSyntaxError: Template: C:\Users\lovens.elie\D
 [2026-03-28 17:31:45,302] INFO django.server: "GET /notifications/live/ HTTP/1.1" 200 1250
 [2026-03-28 17:32:07,155] INFO django.utils.autoreload: C:\Users\lovens.elie\Documents\Sysdaa\sysdaa\mouvements_stock\forms.py changed, reloading.
 [2026-03-28 17:32:30,942] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-03-28 17:32:45,402] INFO django.server: "GET /notifications/live/ HTTP/1.1" 200 1250
+[2026-03-28 17:33:45,184] INFO django.server: "GET /notifications/live/ HTTP/1.1" 200 1250
+[2026-03-28 17:34:45,299] INFO django.server: "GET /notifications/live/ HTTP/1.1" 200 1250
+[2026-03-28 17:35:45,177] INFO django.server: "GET /notifications/live/ HTTP/1.1" 200 1250
+[2026-03-28 17:36:45,163] INFO django.server: "GET /notifications/live/ HTTP/1.1" 200 1250
+[2026-03-28 17:37:45,303] INFO django.server: "GET /notifications/live/ HTTP/1.1" 200 1250
+[2026-03-28 17:38:35,871] INFO django.server: "GET /notifications/live/ HTTP/1.1" 200 1250
+[2026-03-28 17:38:41,115] INFO django.server: "GET /notifications/live/ HTTP/1.1" 200 1250
+[2026-03-28 17:38:46,112] INFO django.server: "GET /notifications/live/ HTTP/1.1" 200 1250
+[2026-03-28 17:38:51,113] INFO django.server: "GET /notifications/live/ HTTP/1.1" 200 1250
+[2026-03-28 17:38:56,104] INFO django.server: "GET /notifications/live/ HTTP/1.1" 200 1250
+[2026-03-28 17:39:01,112] INFO django.server: "GET /notifications/live/ HTTP/1.1" 200 1250
+[2026-03-28 17:39:06,125] INFO django.server: "GET /notifications/live/ HTTP/1.1" 200 1250
+[2026-03-28 17:39:11,109] INFO django.server: "GET /notifications/live/ HTTP/1.1" 200 1250
+[2026-03-28 17:39:16,114] INFO django.server: "GET /notifications/live/ HTTP/1.1" 200 1250
+[2026-03-28 17:39:21,112] INFO django.server: "GET /notifications/live/ HTTP/1.1" 200 1250
+[2026-03-28 17:39:26,109] INFO django.server: "GET /notifications/live/ HTTP/1.1" 200 1250
+[2026-03-28 17:39:31,125] INFO django.server: "GET /notifications/live/ HTTP/1.1" 200 1250
+[2026-03-28 17:39:36,185] INFO django.server: "GET /notifications/live/ HTTP/1.1" 200 1250
+[2026-03-28 17:39:45,112] INFO django.server: "GET /notifications/live/ HTTP/1.1" 200 1250
+[2026-03-28 17:40:45,165] INFO django.server: "GET /notifications/live/ HTTP/1.1" 200 1250
+[2026-03-28 17:41:45,291] INFO django.server: "GET /notifications/live/ HTTP/1.1" 200 1250
+[2026-03-28 17:42:45,161] INFO django.server: "GET /notifications/live/ HTTP/1.1" 200 1250
+[2026-03-28 17:43:19,663] INFO django.utils.autoreload: C:\Users\lovens.elie\Documents\Sysdaa\sysdaa\rapports\services.py changed, reloading.
+[2026-03-28 17:43:32,051] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-03-28 17:43:45,605] INFO django.server: "GET /notifications/live/ HTTP/1.1" 200 1250
+[2026-03-28 17:43:55,334] INFO django.utils.autoreload: C:\Users\lovens.elie\Documents\Sysdaa\sysdaa\rapports\forms.py changed, reloading.
+[2026-03-28 17:43:56,616] INFO django.utils.autoreload: Watching for file changes with StatReloader

@@ -33,6 +33,7 @@ from reportlab.platypus import (
 )
 
 from articles.models import Article, Categorie
+from audit.models import AuditLog
 from configurations.models import ConfigurationSysteme
 from mouvements_stock.models import MouvementStock
 from requisitions.models import LigneRequisition, Requisition
@@ -67,6 +68,7 @@ TYPE_RAPPORT_LABELS = {
     "direction_moins_demandeuse": "Direction la moins demandeuse",
     "article_plus_demande": "Article le plus demandé",
     "article_moins_demande": "Article le moins demandé",
+    "sortie_manuelle": "Sortie manuelle",
 }
 
 
@@ -924,6 +926,153 @@ def _generate_requisition_state_direction_report(
     )
 
 
+def _format_nom_prenom_utilisateur(utilisateur) -> tuple[str, str]:
+    if utilisateur is None:
+        return "-", "-"
+
+    nom = (getattr(utilisateur, "nom", "") or "").strip()
+    prenom = (getattr(utilisateur, "prenom", "") or "").strip()
+
+    if not nom and not prenom:
+        full_name = (getattr(utilisateur, "get_full_name", lambda: "")() or "").strip()
+        if full_name:
+            parts = full_name.split()
+            if len(parts) == 1:
+                return parts[0], "-"
+            if len(parts) >= 2:
+                return " ".join(parts[:-1]), parts[-1]
+
+        identifiant = (
+            getattr(utilisateur, "email", "")
+            or getattr(utilisateur, "username", "")
+            or ""
+        ).strip()
+        if identifiant:
+            return identifiant, "-"
+        return "-", "-"
+
+    return nom or "-", prenom or "-"
+
+
+def _audit_actor_map_for_mouvements(mouvement_ids: list[int]) -> dict[int, object]:
+    if not mouvement_ids:
+        return {}
+
+    logs = (
+        AuditLog.objects.select_related("acteur")
+        .filter(
+            app="mouvements_stock",
+            action=AuditLog.Action.CREATION,
+            cible_type="MouvementStock",
+            cible_id__in=[str(mid) for mid in mouvement_ids],
+            succes=True,
+        )
+        .order_by("-date_action", "-id")
+    )
+
+    actor_map: dict[int, object] = {}
+    for log in logs:
+        try:
+            mouvement_id = int(log.cible_id or 0)
+        except (TypeError, ValueError):
+            continue
+
+        if mouvement_id in actor_map:
+            continue
+
+        details = log.details or {}
+        if details.get("type_mouvement") != "SORTIE":
+            continue
+        if details.get("origine") != "manuelle":
+            continue
+
+        actor_map[mouvement_id] = log.acteur
+
+    return actor_map
+
+
+def _generate_sortie_manuelle_report(
+    filters: ReportFilters,
+    *,
+    date_debut,
+    date_fin,
+    period_label,
+    annee_reelle,
+    mois_label,
+):
+    qs = (
+        _base_mouvements_queryset(filters, date_debut, date_fin)
+        .filter(
+            type_mouvement=MouvementStock.TypeMouvement.SORTIE,
+            requisition__isnull=True,
+        )
+        .order_by("-date_mouvement", "-id")
+    )
+
+    mouvements = list(qs)
+    actor_map = _audit_actor_map_for_mouvements([m.id for m in mouvements])
+
+    rows: list[ReportRow] = []
+    total_quantite_unites = 0
+
+    for mouvement in mouvements:
+        acteur = actor_map.get(mouvement.id)
+        nom, prenom = _format_nom_prenom_utilisateur(acteur)
+        quantite_affichage = getattr(mouvement, "quantite_affichage", "") or mouvement.quantite_unites
+        total_quantite_unites += int(mouvement.quantite_unites or 0)
+
+        rows.append(
+            ReportRow(
+                values=[
+                    getattr(mouvement.article, "nom", "-") or "-",
+                    quantite_affichage,
+                    timezone.localtime(mouvement.date_mouvement).strftime("%d/%m/%Y %H:%M"),
+                    (mouvement.motif_sortie or "-").strip() or "-",
+                    nom,
+                    prenom,
+                ]
+            )
+        )
+
+    cards = [
+        SummaryCard("Sorties manuelles", len(rows)),
+        SummaryCard("Articles distincts", len({m.article_id for m in mouvements if m.article_id})),
+        SummaryCard("Qté sortie (unités)", total_quantite_unites, "danger"),
+    ]
+
+    subtitle = (
+        "Liste des sorties manuelles enregistrées sur la période, avec la quantité sortie, "
+        "la date, le motif et l'identité de l'utilisateur ayant effectué l'opération."
+    )
+
+    suffix = "annuel" if filters.period_type == "ANNUEL" else "mensuel"
+
+    return GenericReportData(
+        report_type="sortie_manuelle",
+        report_label=TYPE_RAPPORT_LABELS["sortie_manuelle"],
+        period_type=filters.period_type,
+        period_label=period_label,
+        title=f"{TYPE_RAPPORT_LABELS['sortie_manuelle']} — {period_label}",
+        subtitle=subtitle,
+        annee_fiscale_label=filters.configuration.code,
+        mois=filters.mois,
+        mois_label=mois_label,
+        annee_reelle=annee_reelle,
+        date_debut=date_debut,
+        date_fin=date_fin,
+        date_export=timezone.localtime(),
+        columns=["Article", "Quantité", "Date de sortie", "Motif", "Nom", "Prénom"],
+        rows=rows,
+        summary_cards=cards,
+        export_filename_base=f"rapport_sortie_manuelle_{suffix}_{filters.configuration.code.replace('-', '_')}",
+        filters_text=_build_filters_text(filters),
+        extra_context={
+            "export_querystring": _querystring_for_report(filters),
+            "mode_logique": "sortie_manuelle",
+        },
+    )
+
+
 def _generate_categorie_report(
     filters: ReportFilters,
     *,
@@ -1309,6 +1458,16 @@ def generer_rapport(filters: ReportFilters) -> GenericReportData:
             annee_reelle=annee_reelle,
             mois_label=mois_label,
             mode=filters.report_type,
+        )
+
+    if filters.report_type == "sortie_manuelle":
+        return _generate_sortie_manuelle_report(
+            filters,
+            date_debut=date_debut,
+            date_fin=date_fin,
+            period_label=period_label,
+            annee_reelle=annee_reelle,
+            mois_label=mois_label,
         )
 
     raise ValidationError("Type de rapport invalide.")
