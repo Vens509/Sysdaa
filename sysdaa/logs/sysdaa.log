@@ -3746,3 +3746,290 @@ Traceback (most recent call last):
 django.urls.exceptions.NoReverseMatch: Reverse for 'utilisateurs.views._login_url' not found. 'utilisateurs.views._login_url' is not a valid view function or pattern name.
 [2026-03-27 17:20:54,082] INFO two_factor.views.core: User's authentication flow has timed out. The user has been redirected to the initial auth form.
 [2026-03-27 17:31:59,104] WARNING django.request: Not Found: /favicon.ico
+[2026-03-28 11:10:47,074] WARNING django.request: Not Found: /favicon.ico
+[2026-03-28 11:11:13,725] ERROR django.request: Internal Server Error: /account/login/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\generic\base.py", line 106, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\decorators\debug.py", line 143, in sensitive_post_parameters_wrapper
+    return view(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\decorators.py", line 192, in _view_wrapper
+    result = _process_exception(request, e)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\decorators.py", line 190, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\decorators\cache.py", line 80, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\core.py", line 426, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\formtools\wizard\views.py", line 250, in dispatch
+    response = super().dispatch(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\generic\base.py", line 145, in dispatch
+    return handler(request, *args, **kwargs)
+  File "C:\Sysdaa\sysdaa\core\views.py", line 901, in post
+    return super().post(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\core.py", line 156, in post
+    response = super().post(*args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\utils.py", line 162, in post
+    return super().post(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\formtools\wizard\views.py", line 311, in post
+    return self.render_next_step(form)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\formtools\wizard\views.py", line 329, in render_next_step
+    return self.render(new_form, **kwargs)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\sysdaa\core\views.py", line 848, in render
+    response = super().render(form, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\core.py", line 344, in render
+    self.get_device().generate_challenge()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django_otp\plugins\otp_email\models.py", line 67, in generate_challenge
+    message = self._deliver_token(extra_context)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django_otp\plugins\otp_email\models.py", line 103, in _deliver_token
+    self.send_mail(body, html_message=body_html)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django_otp\plugins\otp_email\models.py", line 116, in send_mail
+    send_mail(
+    ~~~~~~~~~^
+        str(settings.OTP_EMAIL_SUBJECT),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        **kwargs,
+        ^^^^^^^^^
+    )
+    ^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\deprecation.py", line 268, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\__init__.py", line 108, in send_mail
+    return mail.send()
+           ~~~~~~~~~^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\message.py", line 358, in send
+    return self.get_connection(fail_silently).send_messages([self])
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\backends\smtp.py", line 130, in send_messages
+    new_conn_created = self.open()
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\backends\smtp.py", line 95, in open
+    self.connection.starttls(context=self.ssl_context)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\smtplib.py", line 791, in starttls
+    self.sock = context.wrap_socket(self.sock,
+                ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+                                    server_hostname=self._host)
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\ssl.py", line 455, in wrap_socket
+    return self.sslsocket_class._create(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sock=sock,
+        ^^^^^^^^^^
+    ...<5 lines>...
+        session=session
+        ^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\ssl.py", line 1076, in _create
+    self.do_handshake()
+    ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\ssl.py", line 1372, in do_handshake
+    self._sslobj.do_handshake()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+ssl.SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'smtp.budget.gouv.ht'. (_ssl.c:1081)
+[2026-03-28 11:12:13,524] ERROR django.request: Internal Server Error: /account/login/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\generic\base.py", line 106, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\decorators\debug.py", line 143, in sensitive_post_parameters_wrapper
+    return view(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\decorators.py", line 192, in _view_wrapper
+    result = _process_exception(request, e)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\decorators.py", line 190, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\decorators\cache.py", line 80, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\core.py", line 426, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\formtools\wizard\views.py", line 250, in dispatch
+    response = super().dispatch(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\generic\base.py", line 145, in dispatch
+    return handler(request, *args, **kwargs)
+  File "C:\Sysdaa\sysdaa\core\views.py", line 901, in post
+    return super().post(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\core.py", line 156, in post
+    response = super().post(*args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\utils.py", line 162, in post
+    return super().post(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\formtools\wizard\views.py", line 311, in post
+    return self.render_next_step(form)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\formtools\wizard\views.py", line 329, in render_next_step
+    return self.render(new_form, **kwargs)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\sysdaa\core\views.py", line 848, in render
+    response = super().render(form, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\core.py", line 344, in render
+    self.get_device().generate_challenge()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django_otp\plugins\otp_email\models.py", line 67, in generate_challenge
+    message = self._deliver_token(extra_context)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django_otp\plugins\otp_email\models.py", line 103, in _deliver_token
+    self.send_mail(body, html_message=body_html)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django_otp\plugins\otp_email\models.py", line 116, in send_mail
+    send_mail(
+    ~~~~~~~~~^
+        str(settings.OTP_EMAIL_SUBJECT),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        **kwargs,
+        ^^^^^^^^^
+    )
+    ^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\deprecation.py", line 268, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\__init__.py", line 108, in send_mail
+    return mail.send()
+           ~~~~~~~~~^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\message.py", line 358, in send
+    return self.get_connection(fail_silently).send_messages([self])
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\backends\smtp.py", line 130, in send_messages
+    new_conn_created = self.open()
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\backends\smtp.py", line 95, in open
+    self.connection.starttls(context=self.ssl_context)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\smtplib.py", line 791, in starttls
+    self.sock = context.wrap_socket(self.sock,
+                ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+                                    server_hostname=self._host)
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\ssl.py", line 455, in wrap_socket
+    return self.sslsocket_class._create(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sock=sock,
+        ^^^^^^^^^^
+    ...<5 lines>...
+        session=session
+        ^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\ssl.py", line 1076, in _create
+    self.do_handshake()
+    ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\ssl.py", line 1372, in do_handshake
+    self._sslobj.do_handshake()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+ssl.SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'smtp.budget.gouv.ht'. (_ssl.c:1081)
+[2026-03-28 11:12:42,874] WARNING django.request: Not Found: /favicon.ico
+[2026-03-28 11:15:12,548] ERROR django.request: Internal Server Error: /account/login/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\generic\base.py", line 106, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\decorators\debug.py", line 143, in sensitive_post_parameters_wrapper
+    return view(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\decorators.py", line 192, in _view_wrapper
+    result = _process_exception(request, e)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\decorators.py", line 190, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\decorators\cache.py", line 80, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\core.py", line 426, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\formtools\wizard\views.py", line 250, in dispatch
+    response = super().dispatch(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\generic\base.py", line 145, in dispatch
+    return handler(request, *args, **kwargs)
+  File "C:\Sysdaa\sysdaa\core\views.py", line 901, in post
+    return super().post(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\core.py", line 156, in post
+    response = super().post(*args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\utils.py", line 162, in post
+    return super().post(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\formtools\wizard\views.py", line 311, in post
+    return self.render_next_step(form)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\formtools\wizard\views.py", line 329, in render_next_step
+    return self.render(new_form, **kwargs)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\sysdaa\core\views.py", line 848, in render
+    response = super().render(form, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\core.py", line 344, in render
+    self.get_device().generate_challenge()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django_otp\plugins\otp_email\models.py", line 67, in generate_challenge
+    message = self._deliver_token(extra_context)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django_otp\plugins\otp_email\models.py", line 103, in _deliver_token
+    self.send_mail(body, html_message=body_html)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django_otp\plugins\otp_email\models.py", line 116, in send_mail
+    send_mail(
+    ~~~~~~~~~^
+        str(settings.OTP_EMAIL_SUBJECT),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        **kwargs,
+        ^^^^^^^^^
+    )
+    ^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\deprecation.py", line 268, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\__init__.py", line 108, in send_mail
+    return mail.send()
+           ~~~~~~~~~^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\message.py", line 358, in send
+    return self.get_connection(fail_silently).send_messages([self])
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\backends\smtp.py", line 130, in send_messages
+    new_conn_created = self.open()
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\backends\smtp.py", line 95, in open
+    self.connection.starttls(context=self.ssl_context)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\smtplib.py", line 791, in starttls
+    self.sock = context.wrap_socket(self.sock,
+                ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+                                    server_hostname=self._host)
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\ssl.py", line 455, in wrap_socket
+    return self.sslsocket_class._create(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sock=sock,
+        ^^^^^^^^^^
+    ...<5 lines>...
+        session=session
+        ^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\ssl.py", line 1076, in _create
+    self.do_handshake()
+    ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\ssl.py", line 1372, in do_handshake
+    self._sslobj.do_handshake()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+ssl.SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'smtp.budget.gouv.ht'. (_ssl.c:1081)
