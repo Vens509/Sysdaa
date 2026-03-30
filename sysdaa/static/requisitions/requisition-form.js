@@ -171,15 +171,7 @@
       return "Sélectionnez un article.";
     }
 
-    const stock = Number(articleMeta.stock_actuel_unites || 0);
-    if (stock <= 0) {
-      return "Stock actuel : 0 unité.";
-    }
-
-    return (
-      `Stock actuel : ${stock} ${pluralize(stock, "unité", "unités")}. ` +
-      `${articleMeta.resume_conditionnement || ""}`.trim()
-    );
+    return articleMeta.resume_conditionnement || "";
   }
 
   function formatUnitHelp(articleMeta) {
@@ -259,10 +251,58 @@
     setSubmitState(formHasBlockingError());
   }
 
-  function articleMatchesCategory(meta, categoryValue) {
-    const wanted = normalizeText(categoryValue);
-    if (!wanted) return true;
-    return normalizeText(meta?.categorie_key || meta?.categorie || "") === wanted;
+  function getSelectedCategoryDescriptors(categorySelect) {
+    if (!categorySelect) {
+      return {
+        value: "",
+        label: "",
+      };
+    }
+
+    const value = String(categorySelect.value || "").trim();
+    const selectedOption =
+      categorySelect.options && categorySelect.selectedIndex >= 0
+        ? categorySelect.options[categorySelect.selectedIndex]
+        : null;
+    let label = selectedOption ? String(selectedOption.textContent || "").trim() : "";
+
+    if (!value) {
+      label = "";
+    }
+
+    return { value, label };
+  }
+
+  function articleMatchesCategory(meta, categoryValue, categoryLabel) {
+    const wantedValue = normalizeText(categoryValue);
+    const wantedLabel = normalizeText(categoryLabel);
+
+    if (!wantedValue && !wantedLabel) return true;
+
+    const articleCategoryCandidates = [
+      meta?.categorie_key,
+      meta?.categorie,
+      meta?.categorie_libelle,
+      meta?.categorie_nom,
+      meta?.categorie_label,
+      meta?.categorie_slug,
+      meta?.categorie_id,
+      meta?.categorie_pk,
+    ]
+      .map((item) => normalizeText(item))
+      .filter(Boolean);
+
+    if (!articleCategoryCandidates.length) return false;
+
+    if (wantedValue && articleCategoryCandidates.includes(wantedValue)) {
+      return true;
+    }
+
+    if (wantedLabel && articleCategoryCandidates.includes(wantedLabel)) {
+      return true;
+    }
+
+    return false;
   }
 
   function articleMatchesSearch(meta, searchValue) {
@@ -298,10 +338,10 @@
     return getSelectedArticleIds(currentRow).has(String(articleId));
   }
 
-  function getFilteredArticles(articleSelect, categoryValue, searchValue) {
+  function getFilteredArticles(articleSelect, categoryValue, searchValue, categoryLabel) {
     return getAllArticlesMeta(articleSelect).filter((meta) => {
       return (
-        articleMatchesCategory(meta, categoryValue) &&
+        articleMatchesCategory(meta, categoryValue, categoryLabel) &&
         articleMatchesSearch(meta, searchValue)
       );
     });
@@ -314,14 +354,32 @@
     const articleMeta = getArticleMeta(articleSelect);
     if (!articleMeta) return;
 
-    const categoryLabel = String(articleMeta.categorie || "").trim();
-    if (!categoryLabel) return;
+    const metaCandidates = [
+      articleMeta.categorie_key,
+      articleMeta.categorie,
+      articleMeta.categorie_libelle,
+      articleMeta.categorie_nom,
+      articleMeta.categorie_label,
+      articleMeta.categorie_slug,
+      articleMeta.categorie_id,
+      articleMeta.categorie_pk,
+    ]
+      .map((item) => String(item || "").trim())
+      .filter(Boolean);
 
-    const hasOption = Array.from(categorySelect.options).some(
-      (opt) => normalizeText(opt.value) === normalizeText(categoryLabel)
-    );
-    if (hasOption) {
-      categorySelect.value = categoryLabel;
+    if (!metaCandidates.length) return;
+
+    const matchingOption = Array.from(categorySelect.options).find((opt) => {
+      const optionValue = normalizeText(opt.value);
+      const optionLabel = normalizeText(opt.textContent || "");
+      return metaCandidates.some((candidate) => {
+        const normalizedCandidate = normalizeText(candidate);
+        return normalizedCandidate === optionValue || normalizedCandidate === optionLabel;
+      });
+    });
+
+    if (matchingOption) {
+      categorySelect.value = matchingOption.value;
     }
   }
 
@@ -329,10 +387,11 @@
     const { categorySelect, articleSelect } = getRowElements(row);
     if (!articleSelect) return;
 
-    const categoryValue = categorySelect ? String(categorySelect.value || "").trim() : "";
+    const { value: categoryValue, label: categoryLabel } =
+      getSelectedCategoryDescriptors(categorySelect);
     const selectedValue = String(articleSelect.value || "").trim();
     const selectedInOtherRows = getSelectedArticleIds(row);
-    const articles = getFilteredArticles(articleSelect, categoryValue, "");
+    const articles = getFilteredArticles(articleSelect, categoryValue, "", categoryLabel);
 
     clearSelectOptions(articleSelect);
     articleSelect.appendChild(buildOption("", "Sélectionnez un article", !selectedValue));
@@ -368,7 +427,7 @@
       const selectedMeta = selectedValue ? getArticleMetaMap(articleSelect)[selectedValue] : null;
       if (
         selectedMeta &&
-        articleMatchesCategory(selectedMeta, categoryValue) &&
+        articleMatchesCategory(selectedMeta, categoryValue, categoryLabel) &&
         selectedMeta.est_disponible &&
         !selectedInOtherRows.has(String(selectedMeta.id))
       ) {
@@ -402,7 +461,8 @@
 
     if (!articleSelect || !articleSearchInput || !articleSearchResults) return;
 
-    const categoryValue = categorySelect ? String(categorySelect.value || "").trim() : "";
+    const { value: categoryValue, label: categoryLabel } =
+      getSelectedCategoryDescriptors(categorySelect);
     const searchValue = String(articleSearchInput.value || "").trim();
 
     if (!searchValue) {
@@ -411,7 +471,7 @@
     }
 
     const selectedInOtherRows = getSelectedArticleIds(row);
-    const items = getFilteredArticles(articleSelect, categoryValue, searchValue);
+    const items = getFilteredArticles(articleSelect, categoryValue, searchValue, categoryLabel);
 
     articleSearchResults.innerHTML = "";
 
@@ -444,7 +504,7 @@
       } else if (isAlreadySelectedElsewhere) {
         statusHtml = `<div class="small text-warning">Déjà choisi sur une autre ligne</div>`;
       } else {
-        statusHtml = `<div class="small text-success">Stock actuel : ${meta.stock_actuel_unites || 0} unités</div>`;
+        statusHtml = "";
       }
 
       btn.innerHTML = `

@@ -974,6 +974,38 @@ def detail_pdf(request, pk: int):
             y,
             f"Réquisition REQ-{req.id}"
         )
+
+        # Signatures fixes en bas de page
+        signature_y = 20 * mm
+        line_length = 58 * mm
+
+        canvas.setStrokeColor(colors.black)
+        canvas.setLineWidth(0.7)
+
+        # Ligne gauche
+        left_x1 = doc.leftMargin
+        left_x2 = doc.leftMargin + line_length
+        canvas.line(left_x1, signature_y, left_x2, signature_y)
+
+        # Ligne droite
+        right_x2 = width - doc.rightMargin
+        right_x1 = right_x2 - line_length
+        canvas.line(right_x1, signature_y, right_x2, signature_y)
+
+        canvas.setFont("Helvetica", 8)
+        canvas.setFillColor(colors.black)
+
+        canvas.drawCentredString(
+            (left_x1 + left_x2) / 2,
+            signature_y - 10,
+            "Administration"
+        )
+        canvas.drawCentredString(
+            (right_x1 + right_x2) / 2,
+            signature_y - 10,
+            "Demandeur"
+        )
+
         canvas.restoreState()
 
     buffer = BytesIO()

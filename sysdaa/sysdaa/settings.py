@@ -42,7 +42,7 @@ if SOCKET_DEFAULT_TIMEOUT > 0:
 # Base
 # -------------------------------------------------------------------
 SECRET_KEY = env_str("DJANGO_SECRET_KEY", "CHANGE_ME_IN_PROD")
-DEBUG = env_bool("DJANGO_DEBUG", True)
+DEBUG = env_bool("DJANGO_DEBUG", False)
 
 ALLOWED_HOSTS = [
     h.strip()
@@ -57,7 +57,11 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 if DEBUG and not ALLOWED_HOSTS:
-    ALLOWED_HOSTS = ["10.3.26.105", "localhost"]
+   CSRF_TRUSTED_ORIGINS = [
+    'http://10.3.26.105:84',
+    'http://127.0.0.1:84',
+    'http://localhost:84',
+]
 
 # -------------------------------------------------------------------
 # Applications
@@ -197,13 +201,13 @@ LOGOUT_REDIRECT_URL = "/login/"
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_AGE = env_int("DJANGO_SESSION_COOKIE_AGE", 60 * 60 * 5)
 
+# Forcez à False pour le HTTP local/interne
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SAMESITE = "Lax"
-
-CSRF_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SAMESITE = "Lax"
-
+CSRF_TRUSTED_ORIGINS = ['http://10.3.26.105:84']
 # -------------------------------------------------------------------
 # SMTP / Email
 # -------------------------------------------------------------------
@@ -211,7 +215,7 @@ EMAIL_BACKEND = env_str(
     "DJANGO_EMAIL_BACKEND",
     "core.email_backend.EmailBackend",
 )
-EMAIL_HOST = env_str("DJANGO_EMAIL_HOST", "smtp.gmail.com")
+EMAIL_HOST = env_str("DJANGO_EMAIL_HOST", "smtp.budget.gouv.ht")
 EMAIL_PORT = env_int("DJANGO_EMAIL_PORT", 587)
 EMAIL_USE_TLS = env_bool("DJANGO_EMAIL_USE_TLS", True)
 EMAIL_USE_SSL = env_bool("DJANGO_EMAIL_USE_SSL", False)

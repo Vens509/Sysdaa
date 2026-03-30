@@ -19,13 +19,6 @@
         return opt ? opt.text : "";
     }
 
-    function findOptionByValue(select, value) {
-        if (!select) return null;
-        return Array.from(select.options).find(function (option) {
-            return String(option.value || "") === String(value || "");
-        }) || null;
-    }
-
     function setLockedSelect(select, locked) {
         if (!select) return;
         if (locked) {
@@ -44,6 +37,25 @@
         });
     }
 
+    function disableOptionsByIds(directionSelect, ids, keepCurrentValue) {
+        if (!directionSelect) return;
+
+        const selectedValue = String(directionSelect.value || "");
+        const blockedIds = (ids || []).map(String);
+
+        Array.from(directionSelect.options).forEach(function (opt) {
+            if (!opt.value) return;
+
+            const optionValue = String(opt.value || "");
+            const isBlocked = blockedIds.includes(optionValue);
+            const isCurrent = optionValue === selectedValue;
+
+            if (isBlocked && !(keepCurrentValue && isCurrent)) {
+                opt.disabled = true;
+            }
+        });
+    }
+
     function updateFormLogic() {
         const roleSelect = document.querySelector('[data-role-select="true"]');
         const directionSelect = document.querySelector('[data-direction-select="true"]');
@@ -53,17 +65,32 @@
         if (!roleSelect || !directionSelect) return;
 
         const roleLabel = normalize(getSelectedLabel(roleSelect));
-        const lockedRoles = [
-            "gestionnaire des ressources matérielles",
-            "directeur daa"
-        ];
-        const assistantRole = "assistant de directeur";
+
+        const lockedRoles = parseJSON(
+            roleSelect.getAttribute("data-role-locked-daa"),
+            []
+        ).map(normalize);
+
+        const assistantRole = normalize(
+            roleSelect.getAttribute("data-role-assistant") || "Assistant de directeur"
+        );
+
+        const directorRole = normalize(
+            roleSelect.getAttribute("data-role-director-direction") || "Directeur de direction"
+        );
 
         const daaId = String(directionSelect.getAttribute("data-direction-daa-id") || "");
-        const blocked = parseJSON(
+
+        const assistantBlocked = parseJSON(
             directionSelect.getAttribute("data-assistant-blocked-directions"),
             []
         ).map(String);
+
+        const directorBlocked = parseJSON(
+            directionSelect.getAttribute("data-director-blocked-directions"),
+            []
+        ).map(String);
+
         const directorMap = parseJSON(
             directionSelect.getAttribute("data-assistant-director-map"),
             {}
@@ -75,23 +102,36 @@
             if (daaId) {
                 directionSelect.value = daaId;
             }
+
             setLockedSelect(directionSelect, true);
 
             if (hiddenDirectorInput) {
                 hiddenDirectorInput.value = "";
             }
+
+            if (directionHelp) {
+                directionHelp.textContent = "Cette direction est imposée pour ce rôle.";
+            }
+            return;
+        }
+
+        setLockedSelect(directionSelect, false);
+
+        if (roleLabel === directorRole) {
+            disableOptionsByIds(directionSelect, directorBlocked, true);
+
+            if (hiddenDirectorInput) {
+                hiddenDirectorInput.value = "";
+            }
+
+            if (directionHelp) {
+                directionHelp.textContent = "Les directions ayant déjà un directeur actif sont grisées et inaccessibles.";
+            }
             return;
         }
 
         if (roleLabel === assistantRole) {
-            setLockedSelect(directionSelect, false);
-
-            Array.from(directionSelect.options).forEach(function (opt) {
-                if (!opt.value) return;
-                if (blocked.includes(String(opt.value)) && String(opt.value) !== String(directionSelect.value || "")) {
-                    opt.disabled = true;
-                }
-            });
+            disableOptionsByIds(directionSelect, assistantBlocked, true);
 
             const selectedDir = String(directionSelect.value || "");
             const directorData = directorMap[selectedDir];
@@ -105,8 +145,6 @@
             }
             return;
         }
-
-        setLockedSelect(directionSelect, false);
 
         if (hiddenDirectorInput) {
             hiddenDirectorInput.value = "";

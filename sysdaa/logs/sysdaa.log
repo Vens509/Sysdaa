@@ -6579,3 +6579,232 @@ django.template.exceptions.TemplateSyntaxError: Template: C:\Users\lovens.elie\D
 [2026-03-28 18:19:10,742] INFO django.server: "GET /notifications/live/ HTTP/1.1" 200 1250
 [2026-03-28 18:19:15,736] INFO django.server: "GET /notifications/live/ HTTP/1.1" 200 1250
 [2026-03-28 18:19:20,934] INFO django.server: "GET /notifications/live/ HTTP/1.1" 200 1250
+[2026-03-30 08:50:49,603] WARNING django.request: Not Found: /favicon.ico
+[2026-03-30 10:03:31,378] WARNING django.request: Not Found: /favicon.ico
+[2026-03-30 10:04:36,763] WARNING django.request: Not Found: /favicon.ico
+[2026-03-30 11:52:24,095] WARNING django.request: Forbidden (Permission denied): /dashboard-admin/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\sysdaa\core\permissions.py", line 116, in _wrapped
+    raise PermissionDenied(message)
+django.core.exceptions.PermissionDenied: Accès refusé : réservé aux administrateurs.
+[2026-03-30 11:58:55,925] WARNING django.request: Not Found: /favicon.ico
+[2026-03-30 12:18:36,948] WARNING django.request: Not Found: /favicon.ico
+[2026-03-30 14:46:01,891] WARNING django.request: Not Found: /favicon.ico
+[2026-03-30 14:46:29,782] ERROR django.request: Internal Server Error: /account/login/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\generic\base.py", line 106, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\decorators\debug.py", line 143, in sensitive_post_parameters_wrapper
+    return view(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\decorators.py", line 192, in _view_wrapper
+    result = _process_exception(request, e)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\decorators.py", line 190, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\decorators\cache.py", line 80, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\core.py", line 426, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\formtools\wizard\views.py", line 250, in dispatch
+    response = super().dispatch(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\generic\base.py", line 145, in dispatch
+    return handler(request, *args, **kwargs)
+  File "C:\Sysdaa\sysdaa\core\views.py", line 901, in post
+    return super().post(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\core.py", line 156, in post
+    response = super().post(*args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\utils.py", line 162, in post
+    return super().post(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\formtools\wizard\views.py", line 311, in post
+    return self.render_next_step(form)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\formtools\wizard\views.py", line 329, in render_next_step
+    return self.render(new_form, **kwargs)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\sysdaa\core\views.py", line 848, in render
+    response = super().render(form, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\core.py", line 344, in render
+    self.get_device().generate_challenge()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django_otp\plugins\otp_email\models.py", line 67, in generate_challenge
+    message = self._deliver_token(extra_context)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django_otp\plugins\otp_email\models.py", line 103, in _deliver_token
+    self.send_mail(body, html_message=body_html)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django_otp\plugins\otp_email\models.py", line 116, in send_mail
+    send_mail(
+    ~~~~~~~~~^
+        str(settings.OTP_EMAIL_SUBJECT),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        **kwargs,
+        ^^^^^^^^^
+    )
+    ^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\deprecation.py", line 268, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\__init__.py", line 108, in send_mail
+    return mail.send()
+           ~~~~~~~~~^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\message.py", line 358, in send
+    return self.get_connection(fail_silently).send_messages([self])
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\backends\smtp.py", line 130, in send_messages
+    new_conn_created = self.open()
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\backends\smtp.py", line 88, in open
+    self.connection = self.connection_class(
+                      ~~~~~~~~~~~~~~~~~~~~~^
+        self.host, self.port, **connection_params
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\smtplib.py", line 262, in __init__
+    (code, msg) = self.connect(host, port)
+                  ~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\smtplib.py", line 348, in connect
+    self.sock = self._get_socket(host, port, self.timeout)
+                ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\smtplib.py", line 319, in _get_socket
+    return socket.create_connection((host, port), timeout,
+           ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+                                    self.source_address)
+                                    ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 846, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 983, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+[2026-03-30 14:47:30,515] ERROR django.request: Internal Server Error: /account/login/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\generic\base.py", line 106, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\decorators\debug.py", line 143, in sensitive_post_parameters_wrapper
+    return view(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\decorators.py", line 192, in _view_wrapper
+    result = _process_exception(request, e)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\decorators.py", line 190, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\decorators\cache.py", line 80, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\core.py", line 426, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\formtools\wizard\views.py", line 250, in dispatch
+    response = super().dispatch(request, *args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\views\generic\base.py", line 145, in dispatch
+    return handler(request, *args, **kwargs)
+  File "C:\Sysdaa\sysdaa\core\views.py", line 901, in post
+    return super().post(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\core.py", line 156, in post
+    response = super().post(*args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\utils.py", line 162, in post
+    return super().post(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\formtools\wizard\views.py", line 311, in post
+    return self.render_next_step(form)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\formtools\wizard\views.py", line 329, in render_next_step
+    return self.render(new_form, **kwargs)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\sysdaa\core\views.py", line 848, in render
+    response = super().render(form, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\two_factor\views\core.py", line 344, in render
+    self.get_device().generate_challenge()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django_otp\plugins\otp_email\models.py", line 67, in generate_challenge
+    message = self._deliver_token(extra_context)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django_otp\plugins\otp_email\models.py", line 103, in _deliver_token
+    self.send_mail(body, html_message=body_html)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django_otp\plugins\otp_email\models.py", line 116, in send_mail
+    send_mail(
+    ~~~~~~~~~^
+        str(settings.OTP_EMAIL_SUBJECT),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        **kwargs,
+        ^^^^^^^^^
+    )
+    ^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\utils\deprecation.py", line 268, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\__init__.py", line 108, in send_mail
+    return mail.send()
+           ~~~~~~~~~^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\message.py", line 358, in send
+    return self.get_connection(fail_silently).send_messages([self])
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\backends\smtp.py", line 130, in send_messages
+    new_conn_created = self.open()
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\mail\backends\smtp.py", line 88, in open
+    self.connection = self.connection_class(
+                      ~~~~~~~~~~~~~~~~~~~~~^
+        self.host, self.port, **connection_params
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\smtplib.py", line 262, in __init__
+    (code, msg) = self.connect(host, port)
+                  ~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\smtplib.py", line 348, in connect
+    self.sock = self._get_socket(host, port, self.timeout)
+                ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\smtplib.py", line 319, in _get_socket
+    return socket.create_connection((host, port), timeout,
+           ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+                                    self.source_address)
+                                    ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 846, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator.SRV-APPS\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 983, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+[2026-03-30 15:20:13,447] WARNING django.request: Not Found: /favicon.ico
+[2026-03-30 15:27:07,110] WARNING django.security.csrf: Forbidden (CSRF cookie not set.): /account/login/
+[2026-03-30 15:29:08,498] WARNING django.security.csrf: Forbidden (CSRF cookie not set.): /account/login/
+[2026-03-30 15:29:24,692] WARNING django.security.csrf: Forbidden (CSRF cookie not set.): /account/login/
+[2026-03-30 15:32:41,388] WARNING django.security.csrf: Forbidden (CSRF cookie not set.): /account/login/
+[2026-03-30 15:32:51,462] WARNING django.security.csrf: Forbidden (CSRF cookie not set.): /account/login/
+[2026-03-30 16:16:31,158] WARNING django.request: Not Found: /favicon.ico
+[2026-03-30 16:17:02,713] WARNING django.request: Not Found: /favicon.ico
+[2026-03-30 16:19:08,270] WARNING django.request: Not Found: /favicon.ico
+[2026-03-30 16:24:50,724] WARNING django.request: Not Found: /favicon.ico
+[2026-03-30 17:03:44,464] WARNING django.request: Not Found: /favicon.ico
+[2026-03-30 17:04:15,577] WARNING django.request: Not Found: /favicon.ico
+[2026-03-30 17:09:42,406] WARNING django.request: Not Found: /favicon.ico
+[2026-03-30 17:15:24,200] WARNING django.request: Not Found: /favicon.ico
+[2026-03-30 17:29:32,047] WARNING django.request: Not Found: /favicon.ico
+[2026-03-30 17:42:26,636] WARNING django.request: Not Found: /favicon.ico
+[2026-03-30 17:42:35,538] WARNING django.request: Not Found: /favicon.ico
+[2026-03-30 17:48:37,812] WARNING django.request: Not Found: /favicon.ico
+[2026-03-30 17:55:20,798] WARNING django.request: Not Found: /favicon.ico
+[2026-03-30 17:57:39,013] WARNING django.request: Not Found: /favicon.ico
+[2026-03-30 18:02:48,039] WARNING django.request: Not Found: /favicon.ico
+[2026-03-30 18:04:06,958] WARNING django.request: Not Found: /favicon.ico
+[2026-03-30 18:07:03,259] WARNING django.request: Not Found: /favicon.ico
+[2026-03-30 18:20:04,543] WARNING django.request: Not Found: /favicon.ico
