@@ -187,15 +187,37 @@
       background:#fff;
       cursor:pointer;
       color:var(--sys-primary-dark);
+      user-select:none;
     }
 
     .input-group > .form-control.password-input{
       border-right:none;
       border-radius:14px 0 0 14px;
+      padding-right:.95rem;
     }
 
     .input-group > .form-control.password-input:focus{
       z-index:3;
+    }
+
+    .password-toggle:focus{
+      outline:none;
+      box-shadow:0 0 0 .20rem rgba(25,73,147,.12) !important;
+    }
+
+    /* Masquer l’icône native du navigateur sur le champ mot de passe */
+    input[type="password"]::-ms-reveal,
+    input[type="password"]::-ms-clear{
+      display:none;
+      width:0;
+      height:0;
+    }
+
+    input[type="password"]::-webkit-credentials-auto-fill-button,
+    input[type="password"]::-webkit-textfield-decoration-container{
+      display:none !important;
+      visibility:hidden;
+      pointer-events:none;
     }
 
     @media (max-width: 575.98px){
@@ -282,9 +304,15 @@
               <label class="form-label" for="{{ wizard.form.password.id_for_label }}">Mot de passe</label>
               <div class="input-group">
                 {{ wizard.form.password }}
-                <span class="input-group-text password-toggle" id="togglePassword" aria-label="Afficher ou masquer le mot de passe" title="Afficher / masquer">
+                <button
+                  type="button"
+                  class="input-group-text password-toggle"
+                  id="togglePassword"
+                  aria-label="Afficher ou masquer le mot de passe"
+                  title="Afficher / masquer"
+                >
                   <i class="bi bi-eye" id="eyeIcon"></i>
-                </span>
+                </button>
               </div>
               {% if wizard.form.password.errors %}
                 <div class="small mt-2 text-danger">{{ wizard.form.password.errors|striptags }}</div>
@@ -377,9 +405,10 @@
       const passwordField = document.querySelector("input[name='password']");
       if (passwordField) {
         passwordField.classList.add("password-input");
+        passwordField.setAttribute("autocomplete", "current-password");
       }
     });
-    
+
     document.addEventListener("DOMContentLoaded", function () {
       const alerts = document.querySelectorAll(".auto-dismiss");
 
@@ -401,16 +430,20 @@
       const icon = document.getElementById("eyeIcon");
 
       if (toggle && passwordField && icon) {
-        toggle.addEventListener("click", function () {
-          if (passwordField.type === "password") {
-            passwordField.type = "text";
-            icon.classList.remove("bi-eye");
-            icon.classList.add("bi-eye-slash");
-          } else {
-            passwordField.type = "password";
-            icon.classList.remove("bi-eye-slash");
-            icon.classList.add("bi-eye");
-          }
+        toggle.addEventListener("click", function (event) {
+          event.preventDefault();
+
+          const isPassword = passwordField.getAttribute("type") === "password";
+          passwordField.setAttribute("type", isPassword ? "text" : "password");
+
+          icon.classList.toggle("bi-eye", !isPassword);
+          icon.classList.toggle("bi-eye-slash", isPassword);
+
+          passwordField.focus();
+          try {
+            const length = passwordField.value.length;
+            passwordField.setSelectionRange(length, length);
+          } catch (e) {}
         });
       }
     });

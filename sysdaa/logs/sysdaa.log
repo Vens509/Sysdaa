@@ -6808,3 +6808,35 @@ socket.gaierror: [Errno 11001] getaddrinfo failed
 [2026-03-30 18:04:06,958] WARNING django.request: Not Found: /favicon.ico
 [2026-03-30 18:07:03,259] WARNING django.request: Not Found: /favicon.ico
 [2026-03-30 18:20:04,543] WARNING django.request: Not Found: /favicon.ico
+[2026-03-31 08:24:19,946] WARNING django.request: Not Found: /favicon.ico
+[2026-03-31 10:10:33,393] WARNING django.request: Not Found: /favicon.ico
+[2026-03-31 10:52:41,592] WARNING django.request: Forbidden (Permission denied): /dashboard/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\sysdaa\core\permissions.py", line 116, in _wrapped
+    raise PermissionDenied(message)
+django.core.exceptions.PermissionDenied: Accès refusé : dashboard réservé au Directeur DAA et au Gestionnaire des ressources matérielles.
+[2026-03-31 10:52:41,843] WARNING django.request: Not Found: /favicon.ico
+[2026-03-31 10:52:44,927] WARNING django.request: Forbidden (Permission denied): /dashboard/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\sysdaa\core\permissions.py", line 116, in _wrapped
+    raise PermissionDenied(message)
+django.core.exceptions.PermissionDenied: Accès refusé : dashboard réservé au Directeur DAA et au Gestionnaire des ressources matérielles.
+[2026-03-31 11:02:49,125] WARNING django.request: Not Found: /favicon.ico
+[2026-03-31 11:25:32,283] WARNING django.request: Forbidden (Permission denied): /rapports/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\sysdaa\core\permissions.py", line 116, in _wrapped
+    raise PermissionDenied(message)
+django.core.exceptions.PermissionDenied: Accès refusé : réservé au Directeur DAA et au Gestionnaire des ressources matérielles.
+[2026-03-31 11:25:32,809] WARNING django.request: Not Found: /favicon.ico

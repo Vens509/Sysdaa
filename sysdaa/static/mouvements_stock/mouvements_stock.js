@@ -222,10 +222,17 @@
   }
 
   function syncSortieAvailability(form) {
+    const isSortie = normalizeText(form.dataset.mouvementForm) === "sortie";
     const articleSelect = qs("#id_article", form);
     const quantiteInput = qs("#id_quantite", form);
     const submitBtn = qs("#btn-enregistrer-sortie", form);
     const indisponibleInfo = qs("#article-indisponible-info", form);
+
+    if (!isSortie) {
+      if (indisponibleInfo) hideElement(indisponibleInfo);
+      if (quantiteInput) quantiteInput.disabled = false;
+      return;
+    }
 
     if (!articleSelect || !submitBtn) return;
 
