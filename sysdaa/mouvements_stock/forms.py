@@ -45,6 +45,10 @@ def _normalize_text(value: str | None) -> str:
 
 
 class ArticleSelectWidget(forms.Select):
+    def __init__(self, *args, disable_out_of_stock=False, **kwargs):
+        self.disable_out_of_stock = disable_out_of_stock
+        super().__init__(*args, **kwargs)
+
     def create_option(
         self,
         name,
@@ -86,7 +90,7 @@ class ArticleSelectWidget(forms.Select):
                 option["attrs"]["data-stock-affichage"] = article.stock_actuel_affichage
                 option["attrs"]["data-stock-rupture"] = "1" if stock_unites <= 0 else "0"
 
-                if stock_unites <= 0:
+                if stock_unites <= 0 and self.disable_out_of_stock:
                     option["attrs"]["disabled"] = True
                     option["attrs"]["class"] = (
                         f'{option["attrs"].get("class", "")} option-indisponible'.strip()
@@ -98,8 +102,6 @@ class ArticleSelectWidget(forms.Select):
 
 class ArticleChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj: Article) -> str:
-        if int(obj.stock_actuel or 0) <= 0:
-            return f"{obj.nom} — Indisponible (rupture de stock)"
         return obj.nom
 
 
@@ -137,6 +139,7 @@ class BaseMouvementStockForm(forms.Form):
         super().__init__(*args, **kwargs)
 
         self.fields["article"].empty_label = "Sélectionnez un article"
+        self.fields["article"].widget.disable_out_of_stock = isinstance(self, SortieStockForm)
 
         self.fields["quantite"].widget.attrs.update(
             {

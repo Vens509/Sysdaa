@@ -6842,3 +6842,29 @@ django.core.exceptions.PermissionDenied: Accès refusé : réservé au Directeur DAA
 [2026-03-31 11:25:32,809] WARNING django.request: Not Found: /favicon.ico
 [2026-03-31 15:31:17,864] WARNING django.request: Not Found: /favicon.ico
 [2026-03-31 15:32:15,555] WARNING django.request: Not Found: /favicon.ico
+[2026-03-31 15:42:17,165] WARNING django.request: Not Found: /favicon.ico
+[2026-03-31 15:43:56,528] WARNING django.request: Not Found: /favicon.ico
+[2026-03-31 15:56:04,725] WARNING django.request: Not Found: /favicon.ico
+[2026-03-31 15:56:47,945] WARNING django.request: Not Found: /favicon.ico
+[2026-03-31 15:56:51,774] WARNING django.request: Not Found: /favicon.ico
+[2026-03-31 15:59:03,115] WARNING django.request: Not Found: /favicon.ico
+[2026-03-31 15:59:04,948] WARNING django.request: Not Found: /favicon.ico
+[2026-03-31 16:00:00,956] WARNING django.request: Forbidden (Permission denied): /mouvements/entree/
+Traceback (most recent call last):
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Sysdaa\virtual\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Sysdaa\sysdaa\core\permissions.py", line 116, in _wrapped
+    raise PermissionDenied(message)
+django.core.exceptions.PermissionDenied: Accès refusé : rôle non autorisé.
+[2026-03-31 16:00:01,053] WARNING django.request: Not Found: /favicon.ico
+[2026-03-31 16:03:28,264] WARNING django.request: Not Found: /favicon.ico
+[2026-03-31 16:04:40,456] WARNING django.request: Not Found: /favicon.ico
+[2026-03-31 16:04:47,125] WARNING django.request: Not Found: /favicon.ico
+[2026-03-31 16:06:16,384] WARNING django.request: Not Found: /favicon.ico
+[2026-03-31 16:06:53,955] WARNING django.request: Not Found: /favicon.ico
+[2026-03-31 16:06:57,403] WARNING django.request: Not Found: /favicon.ico
+[2026-03-31 16:07:08,129] WARNING django.request: Not Found: /favicon.ico
+[2026-03-31 16:07:26,524] WARNING django.request: Not Found: /favicon.ico
+[2026-03-31 16:13:41,146] WARNING django.request: Not Found: /favicon.ico
