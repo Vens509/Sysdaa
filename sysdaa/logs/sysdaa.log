@@ -6840,3 +6840,5 @@ Traceback (most recent call last):
     raise PermissionDenied(message)
 django.core.exceptions.PermissionDenied: Accès refusé : réservé au Directeur DAA et au Gestionnaire des ressources matérielles.
 [2026-03-31 11:25:32,809] WARNING django.request: Not Found: /favicon.ico
+[2026-03-31 15:31:17,864] WARNING django.request: Not Found: /favicon.ico
+[2026-03-31 15:32:15,555] WARNING django.request: Not Found: /favicon.ico
